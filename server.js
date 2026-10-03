@@ -37,6 +37,66 @@ app.use((req, res, next) => {
   if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) req.body = {};
   next();
 });
+app.get("/", async (req, res) => {
+  let title = "M&D Store — Marwen & Dorra";
+  let description = "اكتشفوا تشكيلة M&D Store وتسوقوا بسهولة عبر موقعنا الإلكتروني.";
+  const fallbackImage = "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&h=630&q=85";
+  let image = fallbackImage;
+  let productId = null;
+  const requestedProductId = String(req.query.product || "");
+  if (/^[1-9]\d*$/.test(requestedProductId) && Number.isSafeInteger(Number(requestedProductId))) {
+    const result = await pool.query(
+      `SELECT p.id, p.name, p.description,
+         (SELECT path FROM product_images WHERE product_id = p.id ORDER BY id LIMIT 1) AS image
+       FROM products p
+       LEFT JOIN categories c ON c.id = p.category_id
+       WHERE p.id = $1 AND p.active = TRUE
+         AND (p.category_id IS NULL OR c.active = TRUE)`,
+      [Number(requestedProductId)]
+    );
+    if (result.rowCount) {
+      const product = result.rows[0];
+      productId = product.id;
+      title = `${product.name} — M&D Store`;
+      description = product.description || `اكتشفوا ${product.name} وتسوقوه الآن من M&D Store.`;
+      if (typeof product.image === "string" && /^\/uploads\/[A-Za-z0-9._-]+$/.test(product.image)) {
+        try {
+          await fs.promises.access(path.join(uploadDir, path.basename(product.image)));
+          image = product.image;
+        } catch (error) {
+          if (error.code !== "ENOENT") throw error;
+        }
+      }
+    }
+  }
+  const publicUrl = String(process.env.PUBLIC_URL || `${req.protocol}://${req.get("host")}`).replace(/\/+$/, "");
+  const pageUrl = new URL("/", `${publicUrl}/`);
+  if (productId !== null) pageUrl.searchParams.set("product", String(productId));
+  const imageUrl = new URL(image, `${publicUrl}/`).href;
+  const escapeAttribute = value => String(value).replace(/[&<>"']/g, character => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[character]);
+  const metadata = [
+    `<meta name="description" content="${escapeAttribute(description)}">`,
+    `<meta property="og:type" content="${productId === null ? "website" : "product"}">`,
+    `<meta property="og:title" content="${escapeAttribute(title)}">`,
+    `<meta property="og:description" content="${escapeAttribute(description)}">`,
+    `<meta property="og:url" content="${escapeAttribute(pageUrl.href)}">`,
+    `<meta property="og:image" content="${escapeAttribute(imageUrl)}">`,
+    '<meta property="og:image:width" content="1200">',
+    '<meta property="og:image:height" content="630">',
+    '<meta name="twitter:card" content="summary_large_image">',
+    `<meta name="twitter:title" content="${escapeAttribute(title)}">`,
+    `<meta name="twitter:description" content="${escapeAttribute(description)}">`,
+    `<meta name="twitter:image" content="${escapeAttribute(imageUrl)}">`
+  ].join("\n");
+  const html = await fs.promises.readFile(path.join(__dirname, "public/index.html"), "utf8");
+  res.type("html").send(html.replace("<!-- SOCIAL_METADATA -->", metadata));
+});
 app.use("/uploads", express.static(uploadDir));
 app.use(express.static(path.join(__dirname, "public")));
 app.use((req, res, next) => {

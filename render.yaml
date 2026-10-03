@@ -23,6 +23,8 @@ services:
         sync: false
       - key: STORE_NAME
         value: M&D Store
+      - key: PUBLIC_URL
+        value: https://md-store-test.onrender.com
       - key: CURRENCY
         value: TND
       - key: WHATSAPP
