@@ -69,7 +69,9 @@ app.get("/", async (req, res) => {
       }
     }
   }
-  const publicUrl = String(process.env.PUBLIC_URL || `${req.protocol}://${req.get("host")}`).replace(/\/+$/, "");
+  const forwardedProtocol = req.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  const protocol = forwardedProtocol === "https" ? "https" : req.protocol;
+  const publicUrl = String(process.env.PUBLIC_URL || `${protocol}://${req.get("host")}`).replace(/\/+$/, "");
   const pageUrl = new URL("/", `${publicUrl}/`);
   if (productId !== null) pageUrl.searchParams.set("product", String(productId));
   const imageUrl = new URL(image, `${publicUrl}/`).href;
