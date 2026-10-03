@@ -20,6 +20,7 @@ const STORE = process.env.STORE_NAME || "M&D Store";
 const CURRENCY = process.env.CURRENCY || "TND";
 const PAYMENT_METHOD = "cash_on_delivery";
 const MAX_MONEY = 9999999999.99;
+const LOW_STOCK_THRESHOLD = 5;
 const uploadDir = path.join(__dirname, "uploads");
 fs.mkdirSync(uploadDir, { recursive: true });
 
@@ -82,12 +83,14 @@ function safeNum(value, fallback = 0) {
 function parseProductInput(body) {
   const name = String(body.name || "").trim();
   const price = safeNum(body.price, NaN);
+  const costPrice = body.cost_price === "" || body.cost_price == null ? null : safeNum(body.cost_price, NaN);
   const deliveryPrice = body.delivery_price === "" || body.delivery_price == null ? 0 : safeNum(body.delivery_price, NaN);
   const oldPrice = body.old_price === "" || body.old_price == null ? null : safeNum(body.old_price, NaN);
   const stock = safeNum(body.stock, 0);
   const categoryValue = String(body.category_id || "").trim();
   const categoryId = categoryValue ? Number(categoryValue) : null;
     if (!name || !Number.isFinite(price) || price < 0 || price > MAX_MONEY ||
+      (costPrice !== null && (!Number.isFinite(costPrice) || costPrice < 0 || costPrice > MAX_MONEY)) ||
       !Number.isFinite(deliveryPrice) || deliveryPrice < 0 || deliveryPrice > MAX_MONEY ||
       (oldPrice !== null && (!Number.isFinite(oldPrice) || oldPrice < 0 || oldPrice > MAX_MONEY)) ||
       !Number.isInteger(stock) || stock < 0 || stock > 2147483647 ||
@@ -99,6 +102,7 @@ function parseProductInput(body) {
     description: String(body.description || ""),
     categoryId,
     price,
+    costPrice,
     deliveryPrice,
     oldPrice,
     stock,
@@ -133,10 +137,13 @@ async function productRows(includeInactive = false) {
     if (!imagesByProduct.has(image.product_id)) imagesByProduct.set(image.product_id, []);
     imagesByProduct.get(image.product_id).push({ id: image.id, path: image.path });
   }
-  return products.rows.map(product => ({
-    ...product,
-    images: imagesByProduct.get(product.id) || []
-  }));
+  return products.rows.map(product => {
+    const { cost_price, ...publicProduct } = product;
+    return {
+      ...(includeInactive ? product : publicProduct),
+      images: imagesByProduct.get(product.id) || []
+    };
+  });
 }
 
 const storage = multer.diskStorage({
@@ -425,7 +432,7 @@ async function loadInventoryReport() {
     pool.query(
       `SELECT oi.product_id, oi.product_name, COALESCE(SUM(oi.quantity), 0)::bigint AS units_sold
        FROM order_items oi JOIN orders o ON o.id = oi.order_id
-       WHERE o.status <> 'cancelled' AND o.inventory_deducted = TRUE
+       WHERE o.status NOT IN ('cancelled', 'returned') AND o.inventory_deducted = TRUE
        GROUP BY oi.product_id, oi.product_name
        ORDER BY units_sold DESC, oi.product_name ASC LIMIT 10`
     ),
@@ -567,9 +574,9 @@ app.post("/api/products", auth, role("admin", "manager"), upload.array("images",
       await client.query("UPDATE products SET advertised = FALSE WHERE advertised = TRUE");
     }
     const result = await client.query(
-      `INSERT INTO products(name, description, category_id, price, delivery_price, old_price, stock, advertised)
-       VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-      [product.name, product.description, product.categoryId, product.price, product.deliveryPrice,
+      `INSERT INTO products(name, description, category_id, price, cost_price, delivery_price, old_price, stock, advertised)
+       VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
+      [product.name, product.description, product.categoryId, product.price, product.costPrice, product.deliveryPrice,
         product.oldPrice, product.stock, product.advertised]
     );
     const productId = result.rows[0].id;
@@ -620,9 +627,9 @@ app.put("/api/products/:id", auth, role("admin", "manager"), upload.array("image
       await client.query("UPDATE products SET advertised = FALSE WHERE advertised = TRUE AND id <> $1", [req.params.id]);
     }
     await client.query(
-      `UPDATE products SET name=$1, description=$2, category_id=$3, price=$4, delivery_price=$5, old_price=$6,
-       stock=$7, active=$8, advertised=$9 WHERE id=$10`,
-      [product.name, product.description, product.categoryId, product.price, product.deliveryPrice,
+      `UPDATE products SET name=$1, description=$2, category_id=$3, price=$4, cost_price=$5, delivery_price=$6, old_price=$7,
+       stock=$8, active=$9, advertised=$10 WHERE id=$11`,
+      [product.name, product.description, product.categoryId, product.price, product.costPrice, product.deliveryPrice,
         product.oldPrice, product.stock, product.active, product.advertised, req.params.id]
     );
     for (const file of req.files || []) {
@@ -761,9 +768,9 @@ app.post("/api/orders", async (req, res) => {
     );
     for (const item of normalizedItems) {
       await client.query(
-        `INSERT INTO order_items(order_id, product_id, product_name, price, delivery_price, quantity)
-         VALUES($1, $2, $3, $4, $5, $6)`,
-        [orderId, item.product.id, item.product.name, item.product.price,
+        `INSERT INTO order_items(order_id, product_id, product_name, price, cost_price, delivery_price, quantity)
+         VALUES($1, $2, $3, $4, $5, $6, $7)`,
+        [orderId, item.product.id, item.product.name, item.product.price, item.product.cost_price,
           item.product.delivery_price || 0, item.quantity]
       );
     }
@@ -808,6 +815,30 @@ app.get("/api/orders", auth, async (req, res) => {
     itemsByOrder.get(item.order_id).push(item);
   }
   res.json(orders.rows.map(order => ({ ...order, items: itemsByOrder.get(order.id) || [] })));
+});
+app.patch("/api/orders/:id/return-cost", auth, role("admin", "manager"), async (req, res) => {
+  const orderId = Number(req.params.id);
+  if (!Number.isInteger(orderId) || orderId < 1 || orderId > 2147483647) {
+    return res.status(400).json({ error: "رقم الطلب غير صالح" });
+  }
+  const returnCost = safeNum(req.body.return_cost, NaN);
+  if (!Number.isFinite(returnCost) || returnCost < 0 || returnCost > MAX_MONEY) {
+    return res.status(400).json({ error: "تكلفة الإرجاع غير صالحة" });
+  }
+  const result = await pool.query(
+    `UPDATE orders
+     SET return_cost = $1,
+         return_cost_updated_at = CASE WHEN $1::numeric > 0 THEN CURRENT_TIMESTAMP ELSE NULL END
+     WHERE id = $2 AND status = 'returned'
+     RETURNING id`,
+    [returnCost, orderId]
+  );
+  if (!result.rowCount) {
+    const order = await pool.query("SELECT id FROM orders WHERE id = $1", [orderId]);
+    if (!order.rowCount) return res.status(404).json({ error: "الطلب غير موجود" });
+    return res.status(409).json({ error: "يمكن تسجيل تكلفة الإرجاع للطلب المرتجع فقط" });
+  }
+  res.json({ ok: true });
 });
 app.get("/api/orders/:id/history", auth, async (req, res) => {
   const result = await pool.query(
@@ -967,7 +998,7 @@ app.delete("/api/shipments/:id", auth, role("admin", "manager"), async (req, res
   res.json({ ok: true });
 });
 app.patch("/api/orders/:id/status", auth, role("admin", "manager"), async (req, res) => {
-  const validStatuses = ["new", "confirmed", "shipped", "delivered", "cancelled"];
+  const validStatuses = ["new", "confirmed", "shipped", "delivered", "cancelled", "returned"];
   if (!validStatuses.includes(req.body.status)) return res.status(400).json({ error: "حالة غير صحيحة" });
   const client = await pool.connect();
   try {
@@ -982,6 +1013,14 @@ app.patch("/api/orders/:id/status", auth, role("admin", "manager"), async (req, 
     }
     const { status: previousStatus, inventory_deducted: inventoryDeducted } = current.rows[0];
     if (previousStatus !== req.body.status) {
+      if (previousStatus === "returned") {
+        await client.query("ROLLBACK");
+        return res.status(409).json({ error: "لا يمكن تغيير حالة الطلب بعد تسجيله كمرتجع" });
+      }
+      if (req.body.status === "returned" && !["shipped", "delivered"].includes(previousStatus)) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({ error: "لا يمكن تسجيل الإرجاع إلا لطلب تم شحنه أو تسليمه" });
+      }
       if (req.body.status === "confirmed" && !inventoryDeducted) {
         const items = await client.query(
           `SELECT product_id, product_name, quantity FROM order_items
@@ -1010,7 +1049,7 @@ app.patch("/api/orders/:id/status", auth, role("admin", "manager"), async (req, 
           );
         }
         await client.query("UPDATE orders SET inventory_deducted = TRUE WHERE id = $1", [req.params.id]);
-      } else if (req.body.status === "cancelled" && inventoryDeducted) {
+      } else if (["cancelled", "returned"].includes(req.body.status) && inventoryDeducted) {
         const items = await client.query(
           `SELECT product_id, product_name, quantity FROM order_items
            WHERE order_id = $1 ORDER BY product_id NULLS FIRST, id`,
@@ -1073,7 +1112,7 @@ app.delete("/api/orders/:id", auth, role("admin", "manager"), async (req, res) =
       return res.status(404).json({ error: "الطلب غير موجود" });
     }
     const order = result.rows[0];
-    if (["shipped", "delivered"].includes(order.status) || order.shipment_id) {
+    if (["shipped", "delivered", "returned"].includes(order.status) || order.shipment_id) {
       await client.query("ROLLBACK");
       return res.status(409).json({ error: "لا يمكن حذف طلب تم شحنه أو تسليمه" });
     }
@@ -1118,24 +1157,80 @@ app.delete("/api/orders/:id", auth, role("admin", "manager"), async (req, res) =
 app.get("/api/customers", auth, async (req, res) => {
   const result = await pool.query(
     `SELECT c.*, COUNT(o.id)::int AS orders,
-     COALESCE(SUM(CASE WHEN o.status <> 'cancelled' THEN o.total ELSE 0 END), 0) AS spent
+     COALESCE(SUM(CASE WHEN o.status NOT IN ('cancelled', 'returned') THEN o.total ELSE 0 END), 0) AS spent
      FROM customers c LEFT JOIN orders o ON o.customer_id = c.id
      GROUP BY c.id ORDER BY c.id DESC`
   );
   res.json(result.rows);
 });
 app.get("/api/stats", auth, async (req, res) => {
-  const [products, customers, orders, revenue] = await Promise.all([
+  const [products, customers, orders, revenue, returnedQuantity, monthlyProfit, lowStock, ordersToday, ordersInDelivery, stock] = await Promise.all([
     pool.query("SELECT COUNT(*)::int AS n FROM products WHERE active = TRUE"),
     pool.query("SELECT COUNT(*)::int AS n FROM customers"),
     pool.query("SELECT COUNT(*)::int AS n FROM orders"),
-    pool.query("SELECT COALESCE(SUM(total), 0) AS n FROM orders WHERE status <> 'cancelled'")
+    pool.query("SELECT COALESCE(SUM(total), 0) AS n FROM orders WHERE status NOT IN ('cancelled', 'returned')"),
+    pool.query(
+      `SELECT COALESCE(SUM(oi.quantity), 0)::bigint AS n
+       FROM order_status_history h
+       JOIN order_items oi ON oi.order_id = h.order_id
+       WHERE h.to_status = 'returned'
+       AND h.created_at >= date_trunc('month', CURRENT_TIMESTAMP)`
+    ),
+    pool.query(
+      `WITH return_expenses AS (
+         SELECT COALESCE(SUM(return_cost), 0) AS amount
+         FROM orders
+         WHERE status = 'returned'
+         AND return_cost_updated_at >= date_trunc('month', CURRENT_TIMESTAMP)
+       ),
+       product_margins AS (
+         SELECT SUM((oi.price - oi.cost_price) * oi.quantity) AS amount,
+         COUNT(oi.cost_price) AS costed_items,
+         COUNT(*) FILTER (WHERE oi.cost_price IS NULL)::int AS uncosted_items
+         FROM order_items oi JOIN orders o ON o.id = oi.order_id
+         WHERE o.status NOT IN ('cancelled', 'returned')
+         AND o.created_at >= date_trunc('month', CURRENT_TIMESTAMP)
+       )
+       SELECT CASE
+         WHEN product_margins.costed_items > 0 OR return_expenses.amount > 0
+         THEN COALESCE(product_margins.amount, 0) - return_expenses.amount
+         ELSE NULL
+       END AS n,
+       product_margins.uncosted_items
+       FROM product_margins CROSS JOIN return_expenses`
+    ),
+    pool.query(
+      "SELECT COUNT(*)::int AS n FROM products WHERE active = TRUE AND stock BETWEEN 1 AND $1",
+      [LOW_STOCK_THRESHOLD]
+    ),
+    pool.query(
+      "SELECT COUNT(*)::int AS n FROM orders WHERE status = 'new' AND created_at >= CURRENT_DATE AND created_at < CURRENT_DATE + INTERVAL '1 day'"
+    ),
+    pool.query(
+      "SELECT COUNT(*)::int AS n FROM orders WHERE status = 'shipped'"
+    ),
+    pool.query(
+      `SELECT COUNT(*) FILTER (WHERE active = TRUE)::int AS total_products,
+       COUNT(*) FILTER (WHERE active = TRUE AND stock > $1)::int AS available,
+       COUNT(*) FILTER (WHERE active = TRUE AND stock BETWEEN 1 AND $1)::int AS low_stock,
+       COUNT(*) FILTER (WHERE active = TRUE AND stock = 0)::int AS out_of_stock
+       FROM products`,
+      [LOW_STOCK_THRESHOLD]
+    )
   ]);
   res.json({
     products: products.rows[0].n,
     customers: customers.rows[0].n,
     orders: orders.rows[0].n,
-    revenue: revenue.rows[0].n
+    revenue: revenue.rows[0].n,
+    monthlyReturnedQuantity: returnedQuantity.rows[0].n,
+    monthlyGrossProfit: monthlyProfit.rows[0].n,
+    monthlyUncostedItems: monthlyProfit.rows[0].uncosted_items,
+    lowStockProducts: lowStock.rows[0].n,
+    ordersNewToday: ordersToday.rows[0].n,
+    ordersInDelivery: ordersInDelivery.rows[0].n,
+    stockSummary: stock.rows[0],
+    lowStockThreshold: LOW_STOCK_THRESHOLD
   });
 });
 
@@ -1373,6 +1468,7 @@ async function initializeDatabase() {
       description TEXT NOT NULL DEFAULT '',
       category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
       price NUMERIC(12, 2) NOT NULL,
+      cost_price NUMERIC(12, 2),
       delivery_price NUMERIC(12, 2) NOT NULL DEFAULT 0,
       old_price NUMERIC(12, 2),
       stock INTEGER NOT NULL DEFAULT 0,
@@ -1382,6 +1478,7 @@ async function initializeDatabase() {
     );
     ALTER TABLE products ADD COLUMN IF NOT EXISTS advertised BOOLEAN NOT NULL DEFAULT FALSE;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS delivery_price NUMERIC(12, 2) NOT NULL DEFAULT 0;
+    ALTER TABLE products ADD COLUMN IF NOT EXISTS cost_price NUMERIC(12, 2);
     CREATE UNIQUE INDEX IF NOT EXISTS products_single_advertised_idx
       ON products (advertised) WHERE advertised = TRUE AND active = TRUE;
     CREATE TABLE IF NOT EXISTS product_images (
@@ -1404,10 +1501,14 @@ async function initializeDatabase() {
       delivery_fee NUMERIC(12, 2) NOT NULL DEFAULT 0,
       payment_method TEXT NOT NULL DEFAULT 'cash_on_delivery',
       status TEXT NOT NULL DEFAULT 'new',
+      return_cost NUMERIC(12, 2) NOT NULL DEFAULT 0,
+      return_cost_updated_at TIMESTAMPTZ,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_fee NUMERIC(12, 2) NOT NULL DEFAULT 0;
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method TEXT NOT NULL DEFAULT 'cash_on_delivery';
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_cost NUMERIC(12, 2) NOT NULL DEFAULT 0;
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_cost_updated_at TIMESTAMPTZ;
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS inventory_deducted BOOLEAN NOT NULL DEFAULT TRUE;
     ALTER TABLE orders ALTER COLUMN inventory_deducted SET DEFAULT FALSE;
     CREATE TABLE IF NOT EXISTS shipments (
@@ -1427,10 +1528,12 @@ async function initializeDatabase() {
       product_id INTEGER REFERENCES products(id) ON DELETE SET NULL,
       product_name TEXT NOT NULL,
       price NUMERIC(12, 2) NOT NULL,
+      cost_price NUMERIC(12, 2),
       delivery_price NUMERIC(12, 2) NOT NULL DEFAULT 0,
       quantity INTEGER NOT NULL
     );
     ALTER TABLE order_items ADD COLUMN IF NOT EXISTS delivery_price NUMERIC(12, 2) NOT NULL DEFAULT 0;
+    ALTER TABLE order_items ADD COLUMN IF NOT EXISTS cost_price NUMERIC(12, 2);
     CREATE TABLE IF NOT EXISTS inventory_movements (
       id SERIAL PRIMARY KEY,
       product_id INTEGER REFERENCES products(id) ON DELETE SET NULL,
