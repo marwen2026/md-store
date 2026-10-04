@@ -441,17 +441,28 @@ function changeDetailQuantity(delta){
 }
 function addDetailToCart(){if(detailProduct)addProductToCart(detailProduct,detailQuantity)}
 function orderDetailNow(){if(detailProduct){addProductToCart(detailProduct,detailQuantity);document.querySelector("#drawer .form input")?.focus()}}
-window.addEventListener("popstate",()=>{
+window.addEventListener("popstate",event=>{
+  if(imagePreviewHistoryEntry){
+    imagePreviewHistoryEntry=false;
+    closeImagePreview(false);
+    return;
+  }
+  if(event.state?.imagePreview){
+    imagePreviewHistoryEntry=true;
+    showImagePreview(event.state.previewProductId,event.state.previewImageIndex);
+    return;
+  }
   const productId=new URLSearchParams(location.search).get("product");
   if(productId)openProductDetails(productId,false);
   else if(detailProduct)closeProductDetails(false,"products");
 });
-let previewProductId=null,previewImageIndex=0;
+let previewProductId=null,previewImageIndex=0,imagePreviewHistoryEntry=false;
 function changeProductImage(productId,delta,event){event?.stopPropagation();const product=products.find(item=>Number(item.id)===Number(productId));const pic=document.querySelector(`.pic[data-product-id="${Number(productId)}"]`);if(!product||!pic||!product.images?.length)return;const index=(Number(pic.dataset.imageIndex||0)+delta+product.images.length)%product.images.length;pic.dataset.imageIndex=String(index);const image=pic.querySelector("img");image.src=product.images[index].path;pic.querySelector(".gallery-count").textContent=`${index+1} / ${product.images.length}`}
-function previewImage(image,productId){previewImageEl.src=image.src;previewImageEl.alt=image.alt;previewImageEl.classList.remove("zoomed");previewProductId=Number(productId);const product=products.find(item=>Number(item.id)===previewProductId),pic=image.closest(".pic"),detailGallery=image.closest(".detail-main-image");previewImageIndex=Number(detailGallery?.dataset.imageIndex||pic?.dataset.imageIndex||0);const hasGallery=Boolean(product?.images?.length>1);previewPrev.hidden=!hasGallery;previewNext.hidden=!hasGallery;imageViewer.classList.add("open")}
+function showImagePreview(productId,imageIndex){const product=products.find(item=>Number(item.id)===Number(productId));if(!product)return;previewProductId=Number(productId);previewImageIndex=Math.max(0,Math.min(Number(imageIndex)||0,productImages(product).length-1));const image=productImages(product)[previewImageIndex];previewImageEl.src=image.path;previewImageEl.alt=product.name;previewImageEl.classList.remove("zoomed");const hasGallery=productImages(product).length>1;previewPrev.hidden=!hasGallery;previewNext.hidden=!hasGallery;imageViewer.classList.add("open")}
+function previewImage(image,productId){const pic=image.closest(".pic"),detailGallery=image.closest(".detail-main-image"),imageIndex=Number(detailGallery?.dataset.imageIndex||pic?.dataset.imageIndex||0);showImagePreview(productId,imageIndex);if(imagePreviewHistoryEntry)history.replaceState({...history.state,previewProductId:Number(productId),previewImageIndex:imageIndex},"",location.href);else{history.pushState({...history.state,imagePreview:true,previewProductId:Number(productId),previewImageIndex:imageIndex},"",location.href);imagePreviewHistoryEntry=true}}
 function changePreviewImage(delta){const product=products.find(item=>Number(item.id)===previewProductId);if(!product?.images?.length)return;previewImageIndex=(previewImageIndex+delta+product.images.length)%product.images.length;previewImageEl.src=product.images[previewImageIndex].path;previewImageEl.alt=product.name;previewImageEl.classList.remove("zoomed")}
 function zoomPreview(){previewImageEl.classList.toggle("zoomed")}
-function closeImagePreview(){imageViewer.classList.remove("open");previewImageEl.src="";previewProductId=null}
+function closeImagePreview(restoreHistory=true){if(restoreHistory&&imagePreviewHistoryEntry)history.back();imageViewer.classList.remove("open");previewImageEl.src="";previewProductId=null}
 function fav(b){b.textContent=b.textContent==="♡"?"♥":"♡";document.getElementById("fav").textContent=[...document.querySelectorAll(".heart")].filter(x=>x.textContent==="♥").length}
 function deliveryLabel(value){const fee=Number(value)||0;return fee>0?`${storeText("deliveryFee")} ${esc(formatStoreMoney(fee))}`:storeText("freeDelivery")}
 function add(id){addProductToCart(products.find(x=>x.id==id))}
