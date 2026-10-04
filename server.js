@@ -21,7 +21,6 @@ const CURRENCY = process.env.CURRENCY || "TND";
 const PAYMENT_METHOD = "cash_on_delivery";
 const MAX_MONEY = 9999999999.99;
 const LOW_STOCK_THRESHOLD = 5;
-const DEFAULT_HERO_LOGO_URL = "/images/hero-brand-logo.png";
 const uploadDir = path.join(__dirname, "uploads");
 fs.mkdirSync(uploadDir, { recursive: true });
 
@@ -286,7 +285,7 @@ app.get("/api/config", async (req, res) => {
       socialInstagram: settings.social_instagram || "",
       socialTiktok: settings.social_tiktok || "",
       heroBackgroundUrl: settings.hero_background_url || "",
-      heroLogoUrl: settings.hero_logo_url || DEFAULT_HERO_LOGO_URL,
+      heroLogoUrl: settings.hero_logo_url || "",
       heroCardX: Number.isFinite(heroCardX) ? heroCardX : 0,
       heroCardY: Number.isFinite(heroCardY) ? heroCardY : 0,
       heroOverlay: Number.isFinite(heroOverlay) ? heroOverlay : 35,
@@ -313,7 +312,7 @@ app.get("/api/admin/settings", auth, role("admin"), async (req, res) => {
       social_instagram: settings.social_instagram || "",
       social_tiktok: settings.social_tiktok || "",
       hero_background_url: settings.hero_background_url || "",
-      hero_logo_url: settings.hero_logo_url || DEFAULT_HERO_LOGO_URL,
+      hero_logo_url: settings.hero_logo_url || "",
       hero_card_x: settings.hero_card_x || "0",
       hero_card_y: settings.hero_card_y || "0",
       hero_overlay: settings.hero_overlay || "35",
@@ -371,7 +370,6 @@ app.put("/api/admin/settings", auth, role("admin"), async (req, res) => {
   }
   for (const key of ["hero_background_url", "hero_logo_url"]) {
     if (!settings[key] || /^\/uploads\/[A-Za-z0-9._-]+$/.test(settings[key])) continue;
-    if (key === "hero_logo_url" && settings[key] === DEFAULT_HERO_LOGO_URL) continue;
     let url;
     try {
       url = new URL(settings[key]);
