@@ -270,6 +270,10 @@ app.get("/api/config", async (req, res) => {
   try {
     const settings = await readStoreSettings();
     const whatsapp = settings.whatsapp || "";
+    const heroCardX = Number(settings.hero_card_x);
+    const heroCardY = Number(settings.hero_card_y);
+    const heroOverlay = Number(settings.hero_overlay);
+    const heroPriceSize = Number(settings.hero_price_size);
     res.json({
       whatsapp: whatsappIsConfigured(whatsapp) ? whatsapp : "",
       whatsappConfigured: whatsappIsConfigured(whatsapp),
@@ -280,6 +284,11 @@ app.get("/api/config", async (req, res) => {
       socialFacebook: settings.social_facebook || "",
       socialInstagram: settings.social_instagram || "",
       socialTiktok: settings.social_tiktok || "",
+      heroBackgroundUrl: settings.hero_background_url || "",
+      heroCardX: Number.isFinite(heroCardX) ? heroCardX : 0,
+      heroCardY: Number.isFinite(heroCardY) ? heroCardY : 0,
+      heroOverlay: Number.isFinite(heroOverlay) ? heroOverlay : 35,
+      heroPriceSize: Number.isFinite(heroPriceSize) ? heroPriceSize : 29,
       store: STORE,
       currency: CURRENCY
     });
@@ -300,7 +309,12 @@ app.get("/api/admin/settings", auth, role("admin"), async (req, res) => {
       opening_hours: settings.opening_hours || "",
       social_facebook: settings.social_facebook || "",
       social_instagram: settings.social_instagram || "",
-      social_tiktok: settings.social_tiktok || ""
+      social_tiktok: settings.social_tiktok || "",
+      hero_background_url: settings.hero_background_url || "",
+      hero_card_x: settings.hero_card_x || "0",
+      hero_card_y: settings.hero_card_y || "0",
+      hero_overlay: settings.hero_overlay || "35",
+      hero_price_size: settings.hero_price_size || "29"
     });
   } catch (error) {
     console.error("Could not load administrator store settings:", error);
@@ -317,7 +331,8 @@ app.put("/api/admin/settings", auth, role("admin"), async (req, res) => {
     opening_hours: 160,
     social_facebook: 500,
     social_instagram: 500,
-    social_tiktok: 500
+    social_tiktok: 500,
+    hero_background_url: 2000
   };
   const settings = {};
   for (const [key, maxLength] of Object.entries(fields)) {
@@ -350,6 +365,34 @@ app.put("/api/admin/settings", auth, role("admin"), async (req, res) => {
     }
     settings[key] = url.toString();
   }
+  if (settings.hero_background_url) {
+    if (/^\/uploads\/[A-Za-z0-9._-]+$/.test(settings.hero_background_url)) {
+      // Uploaded storefront images are served from the persistent uploads directory.
+    } else {
+      let url;
+      try {
+        url = new URL(settings.hero_background_url);
+      } catch {
+        return res.status(400).json({ error: "Invalid hero_background_url" });
+      }
+      if (url.protocol !== "https:" || !url.hostname || url.username || url.password) {
+        return res.status(400).json({ error: "hero_background_url must be a valid HTTPS URL or uploaded image path" });
+      }
+      settings.hero_background_url = url.toString();
+    }
+  }
+  for (const [key, min, max] of [
+    ["hero_card_x", -200, 200],
+    ["hero_card_y", -200, 200],
+    ["hero_overlay", 0, 80],
+    ["hero_price_size", 16, 56]
+  ]) {
+    const value = req.body[key];
+    if (typeof value !== "number" || !Number.isFinite(value) || value < min || value > max) {
+      return res.status(400).json({ error: `Invalid ${key}` });
+    }
+    settings[key] = String(value);
+  }
 
   const entries = Object.entries(settings);
   try {
@@ -363,6 +406,27 @@ app.put("/api/admin/settings", auth, role("admin"), async (req, res) => {
   } catch (error) {
     console.error("Could not save administrator store settings:", error);
     res.status(500).json({ error: "Could not save store settings" });
+  }
+});
+
+app.post("/api/admin/settings/hero-background", auth, role("admin"), upload.single("image"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "Select an image to upload" });
+  const imagePath = `/uploads/${req.file.filename}`;
+  try {
+    await pool.query(
+      `INSERT INTO store_settings(key, value) VALUES('hero_background_url', $1)
+       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+      [imagePath]
+    );
+    res.json({ ok: true, hero_background_url: imagePath });
+  } catch (error) {
+    console.error("Could not save storefront hero background image:", error);
+    try {
+      await fs.promises.unlink(path.join(uploadDir, req.file.filename));
+    } catch (cleanupError) {
+      console.error("Could not remove the failed hero background upload:", cleanupError);
+    }
+    res.status(500).json({ error: "Could not save hero background image" });
   }
 });
 app.get("/api/admin/events", auth, (req, res) => {
@@ -1679,7 +1743,12 @@ async function initializeDatabase() {
        ('opening_hours', ''),
        ('social_facebook', ''),
        ('social_instagram', ''),
-       ('social_tiktok', '')
+       ('social_tiktok', ''),
+       ('hero_background_url', ''),
+       ('hero_card_x', '0'),
+       ('hero_card_y', '0'),
+       ('hero_overlay', '35'),
+       ('hero_price_size', '29')
      ON CONFLICT (key) DO NOTHING`,
     [WHATSAPP_CONFIGURED ? WA : ""]
   );

@@ -488,6 +488,14 @@ function changeFeaturedSlide(delta){
 	if(featuredProducts.length<2)return;
 	showAdvertisement((featuredProductIndex+delta+featuredProducts.length)%featuredProducts.length);
 }
+function applyHeroDisplaySettings(){
+	const heroSlide=document.querySelector(".hero-slide"),heroCard=document.querySelector(".hero-card"),backgroundUrl=cfg.heroBackgroundUrl||"https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=2000&q=88";
+	const overlay=Math.min(80,Math.max(0,Number(cfg.heroOverlay)||0))/100,edgeOverlay=Math.min(.9,overlay+.1);
+	heroSlide.style.backgroundImage=`linear-gradient(90deg,rgba(8,8,8,${edgeOverlay}) 0%,rgba(17,16,15,${overlay}) 48%,rgba(8,8,8,${edgeOverlay}) 100%),url(${JSON.stringify(backgroundUrl)})`;
+	heroSlide.style.backgroundPosition="center 42%";
+	heroCard.style.transform=`translate(${Math.min(200,Math.max(-200,Number(cfg.heroCardX)||0))}px,${Math.min(200,Math.max(-200,Number(cfg.heroCardY)||0))}px)`;
+	heroProductPrice.style.fontSize=`${Math.min(56,Math.max(16,Number(cfg.heroPriceSize)||29))}px`;
+}
 function showAdvertisement(index){
 	if(!featuredProducts.length){
 		featuredProduct=null;
@@ -564,6 +572,6 @@ async function checkout(){
 }
 const previewImageEl=document.getElementById("previewImage");document.addEventListener("keydown",event=>{if(event.key==="Escape"){closeDrawers();closeImagePreview()}});
 applyStoreLanguage();
-Promise.all([fetch("/api/config").then(r=>r.json()).then(x=>{cfg=x;cur.textContent=storeCurrencyLabel();updateStoreWhatsAppLinks()}),loadCats()]).then(()=>Promise.all([load(),loadAdvertisement()]));
+Promise.all([fetch("/api/config").then(r=>r.json()).then(x=>{cfg=x;cur.textContent=storeCurrencyLabel();updateStoreWhatsAppLinks();applyHeroDisplaySettings()}),loadCats()]).then(()=>Promise.all([load(),loadAdvertisement()]));
 render();
 </script></body></html>h
