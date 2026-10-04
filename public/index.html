@@ -115,6 +115,7 @@ html[dir="rtl"] .close{float:right}html[dir="ltr"] .close{float:left}
 .hero-product-visual{display:grid;min-width:0;height:min(370px,70vw);place-items:center;position:relative}
 .hero-product-visual:before{position:absolute;width:min(390px,75%);aspect-ratio:1;content:"";border:1px solid #e5bd6a55;border-radius:50%;background:radial-gradient(circle,#f3d5941c,transparent 68%);box-shadow:0 0 90px #d6a33b29,inset 0 0 55px #d6a33b12}
 .hero-product-visual img{position:relative;z-index:1;min-width:0;min-height:0;width:min(100%,470px);height:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 24px 38px #0008);animation:heroProductIn .6s ease both}
+.hero-product-visual img.hero-brand-logo{width:min(72%,320px);height:auto;max-height:220px;filter:drop-shadow(0 12px 28px #0008)}
 .hero-product-visual img[hidden]{display:none}
 @keyframes heroProductIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
 .hero-brand-mark{position:relative;z-index:1;font-family:"Playfair Display",serif;font-size:clamp(66px,9vw,128px);font-weight:700;letter-spacing:-7px;color:#e2b85b;text-shadow:0 8px 40px #d0a34266}
@@ -173,7 +174,7 @@ html[dir="rtl"] .close{float:right}html[dir="ltr"] .close{float:left}
 <button class="arrow left" type="button" onclick="changeFeaturedSlide(-1)" aria-label="الشريحة السابقة" data-i18n-aria="previousSlide">‹</button>
 <button class="arrow right" type="button" onclick="changeFeaturedSlide(1)" aria-label="الشريحة التالية" data-i18n-aria="nextSlide">›</button>
 <div class="hero-layout">
-  <div class="hero-product-visual"><div class="hero-brand-mark" id="heroBrandMark">M&amp;D</div><img id="heroProductImage" alt="" hidden></div>
+  <div class="hero-product-visual"><div class="hero-brand-mark" id="heroBrandMark">M&amp;D</div><img class="hero-brand-logo" id="heroBrandLogo" alt="M&amp;D Store" hidden><img id="heroProductImage" alt="" hidden></div>
   <article class="hero-card" aria-live="polite">
     <div class="hero-card-head"><span class="hero-card-brand">M&amp;D</span><span class="hero-card-kicker" data-i18n="curatedSelection">CURATED SELECTION</span></div>
     <h1 data-i18n="heroTitle">L’élégance, choisie pour vous</h1>
@@ -488,6 +489,13 @@ function changeFeaturedSlide(delta){
 	if(featuredProducts.length<2)return;
 	showAdvertisement((featuredProductIndex+delta+featuredProducts.length)%featuredProducts.length);
 }
+function updateHeroBrandMark(hasProductImage){
+	const logoUrl=cfg.heroLogoUrl||"";
+	heroBrandMark.hidden=Boolean(hasProductImage)||Boolean(logoUrl);
+	heroBrandLogo.hidden=Boolean(hasProductImage)||!logoUrl;
+	if(logoUrl){heroBrandLogo.src=logoUrl;heroBrandLogo.alt=`${cfg.store||"M&D Store"} logo`}
+	else{heroBrandLogo.removeAttribute("src");heroBrandLogo.alt=""}
+}
 function applyHeroDisplaySettings(){
 	const heroSlide=document.querySelector(".hero-slide"),heroCard=document.querySelector(".hero-card"),backgroundUrl=cfg.heroBackgroundUrl||"https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=2000&q=88";
 	const overlay=Math.min(80,Math.max(0,Number(cfg.heroOverlay)||0))/100,edgeOverlay=Math.min(.9,overlay+.1);
@@ -495,6 +503,7 @@ function applyHeroDisplaySettings(){
 	heroSlide.style.backgroundPosition="center 42%";
 	heroCard.style.transform=`translate(${Math.min(200,Math.max(-200,Number(cfg.heroCardX)||0))}px,${Math.min(200,Math.max(-200,Number(cfg.heroCardY)||0))}px)`;
 	heroProductPrice.style.fontSize=`${Math.min(56,Math.max(16,Number(cfg.heroPriceSize)||29))}px`;
+	updateHeroBrandMark(false);
 }
 function showAdvertisement(index){
 	if(!featuredProducts.length){
@@ -502,7 +511,7 @@ function showAdvertisement(index){
 		featuredProductIndex=0;
 		heroProductImage.hidden=true;
 		heroProductImage.removeAttribute("src");
-		heroBrandMark.hidden=false;
+		updateHeroBrandMark(false);
 		heroProductName.textContent=storeText("discoverSelected");
 		heroProductPrice.textContent="";
 		heroProductOld.textContent="";
@@ -516,7 +525,7 @@ function showAdvertisement(index){
 	featuredProduct=featuredProducts[featuredProductIndex];
 	const image=featuredProduct.images?.[0]?.path;
 	heroProductImage.hidden=!image;
-	heroBrandMark.hidden=Boolean(image);
+	updateHeroBrandMark(Boolean(image));
 	if(image){heroProductImage.src=image;heroProductImage.alt=featuredProduct.name}else{heroProductImage.removeAttribute("src");heroProductImage.alt=""}
 	heroProductName.textContent=featuredProduct.name;
 	heroProductPrice.textContent=formatStoreMoney(featuredProduct.price);

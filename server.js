@@ -285,6 +285,7 @@ app.get("/api/config", async (req, res) => {
       socialInstagram: settings.social_instagram || "",
       socialTiktok: settings.social_tiktok || "",
       heroBackgroundUrl: settings.hero_background_url || "",
+      heroLogoUrl: settings.hero_logo_url || "",
       heroCardX: Number.isFinite(heroCardX) ? heroCardX : 0,
       heroCardY: Number.isFinite(heroCardY) ? heroCardY : 0,
       heroOverlay: Number.isFinite(heroOverlay) ? heroOverlay : 35,
@@ -311,6 +312,7 @@ app.get("/api/admin/settings", auth, role("admin"), async (req, res) => {
       social_instagram: settings.social_instagram || "",
       social_tiktok: settings.social_tiktok || "",
       hero_background_url: settings.hero_background_url || "",
+      hero_logo_url: settings.hero_logo_url || "",
       hero_card_x: settings.hero_card_x || "0",
       hero_card_y: settings.hero_card_y || "0",
       hero_overlay: settings.hero_overlay || "35",
@@ -332,7 +334,8 @@ app.put("/api/admin/settings", auth, role("admin"), async (req, res) => {
     social_facebook: 500,
     social_instagram: 500,
     social_tiktok: 500,
-    hero_background_url: 2000
+    hero_background_url: 2000,
+    hero_logo_url: 2000
   };
   const settings = {};
   for (const [key, maxLength] of Object.entries(fields)) {
@@ -365,21 +368,18 @@ app.put("/api/admin/settings", auth, role("admin"), async (req, res) => {
     }
     settings[key] = url.toString();
   }
-  if (settings.hero_background_url) {
-    if (/^\/uploads\/[A-Za-z0-9._-]+$/.test(settings.hero_background_url)) {
-      // Uploaded storefront images are served from the persistent uploads directory.
-    } else {
-      let url;
-      try {
-        url = new URL(settings.hero_background_url);
-      } catch {
-        return res.status(400).json({ error: "Invalid hero_background_url" });
-      }
-      if (url.protocol !== "https:" || !url.hostname || url.username || url.password) {
-        return res.status(400).json({ error: "hero_background_url must be a valid HTTPS URL or uploaded image path" });
-      }
-      settings.hero_background_url = url.toString();
+  for (const key of ["hero_background_url", "hero_logo_url"]) {
+    if (!settings[key] || /^\/uploads\/[A-Za-z0-9._-]+$/.test(settings[key])) continue;
+    let url;
+    try {
+      url = new URL(settings[key]);
+    } catch {
+      return res.status(400).json({ error: `Invalid ${key}` });
     }
+    if (url.protocol !== "https:" || !url.hostname || url.username || url.password) {
+      return res.status(400).json({ error: `${key} must be a valid HTTPS URL or uploaded image path` });
+    }
+    settings[key] = url.toString();
   }
   for (const [key, min, max] of [
     ["hero_card_x", -200, 200],
@@ -427,6 +427,26 @@ app.post("/api/admin/settings/hero-background", auth, role("admin"), upload.sing
       console.error("Could not remove the failed hero background upload:", cleanupError);
     }
     res.status(500).json({ error: "Could not save hero background image" });
+  }
+});
+app.post("/api/admin/settings/hero-logo", auth, role("admin"), upload.single("image"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "Select an image to upload" });
+  const imagePath = `/uploads/${req.file.filename}`;
+  try {
+    await pool.query(
+      `INSERT INTO store_settings(key, value) VALUES('hero_logo_url', $1)
+       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+      [imagePath]
+    );
+    res.json({ ok: true, hero_logo_url: imagePath });
+  } catch (error) {
+    console.error("Could not save storefront hero logo image:", error);
+    try {
+      await fs.promises.unlink(path.join(uploadDir, req.file.filename));
+    } catch (cleanupError) {
+      console.error("Could not remove the failed hero logo upload:", cleanupError);
+    }
+    res.status(500).json({ error: "Could not save hero logo image" });
   }
 });
 app.get("/api/admin/events", auth, (req, res) => {
@@ -1745,6 +1765,7 @@ async function initializeDatabase() {
        ('social_instagram', ''),
        ('social_tiktok', ''),
        ('hero_background_url', ''),
+       ('hero_logo_url', ''),
        ('hero_card_x', '0'),
        ('hero_card_y', '0'),
        ('hero_overlay', '35'),

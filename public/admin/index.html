@@ -70,7 +70,41 @@ body.dark .top{background:color-mix(in srgb,var(--panel) 94%,transparent);box-sh
 <div class="box" id="shipmentsDashboard"><h2 id="shipmentsTitle">الشحنات المجمعة</h2><div class="scroll" id="shipments"></div></div>
 <div class="box" id="customersDashboard"><h2 id="customersTitle">العملاء</h2><div class="scroll" id="customers"></div></div>
 <div class="box" id="usersBox"><h2 id="usersTitle">المستخدمون</h2><div class="row"><input id="nu" placeholder="اسم المستخدم"><input id="np" type="password" placeholder="كلمة المرور (6 أحرف+)"></div><select id="nr"><option value="manager">مدير</option><option value="admin">مسؤول</option></select><button id="addUserBtn" onclick="addUser()">إضافة مستخدم</button><div id="users"></div></div>
-<div class="box" id="storeSettingsBox"><h2 id="storeSettingsTitle">إعدادات المتجر</h2><p class="settings-hint" id="storeSettingsHint">تظهر المعلومات المحفوظة مباشرة في المتجر.</p><div class="store-settings-grid"><label><span id="settingsWhatsappLabel">WhatsApp</span><input id="settingsWhatsapp" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="+216..."></label><label><span id="settingsPhoneLabel">الهاتف</span><input id="settingsPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="40"></label><label><span id="settingsEmailLabel">البريد الإلكتروني</span><input id="settingsEmail" type="email" autocomplete="email" maxlength="254"></label><label><span id="settingsHoursLabel">ساعات العمل</span><input id="settingsHours" maxlength="160"></label><label style="grid-column:1/-1"><span id="settingsAddressLabel">العنوان</span><textarea id="settingsAddress" maxlength="500"></textarea></label><label><span id="settingsFacebookLabel">Facebook</span><input id="settingsFacebook" type="url" inputmode="url" maxlength="500" placeholder="https://www.facebook.com/..."></label><label><span id="settingsInstagramLabel">Instagram</span><input id="settingsInstagram" type="url" inputmode="url" maxlength="500" placeholder="https://www.instagram.com/..."></label><label><span id="settingsTiktokLabel">TikTok</span><input id="settingsTiktok" type="url" inputmode="url" maxlength="500" placeholder="https://www.tiktok.com/@..."></label></div><section class="hero-slider-settings" aria-labelledby="heroSettingsTitle"><h3 id="heroSettingsTitle">تخصيص السلايدر</h3><p class="settings-hint" id="heroSettingsHint">غيّر الخلفية وموضع المحتوى وتعتيم الخلفية وحجم السعر، ثم احفظ الإعدادات.</p><div class="hero-slider-fields"><label><span id="heroBackgroundLabel">رابط صورة الخلفية</span><input id="heroBackgroundUrl" type="url" inputmode="url" maxlength="2000" placeholder="https://..." onchange="updateHeroBackgroundPreview()"></label><label><span id="heroBackgroundFileLabel">أو ارفع صورة (حتى 5 ميغابايت)</span><input id="heroBackgroundFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><img class="hero-background-preview" id="heroBackgroundPreview" alt="" hidden></label><label><span id="heroCardXLabel">تحريك المحتوى أفقيًا</span><output id="heroCardXValue">0 px</output><input id="heroCardX" type="range" min="-200" max="200" step="5" value="0" oninput="updateHeroSettingValues()"></label><label><span id="heroCardYLabel">تحريك المحتوى عموديًا</span><output id="heroCardYValue">0 px</output><input id="heroCardY" type="range" min="-200" max="200" step="5" value="0" oninput="updateHeroSettingValues()"></label><label><span id="heroOverlayLabel">تعتيم الخلفية</span><output id="heroOverlayValue">35%</output><input id="heroOverlay" type="range" min="0" max="80" step="5" value="35" oninput="updateHeroSettingValues()"></label><label><span id="heroPriceSizeLabel">حجم السعر</span><output id="heroPriceSizeValue">29 px</output><input id="heroPriceSize" type="range" min="16" max="56" step="1" value="29" oninput="updateHeroSettingValues()"></label></div><div class="hero-background-actions"><button type="button" id="uploadHeroBackgroundBtn" onclick="uploadHeroBackground()">رفع صورة الخلفية</button><button type="button" class="toggle-btn" id="resetHeroBackgroundBtn" onclick="resetHeroBackground()">استعادة الخلفية الافتراضية</button></div></section><button class="gold hero-settings-actions" id="saveStoreSettingsBtn" type="button" onclick="saveStoreSettings()">حفظ إعدادات المتجر</button></div>
+<div class="box" id="storeSettingsBox">
+<h2 id="storeSettingsTitle">إعدادات المتجر</h2>
+<p class="settings-hint" id="storeSettingsHint">تظهر المعلومات المحفوظة مباشرة في المتجر.</p>
+<div class="store-settings-grid">
+<label><span id="settingsWhatsappLabel">WhatsApp</span><input id="settingsWhatsapp" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="+216..."></label>
+<label><span id="settingsPhoneLabel">الهاتف</span><input id="settingsPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="40"></label>
+<label><span id="settingsEmailLabel">البريد الإلكتروني</span><input id="settingsEmail" type="email" autocomplete="email" maxlength="254"></label>
+<label><span id="settingsHoursLabel">ساعات العمل</span><input id="settingsHours" maxlength="160"></label>
+<label style="grid-column:1/-1"><span id="settingsAddressLabel">العنوان</span><textarea id="settingsAddress" maxlength="500"></textarea></label>
+<label><span id="settingsFacebookLabel">Facebook</span><input id="settingsFacebook" type="url" inputmode="url" maxlength="500" placeholder="https://www.facebook.com/..."></label>
+<label><span id="settingsInstagramLabel">Instagram</span><input id="settingsInstagram" type="url" inputmode="url" maxlength="500" placeholder="https://www.instagram.com/..."></label>
+<label><span id="settingsTiktokLabel">TikTok</span><input id="settingsTiktok" type="url" inputmode="url" maxlength="500" placeholder="https://www.tiktok.com/@..."></label>
+</div>
+<section class="hero-slider-settings" aria-labelledby="heroSettingsTitle">
+<h3 id="heroSettingsTitle">تخصيص السلايدر</h3>
+<p class="settings-hint" id="heroSettingsHint">غيّر الخلفية وموضع المحتوى وتعتيم الخلفية وحجم السعر، ثم احفظ الإعدادات.</p>
+<div class="hero-slider-fields">
+<label><span id="heroBackgroundLabel">رابط صورة الخلفية</span><input id="heroBackgroundUrl" type="url" inputmode="url" maxlength="2000" placeholder="https://..." onchange="updateHeroBackgroundPreview()"></label>
+<label><span id="heroBackgroundFileLabel">أو ارفع صورة (حتى 5 ميغابايت)</span><input id="heroBackgroundFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><img class="hero-background-preview" id="heroBackgroundPreview" alt="" hidden></label>
+<label><span id="heroCardXLabel">تحريك المحتوى أفقيًا</span><output id="heroCardXValue">0 px</output><input id="heroCardX" type="range" min="-200" max="200" step="5" value="0" oninput="updateHeroSettingValues()"></label>
+<label><span id="heroCardYLabel">تحريك المحتوى عموديًا</span><output id="heroCardYValue">0 px</output><input id="heroCardY" type="range" min="-200" max="200" step="5" value="0" oninput="updateHeroSettingValues()"></label>
+<label><span id="heroOverlayLabel">تعتيم الخلفية</span><output id="heroOverlayValue">35%</output><input id="heroOverlay" type="range" min="0" max="80" step="5" value="35" oninput="updateHeroSettingValues()"></label>
+<label><span id="heroPriceSizeLabel">حجم السعر</span><output id="heroPriceSizeValue">29 px</output><input id="heroPriceSize" type="range" min="16" max="56" step="1" value="29" oninput="updateHeroSettingValues()"></label>
+<label><span id="heroLogoLabel">رابط صورة الشعار</span><input id="heroLogoUrl" type="url" inputmode="url" maxlength="2000" placeholder="https://..." onchange="updateHeroLogoPreview()"></label>
+<label><span id="heroLogoFileLabel">أو ارفع شعارًا (حتى 5 ميغابايت)</span><input id="heroLogoFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><img class="hero-background-preview" id="heroLogoPreview" alt="" hidden style="object-fit:contain;max-height:120px"></label>
+</div>
+<div class="hero-background-actions">
+<button type="button" id="uploadHeroBackgroundBtn" onclick="uploadHeroBackground()">رفع صورة الخلفية</button>
+<button type="button" class="toggle-btn" id="resetHeroBackgroundBtn" onclick="resetHeroBackground()">استعادة الخلفية الافتراضية</button>
+<button type="button" id="uploadHeroLogoBtn" onclick="uploadHeroLogo()">رفع شعار السلايدر</button>
+<button type="button" class="toggle-btn" id="resetHeroLogoBtn" onclick="resetHeroLogo()">استعادة شعار M&amp;D الافتراضي</button>
+</div>
+</section>
+<button class="gold hero-settings-actions" id="saveStoreSettingsBtn" type="button" onclick="saveStoreSettings()">حفظ إعدادات المتجر</button>
+</div>
 <div class="box" id="auditBox"><div class="export-bar"><h2 id="auditTitle">سجل إجراءات المسؤولين</h2><button class="toggle-btn" id="refreshAuditBtn" type="button" onclick="adminAuditLoad()">تحديث</button></div><div class="scroll" id="auditLogs"><p class="muted" id="auditPlaceholder">اضغط على تحديث لعرض السجل.</p></div></div>
 </div>
 <div class="modal-backdrop" id="orderHistoryModal" onclick="if(event.target===this)closeOrderHistory()"><div class="modal-card"><div class="modal-head"><h2 id="orderHistoryTitle">سجل الطلب</h2><button type="button" onclick="closeOrderHistory()" aria-label="Close">×</button></div><div class="scroll" id="orderHistoryRows"></div></div></div>
@@ -92,6 +126,8 @@ Object.assign(translations.ar,{categoryPreset:"اختر نموذجاً",presetSm
 Object.assign(translations.fr,{categoryPreset:"Choisir un modèle",presetSmartphones:"📱 Smartphones",presetComputing:"💻 Informatique",presetWatches:"⌚ Montres",presetBags:"👜 Sacs",presetClothing:"👕 Vêtements",presetShoes:"👟 Chaussures",presetBeauty:"💄 Beauté",presetHome:"🏠 Maison",presetGaming:"🎮 Gaming",presetSport:"⚽ Sport",presetChildren:"🧸 Enfants",presetPromotions:"🎁 Promotions"});
 Object.assign(translations.ar,{storeSettings:"إعدادات المتجر",storeSettingsHint:"تظهر المعلومات المحفوظة مباشرة في المتجر.",whatsappNumber:"رقم WhatsApp الدولي",contactPhone:"رقم الهاتف",contactEmail:"البريد الإلكتروني",contactAddress:"العنوان",openingHours:"ساعات العمل",saveStoreSettings:"حفظ إعدادات المتجر",settingsSaved:"تم حفظ إعدادات المتجر",settingsFailed:"تعذر حفظ إعدادات المتجر",heroSettingsTitle:"تخصيص السلايدر",heroSettingsHint:"غيّر الخلفية وموضع المحتوى وتعتيم الخلفية وحجم السعر، ثم احفظ الإعدادات.",heroBackgroundLabel:"رابط صورة الخلفية",heroBackgroundFileLabel:"أو ارفع صورة (حتى 5 ميغابايت)",uploadHeroBackground:"رفع صورة الخلفية",resetHeroBackground:"استعادة الخلفية الافتراضية",heroCardXLabel:"تحريك المحتوى أفقيًا",heroCardYLabel:"تحريك المحتوى عموديًا",heroOverlayLabel:"تعتيم الخلفية",heroPriceSizeLabel:"حجم السعر",heroBackgroundUploaded:"تم رفع صورة الخلفية وحفظها",heroBackgroundUploadFailed:"تعذر رفع صورة الخلفية",heroBackgroundInvalid:"اختر صورة بصيغة JPEG أو PNG أو WebP أو GIF"});
 Object.assign(translations.fr,{storeSettings:"Paramètres de la boutique",storeSettingsHint:"Les informations enregistrées s’affichent dans la boutique.",whatsappNumber:"Numéro WhatsApp international",contactPhone:"Téléphone",contactEmail:"E-mail",contactAddress:"Adresse",openingHours:"Horaires d’ouverture",saveStoreSettings:"Enregistrer les paramètres",settingsSaved:"Paramètres de la boutique enregistrés",settingsFailed:"Impossible d’enregistrer les paramètres",heroSettingsTitle:"Personnaliser le diaporama",heroSettingsHint:"Modifiez l’image, la position du contenu, l’opacité du voile et la taille du prix, puis enregistrez.",heroBackgroundLabel:"URL de l’image d’arrière-plan",heroBackgroundFileLabel:"Ou importer une image (5 Mo maximum)",uploadHeroBackground:"Importer l’image d’arrière-plan",resetHeroBackground:"Restaurer l’image par défaut",heroCardXLabel:"Position horizontale du contenu",heroCardYLabel:"Position verticale du contenu",heroOverlayLabel:"Opacité du voile",heroPriceSizeLabel:"Taille du prix",heroBackgroundUploaded:"Image d’arrière-plan importée et enregistrée",heroBackgroundUploadFailed:"Impossible d’importer l’image d’arrière-plan",heroBackgroundInvalid:"Choisissez une image JPEG, PNG, WebP ou GIF"});
+Object.assign(translations.ar,{heroLogoLabel:"رابط صورة الشعار",heroLogoFileLabel:"أو ارفع شعارًا (حتى 5 ميغابايت)",uploadHeroLogo:"رفع شعار السلايدر",resetHeroLogo:"استعادة شعار M&D الافتراضي",heroLogoUploaded:"تم رفع شعار السلايدر وحفظه",heroLogoUploadFailed:"تعذر رفع شعار السلايدر"});
+Object.assign(translations.fr,{heroLogoLabel:"URL de l’image du logo",heroLogoFileLabel:"Ou importer un logo (5 Mo maximum)",uploadHeroLogo:"Importer le logo du diaporama",resetHeroLogo:"Restaurer le logo M&D par défaut",heroLogoUploaded:"Logo du diaporama importé et enregistré",heroLogoUploadFailed:"Impossible d’importer le logo du diaporama"});
 Object.assign(translations.ar,{monthlyGrossProfit:"الربح بعد تكلفة الإرجاع هذا الشهر",monthlyProfitNote:"هامش المنتجات بعد خصم تكاليف الطرود المرتجعة؛ لا يشمل المصاريف الأخرى، وتُستثنى المنتجات بلا تكلفة شراء.",monthlyReturnedQuantity:"كمية المرتجعات هذا الشهر",lowStockMetric:"منتجات منخفضة المخزون",newOrdersToday:"الطلبات الجديدة اليوم",ordersInDelivery:"الطلبات قيد التوصيل",stockOverview:"حالة المخزون",stockTotal:"إجمالي المنتجات",stockAvailable:"متوفر",stockLow:"منخفض (1–5)",stockOut:"منتهي",purchaseCost:"تكلفة الشراء (لحساب الربح)",profitUnavailable:"—"});
 Object.assign(translations.fr,{monthlyGrossProfit:"Marge après frais de retour ce mois",monthlyProfitNote:"Marge des produits moins les frais des colis retournés ; hors autres dépenses et produits sans coût d’achat.",monthlyReturnedQuantity:"Articles retournés ce mois",lowStockMetric:"Produits en stock faible",newOrdersToday:"Nouvelles commandes aujourd’hui",ordersInDelivery:"Commandes en livraison",stockOverview:"État du stock",stockTotal:"Nombre total de produits",stockAvailable:"Disponibles",stockLow:"Stock faible (1–5)",stockOut:"Épuisés",purchaseCost:"Coût d’achat (pour calculer la marge)",profitUnavailable:"—"});
 Object.assign(translations.ar,{socialFacebook:"رابط Facebook",socialInstagram:"رابط Instagram",socialTiktok:"رابط TikTok"});
@@ -132,6 +168,7 @@ function applyStaticTexts(){
   statuses.forEach(({value,key})=>{const opt=orderStatusFilterEl&&orderStatusFilterEl.querySelector('option[value="'+value+'"]');if(opt) opt.textContent=t(key);});
   excelBtn.textContent=t("excel");
   storeSettingsTitle.textContent=t("storeSettings");storeSettingsHint.textContent=t("storeSettingsHint");settingsWhatsappLabel.textContent=t("whatsappNumber");settingsPhoneLabel.textContent=t("contactPhone");settingsEmailLabel.textContent=t("contactEmail");settingsAddressLabel.textContent=t("contactAddress");settingsHoursLabel.textContent=t("openingHours");settingsFacebookLabel.textContent=t("socialFacebook");settingsInstagramLabel.textContent=t("socialInstagram");settingsTiktokLabel.textContent=t("socialTiktok");saveStoreSettingsBtn.textContent=t("saveStoreSettings");heroSettingsTitle.textContent=t("heroSettingsTitle");heroSettingsHint.textContent=t("heroSettingsHint");heroBackgroundLabel.textContent=t("heroBackgroundLabel");heroBackgroundFileLabel.textContent=t("heroBackgroundFileLabel");heroCardXLabel.textContent=t("heroCardXLabel");heroCardYLabel.textContent=t("heroCardYLabel");heroOverlayLabel.textContent=t("heroOverlayLabel");heroPriceSizeLabel.textContent=t("heroPriceSizeLabel");uploadHeroBackgroundBtn.textContent=t("uploadHeroBackground");resetHeroBackgroundBtn.textContent=t("resetHeroBackground");updateHeroSettingValues();
+  heroLogoLabel.textContent=t("heroLogoLabel");heroLogoFileLabel.textContent=t("heroLogoFileLabel");uploadHeroLogoBtn.textContent=t("uploadHeroLogo");resetHeroLogoBtn.textContent=t("resetHeroLogo");
   if(productModal.classList.contains("open"))formTitle.textContent=pid.value?t("editProduct"):t("createProduct");
   if(document.getElementById("loginTitle")) loginTitle.textContent="🔐 M&D Store";
 }
@@ -178,6 +215,7 @@ async function storeSettingsLoad(){
   if(!response.ok)throw new Error(settings.error||t("settingsFailed"));
   settingsWhatsapp.value=settings.whatsapp;settingsPhone.value=settings.contact_phone;settingsEmail.value=settings.contact_email;settingsAddress.value=settings.contact_address;settingsHours.value=settings.opening_hours;settingsFacebook.value=settings.social_facebook;settingsInstagram.value=settings.social_instagram;settingsTiktok.value=settings.social_tiktok;
   heroBackgroundUrl.value=settings.hero_background_url;heroCardX.value=settings.hero_card_x;heroCardY.value=settings.hero_card_y;heroOverlay.value=settings.hero_overlay;heroPriceSize.value=settings.hero_price_size;updateHeroSettingValues();updateHeroBackgroundPreview();
+  heroLogoUrl.value=settings.hero_logo_url;updateHeroLogoPreview();
 }
 function updateHeroSettingValues(){
   const suffix=currentLang==="fr"?"px":"بكسل";
@@ -192,6 +230,16 @@ function updateHeroBackgroundPreview(){
 }
 function resetHeroBackground(){
   heroBackgroundUrl.value="";heroBackgroundFile.value="";updateHeroBackgroundPreview();
+}
+function updateHeroLogoPreview(){
+  const url=heroLogoUrl.value.trim();
+  if(!url){heroLogoPreview.removeAttribute("src");heroLogoPreview.hidden=true;return}
+  heroLogoPreview.onerror=()=>{console.error("Could not preview the selected hero logo.");heroLogoPreview.hidden=true};
+  heroLogoPreview.onload=()=>{heroLogoPreview.hidden=false};
+  heroLogoPreview.src=url;
+}
+function resetHeroLogo(){
+  heroLogoUrl.value="";heroLogoFile.value="";updateHeroLogoPreview();
 }
 async function uploadHeroBackground(){
   const file=heroBackgroundFile.files[0];
@@ -208,10 +256,25 @@ async function uploadHeroBackground(){
     uploadHeroBackgroundBtn.disabled=false;
   }
 }
+async function uploadHeroLogo(){
+  const file=heroLogoFile.files[0];
+  if(!file){alert(t("heroBackgroundInvalid"));return}
+  uploadHeroLogoBtn.disabled=true;
+  try{
+    const formData=new FormData();formData.append("image",file);
+    const response=await api("/api/admin/settings/hero-logo",{method:"POST",body:formData}),result=await response.json();
+    if(!response.ok){alert(result.error||t("heroLogoUploadFailed"));return}
+    heroLogoUrl.value=result.hero_logo_url;updateHeroLogoPreview();showToast(t("heroLogoUploaded"));
+  }catch(error){
+    console.error("Could not upload the storefront hero logo:",error);alert(t("heroLogoUploadFailed"));
+  }finally{
+    uploadHeroLogoBtn.disabled=false;
+  }
+}
 async function saveStoreSettings(){
   saveStoreSettingsBtn.disabled=true;
   try{
-    const response=await api("/api/admin/settings",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({whatsapp:settingsWhatsapp.value,contact_phone:settingsPhone.value,contact_email:settingsEmail.value,contact_address:settingsAddress.value,opening_hours:settingsHours.value,social_facebook:settingsFacebook.value,social_instagram:settingsInstagram.value,social_tiktok:settingsTiktok.value,hero_background_url:heroBackgroundUrl.value,hero_card_x:Number(heroCardX.value),hero_card_y:Number(heroCardY.value),hero_overlay:Number(heroOverlay.value),hero_price_size:Number(heroPriceSize.value)})});
+    const response=await api("/api/admin/settings",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({whatsapp:settingsWhatsapp.value,contact_phone:settingsPhone.value,contact_email:settingsEmail.value,contact_address:settingsAddress.value,opening_hours:settingsHours.value,social_facebook:settingsFacebook.value,social_instagram:settingsInstagram.value,social_tiktok:settingsTiktok.value,hero_background_url:heroBackgroundUrl.value,hero_logo_url:heroLogoUrl.value,hero_card_x:Number(heroCardX.value),hero_card_y:Number(heroCardY.value),hero_overlay:Number(heroOverlay.value),hero_price_size:Number(heroPriceSize.value)})});
     const result=await response.json();
     if(!response.ok){alert(result.error||t("settingsFailed"));return}
     showToast(t("settingsSaved"));
