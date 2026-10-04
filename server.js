@@ -187,11 +187,27 @@ class OrderValidationError extends Error {}
 class InventoryAvailabilityError extends Error {}
 
 async function productRows(includeInactive = false) {
+  const salesJoin = includeInactive ? "" : `
+     LEFT JOIN (
+       SELECT sold.product_id, sold.units_sold,
+         ROW_NUMBER() OVER (ORDER BY sold.units_sold DESC, sold.product_id DESC) AS sales_rank
+       FROM (
+         SELECT oi.product_id, SUM(oi.quantity)::bigint AS units_sold
+         FROM order_items oi
+         JOIN orders o ON o.id = oi.order_id
+         WHERE oi.product_id IS NOT NULL
+           AND o.status NOT IN ('cancelled', 'returned')
+           AND o.inventory_deducted = TRUE
+         GROUP BY oi.product_id
+       ) sold
+     ) sales ON sales.product_id = p.id`;
   const products = await pool.query(
     `SELECT p.*, c.name AS category_name
+       ${includeInactive ? "" : ", COALESCE(sales.units_sold, 0)::bigint AS units_sold, COALESCE(sales.sales_rank <= 3, FALSE) AS best_seller"}
      FROM products p LEFT JOIN categories c ON c.id = p.category_id
+     ${salesJoin}
      ${includeInactive ? "" : "WHERE p.active = TRUE AND (p.category_id IS NULL OR c.active = TRUE)"}
-     ORDER BY p.id DESC`
+     ORDER BY ${includeInactive ? "p.id DESC" : "COALESCE(sales.units_sold, 0) DESC, p.id DESC"}`
   );
   const images = await pool.query("SELECT id, product_id, path FROM product_images ORDER BY id");
   const imagesByProduct = new Map();
