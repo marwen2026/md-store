@@ -1,0 +1,19 @@
+name: Render Health Check
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check Render health
+        run: |
+          curl --fail --location --silent --show-error --max-time 30 \
+            https://md-store-test.onrender.com/health
