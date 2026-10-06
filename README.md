@@ -14,6 +14,7 @@
 - WhatsApp orders are recorded without reducing stock until an administrator confirms them; cancelling a confirmed order returns its stock
 - Admin dashboard data refreshes automatically every second and when returning to the tab, without interrupting active edits
 - Multiple product images + image deletion
+- Product image bytes and metadata are stored in PostgreSQL, so product photos survive app restarts and deployments. On startup, existing uploaded files are migrated automatically when they are still available.
 - Orders, customers, statuses
 - Per-order status history and administrator activity log
 - PDF invoices
@@ -26,7 +27,7 @@
 3. From this directory, run `docker compose up -d --build`.
 4. Open the storefront at `http://localhost:3000` and the administration at `http://localhost:3000/admin`.
 
-The app waits for PostgreSQL to become healthy, then creates its tables and first admin account. The Docker database is published on host port `5433` so it can coexist with a PostgreSQL server already listening on `5432`. In pgAdmin, register a server with host `127.0.0.1`, port `5433`, database `md_store`, username `postgres`, and the `POSTGRES_PASSWORD` value from `.env`. Change `POSTGRES_PORT` in `.env` if port 5433 is already occupied.
+The app waits for PostgreSQL to become healthy, creates its tables and first admin account, and migrates available legacy product uploads into PostgreSQL. Product images uploaded from the admin dashboard are stored as binary data in the `product_images` table. Older image files that have already disappeared from the uploads directory cannot be recovered by migration and must be uploaded again. The Docker database is published on host port `5433` so it can coexist with a PostgreSQL server already listening on `5432`. In pgAdmin, register a server with host `127.0.0.1`, port `5433`, database `md_store`, username `postgres`, and the `POSTGRES_PASSWORD` value from `.env`. Change `POSTGRES_PORT` in `.env` if port 5433 is already occupied.
 
 `docker compose down` stops the services and preserves database and upload volumes. `docker compose down -v` permanently deletes those volumes and their data.
 

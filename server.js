@@ -66,6 +66,8 @@ app.get("/", async (req, res) => {
         } catch (error) {
           if (error.code !== "ENOENT") throw error;
         }
+      } else if (typeof product.image === "string" && /^\/api\/product-images\/[1-9]\d*$/.test(product.image)) {
+        image = product.image;
       }
     }
   }
@@ -100,6 +102,22 @@ app.get("/", async (req, res) => {
   res.type("html").send(html.replace("<!-- SOCIAL_METADATA -->", metadata));
 });
 app.use("/uploads", express.static(uploadDir));
+app.get("/uploads/:filename", (req, res) => {
+  res.status(404).json({ error: "Image not found" });
+});
+app.get("/api/product-images/:id", async (req, res) => {
+  if (!/^[1-9]\d*$/.test(req.params.id)) return res.status(404).json({ error: "Image not found" });
+  const { rows } = await pool.query(
+    "SELECT image_data, content_type FROM product_images WHERE id = $1",
+    [Number(req.params.id)]
+  );
+  const image = rows[0];
+  if (!image?.image_data || !image.content_type) return res.status(404).json({ error: "Image not found" });
+  res.set({
+    "Cache-Control": "public, max-age=31536000, immutable",
+    "X-Content-Type-Options": "nosniff"
+  }).type(image.content_type).send(image.image_data);
+});
 app.use(express.static(path.join(__dirname, "public")));
 app.use((req, res, next) => {
   res.on("finish", () => {
@@ -173,18 +191,60 @@ function parseProductInput(body) {
   };
 }
 
-function removeUploadedFiles(files = []) {
+class OrderValidationError extends Error {}
+class InventoryAvailabilityError extends Error {}
+
+async function insertProductImages(client, productId, files = []) {
   for (const file of files) {
-    try {
-      fs.unlinkSync(file.path);
-    } catch (error) {
-      if (error.code !== "ENOENT") console.error("Could not remove uploaded image:", error);
-    }
+    const result = await client.query(
+      `INSERT INTO product_images(product_id, path, image_data, content_type)
+       VALUES($1, '', $2, $3) RETURNING id`,
+      [productId, file.buffer, file.mimetype]
+    );
+    const imagePath = `/api/product-images/${result.rows[0].id}`;
+    await client.query("UPDATE product_images SET path = $1 WHERE id = $2", [imagePath, result.rows[0].id]);
   }
 }
 
-class OrderValidationError extends Error {}
-class InventoryAvailabilityError extends Error {}
+async function migrateLegacyProductImages() {
+  const { rows } = await pool.query(
+    `SELECT id, path FROM product_images
+     WHERE image_data IS NULL AND path ~ '^/uploads/[A-Za-z0-9._-]+$'`
+  );
+  const contentTypes = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".webp": "image/webp",
+    ".gif": "image/gif"
+  };
+  let migrated = 0;
+  let missing = 0;
+  for (const image of rows) {
+    const filename = path.basename(image.path);
+    let imageData;
+    try {
+      imageData = await fs.promises.readFile(path.join(uploadDir, filename));
+    } catch (error) {
+      if (error.code === "ENOENT") {
+        missing++;
+        continue;
+      }
+      throw error;
+    }
+    const contentType = contentTypes[path.extname(filename).toLowerCase()];
+    if (!contentType) {
+      throw new Error(`Unsupported legacy product image format: ${filename}`);
+    }
+    await pool.query(
+      "UPDATE product_images SET path = $1, image_data = $2, content_type = $3 WHERE id = $4",
+      [`/api/product-images/${image.id}`, imageData, contentType, image.id]
+    );
+    migrated++;
+  }
+  if (migrated) console.log(`Migrated ${migrated} product image(s) into PostgreSQL.`);
+  if (missing) console.warn(`${missing} legacy product image(s) are missing from disk and must be uploaded again.`);
+}
 
 async function productRows(includeInactive = false) {
   const salesJoin = includeInactive ? "" : `
@@ -233,6 +293,18 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
   storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, callback) => {
+    if (!/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) {
+      const error = new Error("Seuls les fichiers JPEG, PNG, WebP et GIF sont acceptés");
+      error.status = 400;
+      return callback(error);
+    }
+    callback(null, true);
+  }
+});
+const productUpload = multer({
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, callback) => {
     if (!/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) {
@@ -722,12 +794,9 @@ app.get("/api/admin/inventory/export.pdf", auth, role("admin", "manager"), async
   document.end();
 });
 
-app.post("/api/products", auth, role("admin", "manager"), upload.array("images", 8), async (req, res) => {
+app.post("/api/products", auth, role("admin", "manager"), productUpload.array("images", 8), async (req, res) => {
   const product = parseProductInput(req.body);
-  if (!product) {
-    removeUploadedFiles(req.files);
-    return res.status(400).json({ error: "الاسم والسعر مطلوبان" });
-  }
+  if (!product) return res.status(400).json({ error: "الاسم والسعر مطلوبان" });
   let client;
   try {
     client = await pool.connect();
@@ -742,9 +811,7 @@ app.post("/api/products", auth, role("admin", "manager"), upload.array("images",
         product.oldPrice, product.stock, product.advertised]
     );
     const productId = result.rows[0].id;
-    for (const file of req.files || []) {
-      await client.query("INSERT INTO product_images(product_id, path) VALUES($1, $2)", [productId, `/uploads/${file.filename}`]);
-    }
+    await insertProductImages(client, productId, req.files);
     if (product.stock > 0) {
       await client.query(
         `INSERT INTO inventory_movements(product_id, product_name, movement_type, quantity_change, stock_before, stock_after, actor)
@@ -762,19 +829,15 @@ app.post("/api/products", auth, role("admin", "manager"), upload.array("images",
         console.error("Could not roll back product creation:", rollbackError);
       }
     }
-    removeUploadedFiles(req.files);
     throw error;
   } finally {
     if (client) client.release();
   }
 });
 
-app.put("/api/products/:id", auth, role("admin", "manager"), upload.array("images", 8), async (req, res) => {
+app.put("/api/products/:id", auth, role("admin", "manager"), productUpload.array("images", 8), async (req, res) => {
   const product = parseProductInput(req.body);
-  if (!product) {
-    removeUploadedFiles(req.files);
-    return res.status(400).json({ error: "الاسم والسعر مطلوبان" });
-  }
+  if (!product) return res.status(400).json({ error: "الاسم والسعر مطلوبان" });
   let client;
   try {
     client = await pool.connect();
@@ -782,7 +845,6 @@ app.put("/api/products/:id", auth, role("admin", "manager"), upload.array("image
     const existing = await client.query("SELECT id, name, stock FROM products WHERE id = $1 FOR UPDATE", [req.params.id]);
     if (!existing.rowCount) {
       await client.query("ROLLBACK");
-      removeUploadedFiles(req.files);
       return res.status(404).json({ error: "المنتج غير موجود" });
     }
     if (product.advertised) {
@@ -794,9 +856,7 @@ app.put("/api/products/:id", auth, role("admin", "manager"), upload.array("image
       [product.name, product.description, product.categoryId, product.price, product.costPrice, product.deliveryPrice,
         product.oldPrice, product.stock, product.active, product.advertised, req.params.id]
     );
-    for (const file of req.files || []) {
-      await client.query("INSERT INTO product_images(product_id, path) VALUES($1, $2)", [req.params.id, `/uploads/${file.filename}`]);
-    }
+    await insertProductImages(client, req.params.id, req.files);
     const previousProduct = existing.rows[0];
     if (previousProduct.stock !== product.stock) {
       await client.query(
@@ -816,7 +876,6 @@ app.put("/api/products/:id", auth, role("admin", "manager"), upload.array("image
         console.error("Could not roll back product update:", rollbackError);
       }
     }
-    removeUploadedFiles(req.files);
     throw error;
   } finally {
     if (client) client.release();
@@ -826,7 +885,6 @@ app.delete("/api/products/:id", auth, role("admin", "manager"), async (req, res)
   const productId = Number(req.params.id);
   if (!Number.isInteger(productId) || productId < 1) return res.status(400).json({ error: "معرّف المنتج غير صالح" });
   const client = await pool.connect();
-  let imagePaths = [];
   try {
     await client.query("BEGIN");
     const product = await client.query("SELECT id FROM products WHERE id = $1 FOR UPDATE", [productId]);
@@ -834,8 +892,6 @@ app.delete("/api/products/:id", auth, role("admin", "manager"), async (req, res)
       await client.query("ROLLBACK");
       return res.status(404).json({ error: "المنتج غير موجود" });
     }
-    const images = await client.query("SELECT path FROM product_images WHERE product_id = $1", [productId]);
-    imagePaths = images.rows.map(image => image.path);
     await client.query("DELETE FROM products WHERE id = $1", [productId]);
     await client.query("COMMIT");
   } catch (error) {
@@ -848,28 +904,14 @@ app.delete("/api/products/:id", auth, role("admin", "manager"), async (req, res)
   } finally {
     client.release();
   }
-  for (const imagePath of imagePaths) {
-    const filePath = path.join(uploadDir, path.basename(imagePath));
-    try {
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    } catch (error) {
-      console.error("Could not remove product image:", error);
-    }
-  }
   res.json({ ok: true });
 });
 app.delete("/api/products/:id/images/:imageId", auth, role("admin", "manager"), async (req, res) => {
   const result = await pool.query(
-    "DELETE FROM product_images WHERE id = $1 AND product_id = $2 RETURNING path",
+    "DELETE FROM product_images WHERE id = $1 AND product_id = $2 RETURNING id",
     [req.params.imageId, req.params.id]
   );
   if (!result.rowCount) return res.status(404).json({ error: "الصورة غير موجودة" });
-  const filePath = path.join(__dirname, result.rows[0].path.replace(/^\/uploads\//, "uploads/"));
-  try {
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-  } catch (error) {
-    console.error("Could not remove product image:", error);
-  }
   res.json({ ok: true });
 });
 
@@ -1648,6 +1690,8 @@ async function initializeDatabase() {
       product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
       path TEXT NOT NULL
     );
+    ALTER TABLE product_images ADD COLUMN IF NOT EXISTS image_data BYTEA;
+    ALTER TABLE product_images ADD COLUMN IF NOT EXISTS content_type TEXT;
     CREATE TABLE IF NOT EXISTS customers (
       id SERIAL PRIMARY KEY,
       name TEXT NOT NULL,
@@ -1780,6 +1824,7 @@ async function initializeDatabase() {
      ON CONFLICT (username) DO NOTHING`,
     [process.env.ADMIN_USER || "admin", passwordHash]
   );
+  await migrateLegacyProductImages();
 }
 
 initializeDatabase()
