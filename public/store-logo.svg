@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220">
   <defs>
     <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#D99AA2"/>
-      <stop offset=".48" stop-color="#B76E79"/>
-      <stop offset="1" stop-color="#98535F"/>
+      <stop offset="0" stop-color="#BDE0FE"/>
+      <stop offset=".48" stop-color="#A2D2FF"/>
+      <stop offset="1" stop-color="#BDE0FE"/>
     </linearGradient>
     <filter id="soft-shadow" x="-.12" y="-.12" width="1.24" height="1.3">
       <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
@@ -13,12 +13,12 @@
     </filter>
   </defs>
   <g filter="url(#soft-shadow)">
-    <path d="M31 139V27h25l49 52 49-52h24v112h-29V70l-44 47-44-47v69z" fill="#1F2937"/>
+    <path d="M31 139V27h25l49 52 49-52h24v112h-29V70l-44 47-44-47v69z" fill="#333333"/>
     <path d="M184 68V47a37 37 0 0 1 74 0v22h-14V47a23 23 0 0 0-46 0v21z" fill="url(#gold)"/>
     <path d="M157 70h111c26 0 40 17 40 42v8c0 25-16 41-42 41H157l-34-34 34-35z" fill="url(#gold)"/>
     <path d="M174 85h89c16 0 26 10 26 27v8c0 16-10 26-27 26h-90l-20-20 20-21z" fill="#fff"/>
-    <path d="M182 91h79c12 0 20 8 20 21v8c0 12-8 20-21 20h-80l-15-15 15-16z" fill="none" stroke="#B76E79" stroke-opacity=".5" stroke-width="2"/>
-    <text x="216" y="130" fill="#1F2937" font-family="Arial,sans-serif" font-size="48" font-weight="700" text-anchor="middle">D</text>
+    <path d="M182 91h79c12 0 20 8 20 21v8c0 12-8 20-21 20h-80l-15-15 15-16z" fill="none" stroke="#A2D2FF" stroke-opacity=".5" stroke-width="2"/>
+    <text x="216" y="130" fill="#333333" font-family="Arial,sans-serif" font-size="48" font-weight="700" text-anchor="middle">D</text>
   </g>
-  <text x="160" y="194" fill="#1F2937" font-family="Arial,sans-serif" font-size="43" font-weight="800" letter-spacing="3" text-anchor="middle">M&amp;D</text>
+  <text x="160" y="194" fill="#333333" font-family="Arial,sans-serif" font-size="43" font-weight="800" letter-spacing="3" text-anchor="middle">M&amp;D</text>
 </svg>
