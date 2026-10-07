@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>M&D Store — Marwen & Dorra</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
 <!-- SOCIAL_METADATA -->
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 <style>
@@ -15,6 +16,7 @@ a{text-decoration:none;color:inherit}button,input,select,textarea{font:inherit}
 .menu-toggle{position:absolute;left:30px;top:50%;z-index:1;display:grid;width:42px;height:42px;place-items:center;transform:translateY(-50%);border:1px solid #e7e2d8;border-radius:12px;background:#fff;color:#39352f;font-size:23px;line-height:1;cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease}.menu-toggle:hover{border-color:#d9bd82;background:#fbf8f1;color:#a77a2d}.menu-toggle:focus-visible{outline:2px solid #c99a3b;outline-offset:3px}
 .actions{padding-left:48px}
 .brand{text-align:center;line-height:1}.brand-copy{display:flex;flex-direction:column;align-items:center}.brand .md{font-family:"Playfair Display";font-size:49px;color:#b7862c;font-weight:700;letter-spacing:-3.5px}.brand small{display:block;font-family:serif;font-size:14px;font-weight:800;letter-spacing:1px;margin-top:-3px}.brand em{font-style:normal;font-size:12px;color:#554a37}
+.brand-mark{display:block;width:46px;height:46px;object-fit:contain;filter:drop-shadow(0 3px 5px #b7862c26)}
 .search{height:46px;border:1px solid #e7e4de;border-radius:15px;display:flex;align-items:center;padding:0 15px;background:#f8f8f7;transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}.search:focus-within{border-color:#d4ad61;background:#fff;box-shadow:0 0 0 4px #c99a3b18}.search input{border:0;outline:0;background:transparent;width:100%;min-width:0;font-size:13px}.search b{font-size:20px;font-weight:400;color:#8c7449}.search-clear,.search-clear:hover,.search-clear:focus{flex:0 0 auto;border:0;background:transparent;color:#8c7449;font-size:21px;line-height:1;cursor:pointer;padding:5px 2px;box-shadow:none}.search-clear[hidden]{display:none}
 .actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;font-size:13px}.action{position:relative;display:flex;align-items:center;gap:7px;padding:10px 12px;border:1px solid transparent;border-radius:12px;color:#39352f;cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease}.action:hover{background:#fbf8f1;border-color:#f0e6d3;color:#a77a2d}.actions .store-language{flex:0 0 auto;border-color:#d9bd82;background:#fbf8f1;color:#9d742e}.ico{font-size:23px}.badge{position:absolute;top:1px;right:0;background:var(--gold);color:#fff;border:2px solid #fff;border-radius:50%;font-size:10px;width:19px;height:19px;text-align:center;line-height:15px}
 .nav{height:48px;display:flex;justify-content:center;align-items:center;gap:clamp(22px,4vw,52px);font-weight:700;font-size:14px;border-top:1px solid #f5f3ef;background:#fff}.nav a{position:relative;height:100%;display:flex;align-items:center;color:#292723;transition:color .18s ease}.nav a:after{content:"";position:absolute;bottom:0;left:50%;right:50%;height:2px;border-radius:2px;background:#c99a3b;transition:left .18s ease,right .18s ease}.nav a.active,.nav a:hover{color:#a77a2d}.nav a.active:after,.nav a:hover:after{left:0;right:0}
@@ -45,6 +47,26 @@ a{text-decoration:none;color:inherit}button,input,select,textarea{font:inherit}
 @media(max-width:500px){.footer{padding:0 18px}.footer-main{grid-template-columns:1fr 1fr;gap:24px 14px;padding:30px 0 24px}.footer-brand{grid-column:1/-1}.footer-brand .footer-logo{font-size:32px}.footer-column h3{font-size:14px}.footer-links a,.footer-service{font-size:12px}.footer-bottom{align-items:flex-start;flex-direction:column;gap:6px;padding:14px 0}}
 @media(max-width:500px){.footer-social{gap:13px;padding-bottom:22px}.footer-social a{width:52px;height:52px}.footer-social svg{width:23px;height:23px}}
 @media(prefers-reduced-motion:reduce){.footer-social a{transition:none}.footer-social a:hover{transform:none}}
+.side-menu{padding-bottom:14px;background:#f7f5ef;color:#26241f;box-shadow:14px 0 38px #1118271c}
+.side-menu-head{border-color:#e4dfd4}
+.side-menu-head h2{color:#26241f}
+.side-menu-close{border-color:#e6e0d4;background:#f1eee7;color:#39352f}
+.side-menu-close:hover{border-color:#ddcfad;background:#eee8da}
+.side-menu nav a{min-height:46px;color:#39352f}
+.side-link-icon{border-color:#e5dfd2;background:#f2efe7;color:#9b741e}
+.side-menu nav a:hover,.side-menu nav a:focus-visible{border-color:#e2d7c0;background:#f0ece3;color:#765b24}
+.side-menu nav a:hover .side-link-icon,.side-menu nav a:focus-visible .side-link-icon{border-color:#ddcfad;background:#eae3d2}
+.side-menu-categories{margin-top:12px;padding-top:12px;border-color:#e4dfd4}
+.side-menu-categories h3{color:#26241f}
+.side-menu-categories h3:before{background:#c9a227}
+.side-menu-category-list{gap:5px;padding-bottom:4px;scrollbar-color:#c9c2b4 transparent}
+.side-menu-category{min-height:46px;padding-block:8px;border-color:#e6e1d8;background:#fdfcf9;color:#39352f}
+.side-menu-category:after{color:#b99550}
+.side-menu-category:hover,.side-menu-category:focus-visible,.side-menu-category[aria-pressed="true"]{border-color:#e2d1a9;background:#f1ede3;color:#795d25}
+.side-menu-category[aria-pressed="true"]{box-shadow:inset 3px 0 #c9a227}
+.side-menu-category-list::-webkit-scrollbar-thumb{background:#c9c2b4}
+@media(max-width:900px){.side-menu{padding-bottom:12px}.side-menu nav a{min-height:46px}}
+@media(max-width:420px){.side-menu{padding-bottom:10px}.side-menu nav a{min-height:44px}.side-menu-category-list{gap:5px;padding-bottom:2px}.side-menu-category{min-height:44px;padding-block:7px}}
 </style>
 <style>
 .headmain{height:auto;min-height:0;grid-template-columns:minmax(0,1fr);grid-template-rows:52px 40px;gap:4px;padding:4px 30px 6px}
@@ -57,7 +79,9 @@ a{text-decoration:none;color:inherit}button,input,select,textarea{font:inherit}
  .nav{height:43px}
 @media(max-width:1100px) and (min-width:901px){.headmain{padding-inline:20px}.menu-toggle{left:20px}.actions{right:20px;gap:3px}.actions .action>span:not(.badge){display:none}.action{gap:4px;padding-inline:8px;font-size:12px}.ico{font-size:20px}.search{max-width:640px}}
 @media(max-width:900px){.headmain{min-height:0;height:auto;padding:8px 16px 9px;grid-template-columns:minmax(0,1fr);grid-template-rows:auto;gap:7px}.menu-toggle{left:16px;top:27px}.brand{grid-row:auto;order:-1;justify-self:center}.brand .md{font-size:38px}.brand em{font-size:10px}.search{grid-row:auto;height:40px;max-width:620px}.actions{position:static;justify-content:center;gap:7px;padding:0}.actions .action>span:not(.badge){display:inline}.action{padding:6px 9px;background:#faf9f6;border-color:#f0ede7;font-size:12px}.nav{height:42px}}
+@media(max-width:900px){.brand-mark{width:40px;height:40px}}
 @media(max-width:500px){.headmain{padding:7px 12px 8px;gap:6px}.brand .md{font-size:35px}.search{height:38px;border-radius:12px}.actions{gap:4px;font-size:11px}.action{gap:4px;padding:5px 7px;border-radius:9px}.menu-toggle{left:12px;top:23px;width:34px;height:34px;font-size:19px}.nav{height:40px}}
+@media(max-width:500px){.brand-mark{width:36px;height:36px}.brand em{font-size:9px}}
 </style>
 <style>
 .contact-detail[hidden],.footer-contact-whatsapp[hidden]{display:none!important}.footer-contact-whatsapp{display:flex;align-items:flex-start;gap:9px;margin:9px 0;color:#b8b8b8;font-size:13px;line-height:1.7;text-decoration:none;transition:color .18s ease}.footer-contact-whatsapp:hover{color:#e2b85b}.footer-contact-whatsapp span:first-child{color:#e2b85b}
@@ -164,7 +188,7 @@ html[dir="rtl"] .close{float:right}html[dir="ltr"] .close{float:left}
 <header class="header">
 <div class="headmain">
 <button class="menu-toggle" id="sideMenuToggle" type="button" onclick="openSideMenu()" aria-controls="sideMenu" aria-expanded="false" aria-label="القائمة الجانبية" data-i18n-aria="sideNavigation" title="فتح القائمة الجانبية" data-i18n-title="openMenu">☰</button>
-<div class="brand"><div class="brand-copy"><div class="md">M&amp;D</div><em data-i18n="tagline">تسوّق بذكاء</em></div></div>
+<div class="brand"><div class="brand-copy"><img class="brand-mark" src="favicon.svg" alt="M&amp;D"><em data-i18n="tagline">تسوّق بذكاء</em></div></div>
 <div class="search"><b aria-hidden="true">⌕</b><input id="search" type="search" autocomplete="off" data-i18n-placeholder="searchPlaceholder" data-i18n-aria="searchLabel" placeholder="ابحث عن منتج، علامة تجارية..." aria-label="Rechercher un produit ou une marque"><button class="search-clear" id="searchClear" type="button" onclick="clearProductSearch()" data-i18n-aria="clearSearch" aria-label="Effacer la recherche" hidden>×</button></div>
 <div class="actions"><div class="action">♡ <span data-i18n="favorites">المفضلة</span><span class="badge" id="fav">0</span></div><div class="action" onclick="openCart()">🛒 <span data-i18n="shoppingCart">سلة المشتريات</span><span class="badge" id="count">0</span></div><div class="action">♙ <span data-i18n="myAccount">حسابي</span></div><button class="store-language" id="storeLanguageToggle" type="button" onclick="toggleStoreLanguage()" aria-label="Passer au français" title="Passer au français"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.25"/><path d="M2.9 9h18.2M2.9 15h18.2M12 2.75c2.1 2.3 3.2 5.4 3.2 9.25S14.1 15.85 12 21.25C9.9 19 8.8 15.85 8.8 12S9.9 5.05 12 2.75Z"/></svg><span id="storeLanguageTarget">FR</span></button></div>
 </div>
