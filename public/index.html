@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>M&D Store — Marwen & Dorra</title>
-<link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=6">
 <!-- SOCIAL_METADATA -->
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 <style>
@@ -184,13 +184,21 @@ html[dir="rtl"] .close{float:right}html[dir="ltr"] .close{float:left}
 .footer-social a{width:44px;height:44px}.footer-social svg{width:20px;height:20px}
 @media(max-width:500px){.footer-social a{width:42px;height:42px}.footer-social svg{width:19px;height:19px}}
 @media(max-width:500px){.hero-product-meta{align-items:flex-start;flex-direction:column;gap:4px}}
+.brand-copy{gap:5px}
+.brand-logo{display:block;width:104px;height:72px;object-fit:contain}
+.brand em{display:inline-flex;align-items:center;gap:8px;margin:0;color:#292723;font-size:10px;font-style:normal;font-weight:800}
+.brand em:before,.brand em:after{content:"";width:24px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#D4A017)}
+.brand em:after{transform:scaleX(-1)}
+@media(min-width:901px){.headmain{grid-template-rows:90px 36px}.brand-logo{width:104px;height:72px}}
+@media(max-width:900px){.brand-logo{width:120px;height:83px}}
+@media(max-width:500px){.brand-logo{width:112px;height:77px}.brand em:before,.brand em:after{width:20px}}
 </style>
 </head>
 <body>
 <header class="header">
 <div class="headmain">
 <button class="menu-toggle" id="sideMenuToggle" type="button" onclick="openSideMenu()" aria-controls="sideMenu" aria-expanded="false" aria-label="القائمة الجانبية" data-i18n-aria="sideNavigation" title="فتح القائمة الجانبية" data-i18n-title="openMenu">☰</button>
-<div class="brand"><div class="brand-copy"><div class="md" dir="ltr" role="img" aria-label="M&amp;D">M<span class="brand-amp">&amp;</span>D</div><em data-i18n="tagline">تسوّق بذكاء</em></div></div>
+<div class="brand"><div class="brand-copy"><img class="brand-logo" src="store-logo.svg" alt="M&amp;D" width="320" height="220"><em data-i18n="tagline">تسوّق بذكاء</em></div></div>
 <div class="search"><b aria-hidden="true">⌕</b><input id="search" type="search" autocomplete="off" data-i18n-placeholder="searchPlaceholder" data-i18n-aria="searchLabel" placeholder="ابحث عن منتج، علامة تجارية..." aria-label="Rechercher un produit ou une marque"><button class="search-clear" id="searchClear" type="button" onclick="clearProductSearch()" data-i18n-aria="clearSearch" aria-label="Effacer la recherche" hidden>×</button></div>
 <div class="actions"><div class="action">♡ <span data-i18n="favorites">المفضلة</span><span class="badge" id="fav">0</span></div><div class="action" onclick="openCart()">🛒 <span data-i18n="shoppingCart">سلة المشتريات</span><span class="badge" id="count">0</span></div><div class="action">♙ <span data-i18n="myAccount">حسابي</span></div><button class="store-language" id="storeLanguageToggle" type="button" onclick="toggleStoreLanguage()" aria-label="Passer au français" title="Passer au français"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.25"/><path d="M2.9 9h18.2M2.9 15h18.2M12 2.75c2.1 2.3 3.2 5.4 3.2 9.25S14.1 15.85 12 21.25C9.9 19 8.8 15.85 8.8 12S9.9 5.05 12 2.75Z"/></svg><span id="storeLanguageTarget">FR</span></button></div>
 </div>
