@@ -56,6 +56,61 @@ body.dark{background:radial-gradient(ellipse at 12% 0,#fbbf2410,transparent 34%)
 body.dark .top{background:color-mix(in srgb,var(--panel) 94%,transparent);box-shadow:0 10px 30px #0002}
 @media(max-width:800px){.app{padding:18px 14px}.top{position:relative;top:auto;align-items:flex-start;padding:14px}.top h1{font-size:21px}.cards{gap:10px}.stat{min-height:105px;padding:15px}.stat b{font-size:25px}.box{padding:16px}.dashboard-nav{margin-bottom:13px}}
 @media(max-width:600px){.top{flex-direction:column}.toolbar{width:100%;justify-content:flex-end}.dashboard-nav a{padding:8px 11px}.inventory-summary{grid-template-columns:1fr}.stock-overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.box>.export-bar{align-items:flex-start;flex-direction:column}.login{margin:6vh 14px;padding:24px}}
+:root{--accent:#c99a3b;--accent-soft:#fbf4e5;--bg:#f5f6f8;--panel:#fff;--panel-alt:#faf7f0;--line:#e8e8eb;--text:#202633;--muted:#747b88;--shadow:0 10px 28px #1720330a}
+body{min-height:100vh;background:radial-gradient(ellipse at 50% -12%,#ead8ac55,transparent 45%),var(--bg);font-family:Cairo,"Segoe UI",Arial,sans-serif}
+button{font-weight:700;transition:transform .16s ease,box-shadow .16s ease,background .16s ease,border-color .16s ease}
+button:focus-visible,a:focus-visible{outline:3px solid #c99a3b66;outline-offset:2px}
+.login{width:min(460px,calc(100% - 32px));max-width:none;position:relative;margin:clamp(32px,10vh,100px) auto;padding:38px;border:1px solid #e9e5da;border-radius:24px;background:var(--panel);box-shadow:0 24px 70px #17203314;overflow:hidden}
+.login:before{position:absolute;inset:0 0 auto;height:5px;content:"";background:linear-gradient(90deg,#e8b94f,#c99a3b,#9d742e)}
+.login>.language-toggle{position:absolute;top:20px;inset-inline-end:20px;float:none}
+.login h2{margin:27px 0 5px;color:var(--text);font-size:27px;font-weight:900;letter-spacing:-.4px}
+.login #loginSubtitle{margin:0 0 20px;font-size:14px}
+.login input{min-height:50px;margin:6px 0 10px;padding:0 15px;border-color:var(--line);border-radius:12px;background:#fcfcfd;transition:border-color .16s ease,box-shadow .16s ease}
+.login input:focus{border-color:var(--accent);outline:0;box-shadow:0 0 0 4px #c99a3b1c}
+.login #loginBtn{min-height:50px;margin-top:7px;border:0;border-radius:12px;background:linear-gradient(135deg,#d8ae54,#bf8d2e);color:#241d10;font-size:15px;font-weight:900;box-shadow:0 8px 18px #c99a3b30}
+.login #loginBtn:hover{transform:translateY(-1px);background:linear-gradient(135deg,#e4bd69,#b98227);box-shadow:0 11px 22px #c99a3b3b}
+#msg{min-height:20px;color:var(--danger);font-size:13px}
+.app{max-width:1540px;padding:26px clamp(16px,3vw,44px)}
+.top{top:10px;padding:15px 20px;border-color:#e8e5dc;border-radius:17px;background:#ffffffed;box-shadow:0 8px 24px #1720330b}
+.top h1:before{border:1px solid #ead8aa;background:linear-gradient(145deg,#fff9e9,#ecd69e);color:#8f671f}
+.toolbar button{min-height:40px;padding-inline:14px;border-radius:11px}
+.toolbar #shopBtn{background:var(--accent);color:#241d10}
+.toolbar #logoutBtn{background:#fff;color:#9b3434;border:1px solid #f0dede}
+.dashboard-nav{position:sticky;top:88px;z-index:20;gap:5px;margin-bottom:20px;border-color:#e9e7e1;border-radius:14px;background:#ffffffed;backdrop-filter:blur(12px);box-shadow:0 5px 18px #17203308}
+.dashboard-nav a{padding:10px 14px;border-radius:10px}
+.dashboard-nav a:hover,.dashboard-nav a:focus-visible{background:var(--accent-soft);color:#8d6726}
+.cards{grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:20px}
+.stat{min-height:126px;padding:19px;border-color:#ece9e2;border-radius:16px;background:var(--panel);box-shadow:0 5px 18px #17203307;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.stat:hover{transform:translateY(-2px);border-color:#e5d2a6;box-shadow:0 12px 26px #1720330d}
+.stat:after{inset-inline-end:-30px;bottom:-52px;border-color:#c99a3b18}
+.stat span:first-child{position:relative;z-index:1}
+.stat b{position:relative;z-index:1;margin-top:12px;color:#263044;font-size:30px}
+.stat-profit{border-color:#e5d2a6;background:linear-gradient(145deg,#fff,#fffaf0)}
+.stock-overview,.box{border-color:#e9e7e1;border-radius:17px;background:var(--panel);box-shadow:0 5px 20px #17203308}
+.stock-overview{padding:20px}
+.stock-overview-item{border-color:#eeece6;border-radius:12px;background:#fcfbf8}
+.stock-overview-icon{background:var(--accent-soft)}
+.box{padding:21px}
+.box>h2,.box>.export-bar h2{color:#252d3b}
+.dashboard-nav a,.box,.stock-overview{scroll-margin-top:150px}
+.gold,.category-create .gold{background:linear-gradient(135deg,#d8ae54,#bf8d2e);color:#241d10}
+.gold:hover{background:linear-gradient(135deg,#e3bd6b,#b98227)}
+input,textarea,select{border-color:#e5e6e9;border-radius:10px}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);outline:0;box-shadow:0 0 0 3px #c99a3b1c}
+.scroll{border-color:#ececf0;border-radius:12px}
+th{background:#f8f7f3}
+tr:hover td{background:#fcfaf5}
+.category-admin-row{border-color:#ece9e2;background:#fff}
+.modal-card{border:1px solid #e9e7e1;border-radius:18px}
+body.dark{--bg:#10151e;--panel:#171e29;--panel-alt:#202937;--text:#eef1f5;--muted:#a2adbb;--line:#303a48;--accent:#e2b957;--accent-soft:#332c1d;--shadow:0 10px 30px #0004;background:radial-gradient(ellipse at 50% -12%,#c99a3b18,transparent 45%),var(--bg)}
+body.dark .top,body.dark .dashboard-nav{border-color:var(--line);background:#171e29ed}
+body.dark .login input{background:#10151e}
+body.dark .stat,body.dark .stock-overview,body.dark .box,body.dark .modal-card{border-color:var(--line)}
+body.dark .stock-overview-item,body.dark th{background:var(--panel-alt)}
+@media(max-width:1000px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}.dashboard-nav{top:10px}}
+@media(max-width:800px){.app{padding:16px 14px}.top{top:0}.dashboard-nav{position:relative;top:auto}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.stat{min-height:112px}}
+@media(max-width:600px){.app{padding:12px 10px}.top{padding:14px;border-radius:14px}.top h1{font-size:20px}.toolbar{justify-content:flex-start}.toolbar button{flex:1;padding-inline:8px}.dashboard-nav{gap:3px;padding:4px}.dashboard-nav a{padding:8px 10px;font-size:12px}.cards{gap:8px}.stat{min-height:104px;padding:13px;border-radius:13px}.stat b{font-size:23px}.box,.stock-overview{padding:14px;border-radius:14px}.stock-overview-grid{gap:7px}.stock-overview-item{padding:11px}.login{margin:8vh auto;padding:30px 24px;border-radius:20px}.login>.language-toggle{top:16px;inset-inline-end:16px}.login h2{font-size:24px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
 </style>
 <div class="login" id="login"><button class="language-toggle" id="loginLangToggle" type="button" onclick="toggleLang()" aria-label="Passer au français" title="Passer au français"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.25"/><path d="M2.9 9h18.2M2.9 15h18.2M12 2.75c2.1 2.3 3.2 5.4 3.2 9.25S14.1 19 12 21.25C9.9 19 8.8 15.85 8.8 12S9.9 5.05 12 2.75Z"/></svg><span id="loginLanguageTarget">FR</span></button><h2 id="loginTitle">🔐 M&D Store</h2><p class="muted" id="loginSubtitle">لوحة الإدارة</p><input id="u" value="admin" placeholder="اسم المستخدم"><input id="p" type="password" placeholder="كلمة المرور"><button id="loginBtn" onclick="doLogin()">دخول</button><p id="msg"></p></div>
 <div class="app" id="app"><div class="top"><div><h1 id="dashboardTitle">لوحة الإدارة</h1><span id="who" class="muted"></span></div><div class="toolbar"><button class="language-toggle" id="langToggle" type="button" onclick="toggleLang()" aria-label="Passer au français" title="Passer au français"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.25"/><path d="M2.9 9h18.2M2.9 15h18.2M12 2.75c2.1 2.3 3.2 5.4 3.2 9.25S14.1 19 12 21.25C9.9 19 8.8 15.85 8.8 12S9.9 5.05 8.8 2.75Z"/></svg><span id="languageTarget">FR</span></button><button class="toggle-btn" id="themeToggle" onclick="toggleTheme()">🌙</button><button onclick="location.href='/'" id="shopBtn">المتجر</button> <button onclick="logout()" id="logoutBtn">خروج</button></div></div>
