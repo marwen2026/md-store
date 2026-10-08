@@ -115,6 +115,8 @@ html[dir="rtl"] .close{float:right}html[dir="ltr"] .close{float:left}
 .nav a:after{height:3px;background:linear-gradient(90deg,#C99A3B,#C99A3B,#C99A3B);box-shadow:0 0 10px #C99A3B55}
 .nav a.active,.nav a:hover{color:#C99A3B;text-shadow:0 1px 10px #C99A3B35}
 .nav a:focus-visible{outline:2px solid #C99A3B;outline-offset:3px;border-radius:4px}
+html{scroll-padding-top:calc(var(--store-header-height,0px) + 12px)}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.nav a,.nav a:after{transition:none!important}}
 .hero-slide{background-image:linear-gradient(90deg,#08080885 0%,#11100f99 48%,#08080885 100%),url("https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1800&q=85")}
 .hero-content{text-shadow:0 2px 18px #000b}
 .hero-content .cta{text-shadow:none;box-shadow:0 8px 22px #0005}
@@ -200,7 +202,7 @@ body{background:var(--background);color:var(--text)}
 <div class="search"><b aria-hidden="true">⌕</b><input id="search" type="search" autocomplete="off" data-i18n-placeholder="searchPlaceholder" data-i18n-aria="searchLabel" placeholder="ابحث عن منتج، علامة تجارية..." aria-label="Rechercher un produit ou une marque"><button class="search-clear" id="searchClear" type="button" onclick="clearProductSearch()" data-i18n-aria="clearSearch" aria-label="Effacer la recherche" hidden>×</button></div>
 <div class="actions"><div class="action">♡ <span data-i18n="favorites">المفضلة</span><span class="badge" id="fav">0</span></div><div class="action" onclick="openCart()">🛒 <span data-i18n="shoppingCart">سلة المشتريات</span><span class="badge" id="count">0</span></div><div class="action">♙ <span data-i18n="myAccount">حسابي</span></div><button class="store-language" id="storeLanguageToggle" type="button" onclick="toggleStoreLanguage()" aria-label="Passer au français" title="Passer au français"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.25"/><path d="M2.9 9h18.2M2.9 15h18.2M12 2.75c2.1 2.3 3.2 5.4 3.2 9.25S14.1 15.85 12 21.25C9.9 19 8.8 15.85 8.8 12S9.9 5.05 12 2.75Z"/></svg><span id="storeLanguageTarget">FR</span></button></div>
 </div>
-<nav class="nav" aria-label="التنقل الرئيسي" data-i18n-aria="mainNavigation"><a class="active" href="#" data-i18n="home">الرئيسية</a><a href="#products" data-i18n="newArrivals">جديدنا</a><a href="#products" data-i18n="clothing">ملابس</a><a href="#products" data-i18n="bags">حقائب</a><a href="#products" data-i18n="accessories">إكسسوارات</a><a href="#offers" data-i18n="specialOffers">عروض خاصة</a><a href="#footer" data-i18n="contactUs">اتصل بنا</a></nav>
+<nav class="nav" aria-label="التنقل الرئيسي" data-i18n-aria="mainNavigation"><a class="active" href="#" aria-current="page" data-i18n="home">الرئيسية</a><a href="#products" data-i18n="newArrivals">جديدنا</a><a href="#products" data-i18n="clothing">ملابس</a><a href="#products" data-i18n="bags">حقائب</a><a href="#products" data-i18n="accessories">إكسسوارات</a><a href="#offers" data-i18n="specialOffers">عروض خاصة</a><a href="#footer" data-i18n="contactUs">اتصل بنا</a></nav>
 </header>
 <section class="hero" id="offers" aria-label="عروض المتجر" data-i18n-aria="featuredOffers">
 <div class="hero-slide"></div>
@@ -621,6 +623,19 @@ async function checkout(){
 	}
 }
 const previewImageEl=document.getElementById("previewImage");document.addEventListener("keydown",event=>{if(event.key==="Escape"){closeDrawers();closeImagePreview()}});
+const storeHeader=document.querySelector(".header"),storeNav=document.querySelector(".nav");
+function updateStoreHeaderOffset(){document.documentElement.style.setProperty("--store-header-height",`${storeHeader.getBoundingClientRect().height}px`)}
+updateStoreHeaderOffset();
+if("ResizeObserver"in window)new ResizeObserver(updateStoreHeaderOffset).observe(storeHeader);else window.addEventListener("resize",updateStoreHeaderOffset);
+storeNav.addEventListener("click",event=>{
+	const link=event.target.closest("a");
+	if(!link||!storeNav.contains(link))return;
+	storeNav.querySelectorAll("a").forEach(item=>{
+		const active=item===link;
+		item.classList.toggle("active",active);
+		if(active)item.setAttribute("aria-current","page");else item.removeAttribute("aria-current");
+	});
+});
 applyStoreLanguage();
 Promise.all([fetch("/api/config").then(r=>r.json()).then(x=>{cfg=x;cur.textContent=storeCurrencyLabel();updateStoreWhatsAppLinks();applyHeroDisplaySettings()}),loadCats()]).then(()=>Promise.all([load(),loadAdvertisement()]));
 render();
