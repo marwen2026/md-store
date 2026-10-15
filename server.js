@@ -20,7 +20,25 @@ const STORE = process.env.STORE_NAME || "M&D Store";
 const CURRENCY = process.env.CURRENCY || "TND";
 const PAYMENT_METHOD = "cash_on_delivery";
 const MAX_MONEY = 9999999999.99;
+const FREE_SHIPPING_THRESHOLD = 199;
 const LOW_STOCK_THRESHOLD = 5;
+const DEFAULT_NAVIGATION_LINKS = [
+  { label_ar: "الرئيسية", label_fr: "Accueil", href: "#" },
+  { label_ar: "جديدنا", label_fr: "Nouveautés", href: "#products" },
+  { label_ar: "الملابس", label_fr: "Vêtements", href: "#products" },
+  { label_ar: "الحقائب", label_fr: "Sacs", href: "#products" },
+  { label_ar: "إكسسوارات", label_fr: "Accessoires", href: "#products" },
+  { label_ar: "العروض الخاصة", label_fr: "Offres spéciales", href: "#offers" },
+  { label_ar: "اتصل بنا", label_fr: "Contactez-nous", href: "#footer" }
+];
+const DEFAULT_CATEGORY_ICON_OPTIONS = [
+  { id: "tag", label_ar: "عام", label_fr: "Générique", icon_type: "tag" },
+  { id: "clothing", label_ar: "ملابس", label_fr: "Vêtements", icon_type: "clothing" },
+  { id: "bag", label_ar: "حقائب", label_fr: "Sacs", icon_type: "bag" },
+  { id: "watch", label_ar: "ساعات", label_fr: "Montres", icon_type: "watch" },
+  { id: "accessory", label_ar: "إكسسوارات", label_fr: "Accessoires", icon_type: "accessory" }
+];
+const CATEGORY_ICON_TYPES = new Set(DEFAULT_CATEGORY_ICON_OPTIONS.map(option => option.icon_type));
 const uploadDir = path.join(__dirname, "uploads");
 fs.mkdirSync(uploadDir, { recursive: true });
 
@@ -50,8 +68,9 @@ app.get("/", async (req, res) => {
          (SELECT path FROM product_images WHERE product_id = p.id ORDER BY id LIMIT 1) AS image
        FROM products p
        LEFT JOIN categories c ON c.id = p.category_id
+       LEFT JOIN categories parent ON parent.id = c.parent_id
        WHERE p.id = $1 AND p.active = TRUE
-         AND (p.category_id IS NULL OR c.active = TRUE)`,
+         AND (p.category_id IS NULL OR (c.active = TRUE AND (c.parent_id IS NULL OR parent.active = TRUE)))`,
       [Number(requestedProductId)]
     );
     if (result.rowCount) {
@@ -246,6 +265,77 @@ async function migrateLegacyProductImages() {
   if (missing) console.warn(`${missing} legacy product image(s) are missing from disk and must be uploaded again.`);
 }
 
+async function migrateLegacyHeroBackground() {
+  const { rows } = await pool.query(
+    "SELECT value FROM store_settings WHERE key = 'hero_background_url'"
+  );
+  const imagePath = rows[0]?.value || "";
+  const useBundledBackground = async () => {
+    await pool.query(
+      "UPDATE store_settings SET value = '/hero-background.png' WHERE key = 'hero_background_url' AND value = $1",
+      [imagePath]
+    );
+    console.warn("The saved hero background is unavailable; using the bundled background image.");
+  };
+
+  if (imagePath === "/api/store-assets/hero-background") {
+    const { rows: assets } = await pool.query(
+      "SELECT 1 FROM store_assets WHERE asset_key = 'hero_background'"
+    );
+    if (assets.length) return;
+    await useBundledBackground();
+    return;
+  }
+  if (!/^\/uploads\/[A-Za-z0-9._-]+$/.test(imagePath)) return;
+
+  const filename = path.basename(imagePath);
+  const contentTypes = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".webp": "image/webp",
+    ".gif": "image/gif"
+  };
+  const contentType = contentTypes[path.extname(filename).toLowerCase()];
+  if (!contentType) {
+    await useBundledBackground();
+    return;
+  }
+
+  let imageData;
+  try {
+    imageData = await fs.promises.readFile(path.join(uploadDir, filename));
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      await useBundledBackground();
+      return;
+    }
+    throw error;
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query(
+      `INSERT INTO store_assets(asset_key, image_data, content_type)
+       VALUES('hero_background', $1, $2)
+       ON CONFLICT (asset_key) DO NOTHING`,
+      [imageData, contentType]
+    );
+    await client.query(
+      "UPDATE store_settings SET value = '/api/store-assets/hero-background' WHERE key = 'hero_background_url' AND value = $1",
+      [imagePath]
+    );
+    await client.query("COMMIT");
+    console.log("Migrated the legacy hero background into PostgreSQL.");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 async function productRows(includeInactive = false) {
   const salesJoin = includeInactive ? "" : `
      LEFT JOIN (
@@ -265,9 +355,12 @@ async function productRows(includeInactive = false) {
     `SELECT p.*, c.name AS category_name
        ${includeInactive ? "" : ", COALESCE(sales.units_sold, 0)::bigint AS units_sold, COALESCE(sales.sales_rank <= 3, FALSE) AS best_seller"}
      FROM products p LEFT JOIN categories c ON c.id = p.category_id
+     LEFT JOIN categories parent ON parent.id = c.parent_id
      ${salesJoin}
-     ${includeInactive ? "" : "WHERE p.active = TRUE AND (p.category_id IS NULL OR c.active = TRUE)"}
-     ORDER BY ${includeInactive ? "p.id DESC" : "COALESCE(sales.units_sold, 0) DESC, p.id DESC"}`
+     ${includeInactive ? "" : "WHERE p.active = TRUE AND (p.category_id IS NULL OR (c.active = TRUE AND (c.parent_id IS NULL OR parent.active = TRUE)))"}
+     ORDER BY CASE WHEN EXISTS (SELECT 1 FROM products ordered WHERE ordered.sort_order IS NOT NULL)
+       THEN p.sort_order END ASC NULLS LAST,
+       ${includeInactive ? "p.id DESC" : "COALESCE(sales.units_sold, 0) DESC, p.id DESC"}`
   );
   const images = await pool.query("SELECT id, product_id, path FROM product_images ORDER BY id");
   const imagesByProduct = new Map();
@@ -293,6 +386,18 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
   storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, callback) => {
+    if (!/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) {
+      const error = new Error("Seuls les fichiers JPEG, PNG, WebP et GIF sont acceptés");
+      error.status = 400;
+      return callback(error);
+    }
+    callback(null, true);
+  }
+});
+const heroBackgroundUpload = multer({
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, callback) => {
     if (!/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) {
@@ -334,6 +439,11 @@ async function readStoreSettings() {
   return Object.fromEntries(rows.map(({ key, value }) => [key, value]));
 }
 
+async function categoryIconIsValid(icon) {
+  const result = await pool.query("SELECT 1 FROM category_icon_options WHERE id = $1", [icon]);
+  return result.rowCount > 0;
+}
+
 function whatsappIsConfigured(value) {
   return value.length >= 10 && value.length <= 15 && value !== "21600000000";
 }
@@ -346,6 +456,8 @@ app.get("/api/config", async (req, res) => {
     const heroCardY = Number(settings.hero_card_y);
     const heroOverlay = Number(settings.hero_overlay);
     const heroPriceSize = Number(settings.hero_price_size);
+    const productColumns = Number(settings.product_columns);
+    const categoryColumns = Number(settings.category_columns);
     res.json({
       whatsapp: whatsappIsConfigured(whatsapp) ? whatsapp : "",
       whatsappConfigured: whatsappIsConfigured(whatsapp),
@@ -360,14 +472,180 @@ app.get("/api/config", async (req, res) => {
       heroLogoUrl: settings.hero_logo_url || "",
       heroCardX: Number.isFinite(heroCardX) ? heroCardX : 0,
       heroCardY: Number.isFinite(heroCardY) ? heroCardY : 0,
-      heroOverlay: Number.isFinite(heroOverlay) ? heroOverlay : 35,
+      heroOverlay: Number.isFinite(heroOverlay) ? heroOverlay : 15,
       heroPriceSize: Number.isFinite(heroPriceSize) ? heroPriceSize : 29,
+      productColumns: Number.isInteger(productColumns) && productColumns >= 2 && productColumns <= 6 ? productColumns : 4,
+      categoryColumns: Number.isInteger(categoryColumns) && categoryColumns >= 2 && categoryColumns <= 6 ? categoryColumns : 4,
       store: STORE,
       currency: CURRENCY
     });
   } catch (error) {
     console.error("Could not load public store settings:", error);
     res.status(500).json({ error: "Could not load store configuration" });
+  }
+});
+
+app.get("/api/store-assets/hero-background", async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      "SELECT image_data, content_type FROM store_assets WHERE asset_key = 'hero_background'"
+    );
+    const asset = rows[0];
+    if (!asset?.image_data || !asset.content_type) {
+      return res.status(404).json({ error: "Hero background image not found" });
+    }
+    res.set({
+      "Cache-Control": "no-cache",
+      "X-Content-Type-Options": "nosniff"
+    }).type(asset.content_type).send(asset.image_data);
+  } catch (error) {
+    console.error("Could not load saved storefront background image:", error);
+    res.status(500).json({ error: "Could not load hero background image" });
+  }
+});
+
+app.get("/api/navigation-links", async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      "SELECT id, label_ar, label_fr, href FROM store_navigation_links ORDER BY position, id"
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error("Could not load storefront navigation links:", error);
+    res.status(500).json({ error: "Could not load navigation links" });
+  }
+});
+
+app.get("/api/admin/category-icons", auth, role("admin"), async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, label_ar, label_fr, icon_type FROM category_icon_options ORDER BY position, id"
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Could not load category icon options:", error);
+    res.status(500).json({ error: "Could not load category icon options" });
+  }
+});
+
+app.put("/api/admin/category-icons", auth, role("admin"), async (req, res) => {
+  const options = req.body.options;
+  if (!Array.isArray(options) || options.length < 1 || options.length > 20) {
+    return res.status(400).json({ error: "Provide between 1 and 20 category icon options" });
+  }
+  const normalizedOptions = [];
+  const ids = new Set();
+  for (const option of options) {
+    if (!option || typeof option !== "object" || Array.isArray(option)) {
+      return res.status(400).json({ error: "Invalid category icon option" });
+    }
+    const id = typeof option.id === "string" ? option.id.trim() : "";
+    const labelAr = typeof option.label_ar === "string" ? option.label_ar.trim() : "";
+    const labelFr = typeof option.label_fr === "string" ? option.label_fr.trim() : "";
+    const iconType = typeof option.icon_type === "string" ? option.icon_type : "";
+    if (!/^(?:tag|clothing|bag|watch|accessory|custom_[a-z0-9_-]{1,48})$/.test(id) ||
+        ids.has(id) || !labelAr || labelAr.length > 40 || !labelFr || labelFr.length > 40 ||
+        !CATEGORY_ICON_TYPES.has(iconType)) {
+      return res.status(400).json({ error: "Invalid category icon option fields" });
+    }
+    ids.add(id);
+    normalizedOptions.push({ id, labelAr, labelFr, iconType });
+  }
+
+  const fallbackId = ids.has("tag") ? "tag" : normalizedOptions[0].id;
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("LOCK TABLE categories IN SHARE ROW EXCLUSIVE MODE");
+    await client.query(
+      "UPDATE categories SET icon = $1 WHERE NOT (icon = ANY($2::text[]))",
+      [fallbackId, [...ids]]
+    );
+    await client.query("DELETE FROM category_icon_options");
+    await client.query(
+      `INSERT INTO category_icon_options(id, label_ar, label_fr, icon_type, position)
+       SELECT id, label_ar, label_fr, icon_type, position
+       FROM UNNEST($1::text[], $2::text[], $3::text[], $4::text[]) WITH ORDINALITY
+         AS icon_option(id, label_ar, label_fr, icon_type, position)`,
+      [
+        normalizedOptions.map(option => option.id),
+        normalizedOptions.map(option => option.labelAr),
+        normalizedOptions.map(option => option.labelFr),
+        normalizedOptions.map(option => option.iconType)
+      ]
+    );
+    await client.query("COMMIT");
+    res.json({ ok: true });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Could not save category icon options:", error);
+    res.status(500).json({ error: "Could not save category icon options" });
+  } finally {
+    client.release();
+  }
+});
+
+app.put("/api/admin/navigation-links", auth, role("admin"), async (req, res) => {
+  const links = req.body.links;
+  if (!Array.isArray(links) || links.length > 12) {
+    return res.status(400).json({ error: "Provide no more than 12 navigation links" });
+  }
+  const normalizedLinks = [];
+  for (const link of links) {
+    if (!link || typeof link !== "object" || Array.isArray(link)) {
+      return res.status(400).json({ error: "Invalid navigation link" });
+    }
+    const labelAr = typeof link.label_ar === "string" ? link.label_ar.trim() : "";
+    const labelFr = typeof link.label_fr === "string" ? link.label_fr.trim() : "";
+    const href = typeof link.href === "string" ? link.href.trim() : "";
+    if (!labelAr || labelAr.length > 60 || !labelFr || labelFr.length > 60) {
+      return res.status(400).json({ error: "Each navigation link needs Arabic and French labels (up to 60 characters)" });
+    }
+    if (href.length > 500 || /[\u0000-\u0020]/.test(href)) {
+      return res.status(400).json({ error: "Invalid navigation link URL" });
+    }
+    const isAnchor = href === "#" || /^#[A-Za-z][A-Za-z0-9_-]*$/.test(href);
+    const isLocalPath = /^\/(?!\/)/.test(href) && !href.includes("\\");
+    let isHttpsUrl = false;
+    if (!isAnchor && !isLocalPath) {
+      try {
+        const url = new URL(href);
+        isHttpsUrl = url.protocol === "https:" && Boolean(url.hostname) && !url.username && !url.password;
+      } catch {
+        isHttpsUrl = false;
+      }
+    }
+    if (!isAnchor && !isLocalPath && !isHttpsUrl) {
+      return res.status(400).json({ error: "Link must be an anchor, a local path, or a valid HTTPS URL" });
+    }
+    normalizedLinks.push({ labelAr, labelFr, href });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("DELETE FROM store_navigation_links");
+    if (normalizedLinks.length) {
+      await client.query(
+        `INSERT INTO store_navigation_links(label_ar, label_fr, href, position)
+         SELECT label_ar, label_fr, href, ordinal - 1
+         FROM UNNEST($1::text[], $2::text[], $3::text[]) WITH ORDINALITY
+           AS link(label_ar, label_fr, href, ordinal)`,
+        [
+          normalizedLinks.map(link => link.labelAr),
+          normalizedLinks.map(link => link.labelFr),
+          normalizedLinks.map(link => link.href)
+        ]
+      );
+    }
+    await client.query("COMMIT");
+    res.json({ ok: true });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Could not save storefront navigation links:", error);
+    res.status(500).json({ error: "Could not save navigation links" });
+  } finally {
+    client.release();
   }
 });
 
@@ -387,8 +665,10 @@ app.get("/api/admin/settings", auth, role("admin"), async (req, res) => {
       hero_logo_url: settings.hero_logo_url || "",
       hero_card_x: settings.hero_card_x || "0",
       hero_card_y: settings.hero_card_y || "0",
-      hero_overlay: settings.hero_overlay || "35",
-      hero_price_size: settings.hero_price_size || "29"
+      hero_overlay: settings.hero_overlay || "15",
+      hero_price_size: settings.hero_price_size || "29",
+      product_columns: settings.product_columns || "4",
+      category_columns: settings.category_columns || "4"
     });
   } catch (error) {
     console.error("Could not load administrator store settings:", error);
@@ -441,6 +721,8 @@ app.put("/api/admin/settings", auth, role("admin"), async (req, res) => {
     settings[key] = url.toString();
   }
   for (const key of ["hero_background_url", "hero_logo_url"]) {
+    if (key === "hero_background_url" &&
+      ["/api/store-assets/hero-background", "/hero-background.png"].includes(settings[key])) continue;
     if (!settings[key] || /^\/uploads\/[A-Za-z0-9._-]+$/.test(settings[key])) continue;
     let url;
     try {
@@ -465,6 +747,14 @@ app.put("/api/admin/settings", auth, role("admin"), async (req, res) => {
     }
     settings[key] = String(value);
   }
+  if (!Number.isInteger(req.body.product_columns) || req.body.product_columns < 2 || req.body.product_columns > 6) {
+    return res.status(400).json({ error: "Invalid product_columns" });
+  }
+  settings.product_columns = String(req.body.product_columns);
+  if (!Number.isInteger(req.body.category_columns) || req.body.category_columns < 2 || req.body.category_columns > 6) {
+    return res.status(400).json({ error: "Invalid category_columns" });
+  }
+  settings.category_columns = String(req.body.category_columns);
 
   const entries = Object.entries(settings);
   try {
@@ -481,23 +771,37 @@ app.put("/api/admin/settings", auth, role("admin"), async (req, res) => {
   }
 });
 
-app.post("/api/admin/settings/hero-background", auth, role("admin"), upload.single("image"), async (req, res) => {
+app.post("/api/admin/settings/hero-background", auth, role("admin"), heroBackgroundUpload.single("image"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "Select an image to upload" });
-  const imagePath = `/uploads/${req.file.filename}`;
+  const imagePath = "/api/store-assets/hero-background";
   try {
-    await pool.query(
-      `INSERT INTO store_settings(key, value) VALUES('hero_background_url', $1)
-       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
-      [imagePath]
-    );
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query(
+        `INSERT INTO store_assets(asset_key, image_data, content_type)
+         VALUES('hero_background', $1, $2)
+         ON CONFLICT (asset_key) DO UPDATE
+           SET image_data = EXCLUDED.image_data,
+               content_type = EXCLUDED.content_type,
+               updated_at = NOW()`,
+        [req.file.buffer, req.file.mimetype]
+      );
+      await client.query(
+        `INSERT INTO store_settings(key, value) VALUES('hero_background_url', $1)
+         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+        [imagePath]
+      );
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
     res.json({ ok: true, hero_background_url: imagePath });
   } catch (error) {
     console.error("Could not save storefront hero background image:", error);
-    try {
-      await fs.promises.unlink(path.join(uploadDir, req.file.filename));
-    } catch (cleanupError) {
-      console.error("Could not remove the failed hero background upload:", cleanupError);
-    }
     res.status(500).json({ error: "Could not save hero background image" });
   }
 });
@@ -539,14 +843,24 @@ app.get("/api/admin/events", auth, (req, res) => {
 });
 app.get("/api/categories", async (req, res) => {
   const result = await pool.query(
-    "SELECT id, name, icon FROM categories WHERE active = TRUE ORDER BY sort_order, id"
+    `SELECT c.id, c.name, c.parent_id, COALESCE(icon.icon_type, 'tag') AS icon
+     FROM categories c
+     LEFT JOIN categories parent ON parent.id = c.parent_id
+     LEFT JOIN category_icon_options icon ON icon.id = c.icon
+     WHERE c.active = TRUE AND (c.parent_id IS NULL OR parent.active = TRUE)
+     ORDER BY c.sort_order, c.id`
   );
   res.json(result.rows);
 });
 app.get("/api/admin/categories", auth, async (req, res) => {
   const result = await pool.query(
-    `SELECT c.id, c.name, c.icon, c.active, c.sort_order, COUNT(p.id)::INTEGER AS product_count
-     FROM categories c LEFT JOIN products p ON p.category_id = c.id
+    `SELECT c.id, c.name, c.parent_id, c.icon, c.active, c.sort_order,
+       COUNT(DISTINCT p.id)::INTEGER AS product_count,
+       COUNT(DISTINCT p.id) FILTER (WHERE p.category_id = c.id)::INTEGER AS direct_product_count
+     FROM categories c
+     LEFT JOIN products p ON p.category_id = c.id OR p.category_id IN (
+       SELECT child.id FROM categories child WHERE child.parent_id = c.id
+     )
      GROUP BY c.id ORDER BY c.sort_order, c.id`
   );
   res.json(result.rows);
@@ -560,20 +874,29 @@ app.get("/api/advertisement", async (req, res) => {
 app.post("/api/categories", auth, role("admin"), async (req, res) => {
   const name = String(req.body.name || "").trim();
   const icon = String(req.body.icon || "tag");
+  const parentId = req.body.parent_id == null || req.body.parent_id === "" ? null : Number(req.body.parent_id);
   if (!name || name.length > 100) return res.status(400).json({ error: "اسم القسم مطلوب (حتى 100 حرف)" });
-  if (!["tag", "clothing", "bag", "watch", "accessory"].includes(icon)) {
+  if (!await categoryIconIsValid(icon)) {
     return res.status(400).json({ error: "أيقونة القسم غير صالحة" });
+  }
+  if (parentId !== null && (!Number.isInteger(parentId) || parentId < 1)) {
+    return res.status(400).json({ error: "القسم الأب غير صالح" });
+  }
+  if (parentId !== null) {
+    const parent = await pool.query("SELECT id FROM categories WHERE id = $1 AND parent_id IS NULL", [parentId]);
+    if (!parent.rowCount) return res.status(400).json({ error: "يجب اختيار قسم أب رئيسي صالح" });
   }
   try {
     const result = await pool.query(
-      `INSERT INTO categories(name, icon, sort_order)
-       VALUES($1, $2, COALESCE((SELECT MAX(sort_order) + 1 FROM categories), 0))
+      `INSERT INTO categories(name, icon, parent_id, sort_order)
+       VALUES($1, $2, $3, COALESCE((SELECT MAX(sort_order) + 1 FROM categories), 0))
        RETURNING id`,
-      [name, icon]
+      [name, icon, parentId]
     );
     res.status(201).json({ id: result.rows[0].id });
   } catch (error) {
     if (error.code === "23505") return res.status(400).json({ error: "القسم موجود بالفعل" });
+    if (error.code === "23503") return res.status(400).json({ error: "أيقونة القسم غير متاحة" });
     throw error;
   }
 });
@@ -612,21 +935,32 @@ app.put("/api/categories/:id", auth, role("admin"), async (req, res) => {
   const name = String(req.body.name || "").trim();
   const icon = String(req.body.icon || "");
   const active = req.body.active;
+  const parentId = req.body.parent_id == null || req.body.parent_id === "" ? null : Number(req.body.parent_id);
   if (!Number.isInteger(id) || id < 1) return res.status(400).json({ error: "معرّف القسم غير صالح" });
   if (!name || name.length > 100) return res.status(400).json({ error: "اسم القسم مطلوب (حتى 100 حرف)" });
-  if (!["tag", "clothing", "bag", "watch", "accessory"].includes(icon)) {
+  if (!await categoryIconIsValid(icon)) {
     return res.status(400).json({ error: "أيقونة القسم غير صالحة" });
   }
   if (typeof active !== "boolean") return res.status(400).json({ error: "حالة القسم غير صالحة" });
+  if (parentId !== null && (!Number.isInteger(parentId) || parentId < 1 || parentId === id)) {
+    return res.status(400).json({ error: "القسم الأب غير صالح" });
+  }
+  if (parentId !== null) {
+    const parent = await pool.query("SELECT id FROM categories WHERE id = $1 AND parent_id IS NULL", [parentId]);
+    if (!parent.rowCount) return res.status(400).json({ error: "يجب اختيار قسم أب رئيسي صالح" });
+    const children = await pool.query("SELECT 1 FROM categories WHERE parent_id = $1 LIMIT 1", [id]);
+    if (children.rowCount) return res.status(400).json({ error: "لا يمكن إدراج قسم رئيسي تابعاً لقسم آخر" });
+  }
   try {
     const result = await pool.query(
-      "UPDATE categories SET name = $1, icon = $2, active = $3 WHERE id = $4 RETURNING id",
-      [name, icon, active, id]
+      "UPDATE categories SET name = $1, icon = $2, active = $3, parent_id = $4 WHERE id = $5 RETURNING id",
+      [name, icon, active, parentId, id]
     );
     if (!result.rowCount) return res.status(404).json({ error: "القسم غير موجود" });
     res.json({ ok: true });
   } catch (error) {
     if (error.code === "23505") return res.status(400).json({ error: "القسم موجود بالفعل" });
+    if (error.code === "23503") return res.status(400).json({ error: "أيقونة القسم غير متاحة" });
     throw error;
   }
 });
@@ -645,10 +979,60 @@ app.get("/api/products", async (req, res) => {
   if (query) products = products.filter(product =>
     `${product.name} ${product.description} ${product.category_name || ""}`.toLowerCase().includes(query)
   );
-  if (category) products = products.filter(product => String(product.category_id) === String(category));
+  if (category) {
+    const categoryId = Number(category);
+    if (!Number.isInteger(categoryId) || categoryId < 1) {
+      products = [];
+    } else {
+      const descendants = await pool.query(
+        `WITH RECURSIVE category_tree(id) AS (
+           SELECT id FROM categories WHERE id = $1 AND active = TRUE
+           UNION ALL
+           SELECT child.id FROM categories child
+           JOIN category_tree parent ON child.parent_id = parent.id
+           WHERE child.active = TRUE
+         )
+         SELECT id FROM category_tree`,
+        [categoryId]
+      );
+      const categoryIds = new Set(descendants.rows.map(row => String(row.id)));
+      products = products.filter(product => categoryIds.has(String(product.category_id)));
+    }
+  }
   res.json(products);
 });
 app.get("/api/admin/products", auth, async (req, res) => res.json(await productRows(true)));
+app.put("/api/products/order", auth, role("admin", "manager"), async (req, res) => {
+  const ids = req.body.ids;
+  if (!Array.isArray(ids) || ids.some(id => !Number.isInteger(id) || id < 1) ||
+      new Set(ids).size !== ids.length) {
+    return res.status(400).json({ error: "ترتيب المنتجات غير صالح" });
+  }
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("LOCK TABLE products IN SHARE ROW EXCLUSIVE MODE");
+    const current = await client.query("SELECT id FROM products ORDER BY id DESC");
+    const currentIds = current.rows.map(row => row.id);
+    if (ids.length !== currentIds.length || ids.some(id => !currentIds.includes(id))) {
+      await client.query("ROLLBACK");
+      return res.status(409).json({ error: "تغيرت المنتجات. حدّث القائمة ثم أعد المحاولة." });
+    }
+    await client.query(
+      `UPDATE products AS p SET sort_order = ordered.ordinality - 1
+       FROM unnest($1::INTEGER[]) WITH ORDINALITY AS ordered(id, ordinality)
+       WHERE p.id = ordered.id`,
+      [ids]
+    );
+    await client.query("COMMIT");
+    res.json({ ok: true });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+});
 
 async function loadInventoryReport() {
   const [summary, stockLevels, topProducts, movements] = await Promise.all([
@@ -805,8 +1189,11 @@ app.post("/api/products", auth, role("admin", "manager"), productUpload.array("i
       await client.query("UPDATE products SET advertised = FALSE WHERE advertised = TRUE");
     }
     const result = await client.query(
-      `INSERT INTO products(name, description, category_id, price, cost_price, delivery_price, old_price, stock, advertised)
-       VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
+      `INSERT INTO products(name, description, category_id, price, cost_price, delivery_price, old_price, stock, advertised, sort_order)
+       VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9,
+         CASE WHEN EXISTS (SELECT 1 FROM products WHERE sort_order IS NOT NULL)
+           THEN COALESCE((SELECT MAX(sort_order) + 1 FROM products), 0) ELSE NULL END)
+       RETURNING id`,
       [product.name, product.description, product.categoryId, product.price, product.costPrice, product.deliveryPrice,
         product.oldPrice, product.stock, product.advertised]
     );
@@ -949,10 +1336,14 @@ app.post("/api/orders", async (req, res) => {
       }
       subtotal += Number(product.price) * quantity;
       deliveryFee = Math.max(deliveryFee, Number(product.delivery_price || 0));
-      if (!Number.isFinite(subtotal + deliveryFee) || subtotal + deliveryFee > MAX_MONEY) {
+      if (!Number.isFinite(subtotal) || subtotal > MAX_MONEY) {
         throw new OrderValidationError("المجموع يتجاوز الحد المسموح");
       }
       normalizedItems.push({ product, quantity });
+    }
+    if (subtotal >= FREE_SHIPPING_THRESHOLD) deliveryFee = 0;
+    if (!Number.isFinite(subtotal + deliveryFee) || subtotal + deliveryFee > MAX_MONEY) {
+      throw new OrderValidationError("المجموع يتجاوز الحد المسموح");
     }
     const total = subtotal + deliveryFee;
     const customerResult = await client.query(
@@ -980,7 +1371,18 @@ app.post("/api/orders", async (req, res) => {
     }
     await client.query("COMMIT");
     publishAdminEvent("new-order", { order_id: orderId, total });
-    res.json({ order_id: orderId, subtotal, delivery_fee: deliveryFee, total, payment_method: PAYMENT_METHOD });
+    res.json({
+      order_id: orderId,
+      subtotal,
+      delivery_fee: deliveryFee,
+      total,
+      payment_method: PAYMENT_METHOD,
+      items: normalizedItems.map(item => ({
+        name: item.product.name,
+        quantity: item.quantity,
+        price: Number(item.product.price)
+      }))
+    });
   } catch (error) {
     if (client) {
       try {
@@ -1654,11 +2056,13 @@ async function initializeDatabase() {
       name TEXT UNIQUE NOT NULL,
       icon TEXT NOT NULL DEFAULT 'tag',
       active BOOLEAN NOT NULL DEFAULT TRUE,
-      sort_order INTEGER
+      sort_order INTEGER,
+      parent_id INTEGER REFERENCES categories(id) ON DELETE SET NULL
     );
     ALTER TABLE categories ADD COLUMN IF NOT EXISTS icon TEXT NOT NULL DEFAULT 'tag';
     ALTER TABLE categories ADD COLUMN IF NOT EXISTS active BOOLEAN NOT NULL DEFAULT TRUE;
     ALTER TABLE categories ADD COLUMN IF NOT EXISTS sort_order INTEGER;
+    ALTER TABLE categories ADD COLUMN IF NOT EXISTS parent_id INTEGER REFERENCES categories(id) ON DELETE SET NULL;
     UPDATE categories AS c SET sort_order = ordered.position - 1
       FROM (SELECT id, ROW_NUMBER() OVER (ORDER BY name, id) AS position
             FROM categories WHERE sort_order IS NULL) AS ordered
@@ -1683,6 +2087,9 @@ async function initializeDatabase() {
     ALTER TABLE products ADD COLUMN IF NOT EXISTS advertised BOOLEAN NOT NULL DEFAULT FALSE;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS delivery_price NUMERIC(12, 2) NOT NULL DEFAULT 0;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS cost_price NUMERIC(12, 2);
+    ALTER TABLE products ADD COLUMN IF NOT EXISTS sort_order INTEGER;
+    CREATE INDEX IF NOT EXISTS products_sort_order_idx ON products(sort_order, id)
+      WHERE sort_order IS NOT NULL;
     CREATE UNIQUE INDEX IF NOT EXISTS products_single_advertised_idx
       ON products (advertised) WHERE advertised = TRUE AND active = TRUE;
     CREATE TABLE IF NOT EXISTS product_images (
@@ -1797,7 +2204,170 @@ async function initializeDatabase() {
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL DEFAULT ''
     );
+    CREATE TABLE IF NOT EXISTS store_assets (
+      asset_key TEXT PRIMARY KEY,
+      image_data BYTEA NOT NULL,
+      content_type TEXT NOT NULL CHECK (content_type IN ('image/jpeg', 'image/png', 'image/webp', 'image/gif')),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS store_navigation_links (
+      id SERIAL PRIMARY KEY,
+      label_ar TEXT NOT NULL,
+      label_fr TEXT NOT NULL,
+      href TEXT NOT NULL,
+      position INTEGER NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS category_icon_options (
+      id TEXT PRIMARY KEY,
+      label_ar TEXT NOT NULL,
+      label_fr TEXT NOT NULL,
+      icon_type TEXT NOT NULL CHECK (icon_type IN ('tag', 'clothing', 'bag', 'watch', 'accessory')),
+      position INTEGER NOT NULL
+    );
   `);
+  await pool.query(
+    `WITH initialized AS (
+       INSERT INTO store_settings(key, value) VALUES('category_icon_options_initialized', '1')
+       ON CONFLICT (key) DO NOTHING
+       RETURNING key
+     )
+     INSERT INTO category_icon_options(id, label_ar, label_fr, icon_type, position)
+     SELECT icon_option.id, icon_option.label_ar, icon_option.label_fr, icon_option.icon_type, icon_option.position
+     FROM UNNEST($1::text[], $2::text[], $3::text[], $4::text[], $5::integer[])
+       AS icon_option(id, label_ar, label_fr, icon_type, position)
+     WHERE EXISTS (SELECT 1 FROM initialized)`,
+    [
+      DEFAULT_CATEGORY_ICON_OPTIONS.map(option => option.id),
+      DEFAULT_CATEGORY_ICON_OPTIONS.map(option => option.label_ar),
+      DEFAULT_CATEGORY_ICON_OPTIONS.map(option => option.label_fr),
+      DEFAULT_CATEGORY_ICON_OPTIONS.map(option => option.icon_type),
+      DEFAULT_CATEGORY_ICON_OPTIONS.map((option, index) => index)
+    ]
+  );
+  await pool.query(
+    `DO $$
+     BEGIN
+       IF NOT EXISTS (
+         SELECT 1 FROM pg_constraint WHERE conname = 'categories_icon_option_fk'
+       ) THEN
+         ALTER TABLE categories
+           ADD CONSTRAINT categories_icon_option_fk
+           FOREIGN KEY (icon) REFERENCES category_icon_options(id);
+       END IF;
+     END $$`
+  );
+  await pool.query(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM store_settings WHERE key = 'category_hierarchy_migrated') THEN
+        IF EXISTS (SELECT 1 FROM categories WHERE name IN ('Électronique', 'Electronique'))
+           AND NOT EXISTS (SELECT 1 FROM categories WHERE name = 'Ordinateurs') THEN
+          UPDATE categories SET name = 'Ordinateurs'
+          WHERE name IN ('Électronique', 'Electronique');
+        END IF;
+        INSERT INTO categories(name, icon, active, sort_order)
+        SELECT seed.name, 'tag', TRUE, seed.sort_order
+        FROM (VALUES
+          ('High-Tech', 0),
+          ('Audio & Casques', 1),
+          ('Smartphones', 2),
+          ('Ordinateurs', 3),
+          ('Objets connectés', 4),
+          ('Mode', 5),
+          ('Sacs & Maroquinerie', 6),
+          ('Chaussures', 7),
+          ('Montres', 8),
+          ('Lunettes', 9),
+          ('Maison', 10),
+          ('Décoration', 11),
+          ('Luminaires', 12),
+          ('Cuisine', 13),
+          ('Beauté', 14),
+          ('Parfums', 15),
+          ('Soins', 16),
+          ('Sport', 17),
+          ('Fitness', 18),
+          ('Outdoor', 19),
+          ('Accessoires', 20),
+          ('Automobile', 21),
+          ('Bagagerie', 22),
+          ('Petite maroquinerie', 23)
+        ) AS seed(name, sort_order)
+        ON CONFLICT (name) DO NOTHING;
+        UPDATE categories AS child SET parent_id = parent.id
+        FROM (VALUES
+          ('Audio & Casques', 'High-Tech'),
+          ('Smartphones', 'High-Tech'),
+          ('Ordinateurs', 'High-Tech'),
+          ('Objets connectés', 'High-Tech'),
+          ('Sacs & Maroquinerie', 'Mode'),
+          ('Chaussures', 'Mode'),
+          ('Montres', 'Mode'),
+          ('Lunettes', 'Mode'),
+          ('Décoration', 'Maison'),
+          ('Luminaires', 'Maison'),
+          ('Cuisine', 'Maison'),
+          ('Parfums', 'Beauté'),
+          ('Soins', 'Beauté'),
+          ('Fitness', 'Sport'),
+          ('Outdoor', 'Sport'),
+          ('Automobile', 'Accessoires'),
+          ('Bagagerie', 'Accessoires'),
+          ('Petite maroquinerie', 'Accessoires')
+        ) AS seed(child_name, parent_name)
+        JOIN categories parent ON parent.name = seed.parent_name
+        WHERE child.name = seed.child_name;
+        UPDATE categories AS category SET parent_id = NULL
+        WHERE category.name IN ('High-Tech', 'Mode', 'Maison', 'Beauté', 'Sport', 'Accessoires');
+        UPDATE categories SET sort_order = CASE name
+          WHEN 'High-Tech' THEN 0
+          WHEN 'Audio & Casques' THEN 1
+          WHEN 'Smartphones' THEN 2
+          WHEN 'Ordinateurs' THEN 3
+          WHEN 'Objets connectés' THEN 4
+          WHEN 'Mode' THEN 5
+          WHEN 'Sacs & Maroquinerie' THEN 6
+          WHEN 'Chaussures' THEN 7
+          WHEN 'Montres' THEN 8
+          WHEN 'Lunettes' THEN 9
+          WHEN 'Maison' THEN 10
+          WHEN 'Décoration' THEN 11
+          WHEN 'Luminaires' THEN 12
+          WHEN 'Cuisine' THEN 13
+          WHEN 'Beauté' THEN 14
+          WHEN 'Parfums' THEN 15
+          WHEN 'Soins' THEN 16
+          WHEN 'Sport' THEN 17
+          WHEN 'Fitness' THEN 18
+          WHEN 'Outdoor' THEN 19
+          WHEN 'Accessoires' THEN 20
+          WHEN 'Automobile' THEN 21
+          WHEN 'Bagagerie' THEN 22
+          WHEN 'Petite maroquinerie' THEN 23
+          ELSE 100 + sort_order
+        END;
+        INSERT INTO store_settings(key, value) VALUES('category_hierarchy_migrated', '1');
+      END IF;
+    END $$;
+  `);
+  await pool.query(
+    `WITH initialized AS (
+       INSERT INTO store_settings(key, value) VALUES('navigation_links_initialized', '1')
+       ON CONFLICT (key) DO NOTHING
+       RETURNING key
+     )
+     INSERT INTO store_navigation_links(label_ar, label_fr, href, position)
+     SELECT label_ar, label_fr, href, ordinal - 1
+     FROM UNNEST($1::text[], $2::text[], $3::text[]) WITH ORDINALITY
+       AS link(label_ar, label_fr, href, ordinal)
+     WHERE EXISTS (SELECT 1 FROM initialized)
+       AND NOT EXISTS (SELECT 1 FROM store_navigation_links)`,
+    [
+      DEFAULT_NAVIGATION_LINKS.map(link => link.label_ar),
+      DEFAULT_NAVIGATION_LINKS.map(link => link.label_fr),
+      DEFAULT_NAVIGATION_LINKS.map(link => link.href)
+    ]
+  );
   await pool.query(
     `INSERT INTO store_settings(key, value) VALUES
        ('whatsapp', $1),
@@ -1812,10 +2382,33 @@ async function initializeDatabase() {
        ('hero_logo_url', ''),
        ('hero_card_x', '0'),
        ('hero_card_y', '0'),
-       ('hero_overlay', '35'),
-       ('hero_price_size', '29')
+       ('hero_overlay', '15'),
+       ('hero_price_size', '29'),
+       ('product_columns', '4'),
+       ('category_columns', '4')
      ON CONFLICT (key) DO NOTHING`,
     [WHATSAPP_CONFIGURED ? WA : ""]
+  );
+  await pool.query(
+    `WITH migration AS (
+       INSERT INTO store_settings(key, value) VALUES('hero_background_image_migrated', '1')
+       ON CONFLICT (key) DO NOTHING
+       RETURNING key
+     )
+     UPDATE store_settings SET value = '/hero-background.png'
+     WHERE key = 'hero_background_url'
+       AND EXISTS (SELECT 1 FROM migration)`
+  );
+  await migrateLegacyHeroBackground();
+  await pool.query(
+    `WITH migration AS (
+       INSERT INTO store_settings(key, value) VALUES('hero_overlay_visibility_migrated', '1')
+       ON CONFLICT (key) DO NOTHING
+       RETURNING key
+     )
+     UPDATE store_settings SET value = '15'
+     WHERE key = 'hero_overlay' AND value = '35'
+       AND EXISTS (SELECT 1 FROM migration)`
   );
   const passwordHash = bcrypt.hashSync(process.env.ADMIN_PASSWORD || "Admin@12345", 12);
   await pool.query(

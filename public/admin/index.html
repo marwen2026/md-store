@@ -5,9 +5,12 @@
 :root{--bg:#f4f6fa;--panel:#fff;--panel-alt:#eef2ff;--text:#172033;--muted:#6b7280;--line:#e5e7eb;--accent:#d4af37;--accent-soft:#fef3c7;--danger:#dc2626;--shadow:0 4px 18px #00000008;--input:#fff}
 body.dark{--bg:#0f172a;--panel:#111827;--panel-alt:#1e293b;--text:#e5e7eb;--muted:#94a3b8;--line:#334155;--accent:#fbbf24;--accent-soft:#3b2f12;--danger:#ef4444;--shadow:0 8px 30px rgba(0,0,0,.35);--input:#0b1220}
 *{box-sizing:border-box}body{font-family:Cairo,Arial;margin:0;background:var(--bg);color:var(--text)}.login,.app{max-width:1250px;margin:25px auto;padding:22px}.login{max-width:430px;background:var(--panel);border-radius:16px;box-shadow:0 10px 35px rgba(0,0,0,.08)}.app{display:none}.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:18px}.toolbar{display:flex;align-items:center;gap:8px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.stat,.box,.chart-box{background:var(--panel);padding:18px;border-radius:14px;margin-bottom:20px;box-shadow:var(--shadow)}.stat b{font-size:28px;color:var(--accent)}.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}input,textarea,select{width:100%;padding:11px;margin:5px 0 10px;border:1px solid var(--line);border-radius:8px;font:inherit;background:var(--input);color:var(--text)}button{padding:9px 15px;border:0;border-radius:8px;background:#111827;color:#fff;cursor:pointer}.gold{background:var(--accent);color:#111}.danger{background:var(--danger)}.muted{color:var(--muted)}.thumb{width:58px;height:58px;object-fit:cover;border-radius:8px}.thumbs{display:flex;gap:5px;flex-wrap:wrap}.thumbs img{width:42px;height:42px;object-fit:cover;border-radius:6px}.scroll{overflow:auto}table{width:100%;border-collapse:collapse;min-width:700px}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:right;vertical-align:middle}.pill{display:inline-block;padding:4px 8px;border-radius:20px;background:var(--panel-alt)}.userrow{display:flex;gap:8px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0}.chart-area{height:260px}.export-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}.search-panel{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.toast{position:fixed;left:20px;bottom:20px;background:#111827;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,.22);opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none;z-index:999}.toast.show{opacity:1;transform:translateY(0)}.toggle-btn{background:var(--panel-alt);color:var(--text);border:1px solid var(--line)}.invoice-select{appearance:none;-webkit-appearance:none;-moz-appearance:none;display:inline-flex;align-items:center;justify-content:center;min-width:76px;padding:8px 28px 8px 10px;border:1px solid #d9dfe8;border-radius:10px;background:linear-gradient(180deg,#151d2c,#101827);color:#fff;font-weight:700;cursor:pointer;position:relative;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23ffffff' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 10px center;background-size:12px 12px}.invoice-select option{color:#111827}.invoice-select:focus{outline:2px solid rgba(212,175,55,.4);outline-offset:2px}.invoice-cell{display:flex;justify-content:center}.invoice-cell .toggle-btn{min-width:84px}.order-table tbody tr{background:#fff}.order-table tbody tr:hover{background:#fafafc}.shipment-select{width:18px;height:18px;margin:0;accent-color:var(--accent)}
-.category-create{display:grid;grid-template-columns:minmax(150px,1fr) minmax(160px,220px) minmax(140px,190px) auto;gap:10px;align-items:center;margin-bottom:14px}.category-create input,.category-create select{margin:0}.category-list{display:grid;gap:10px}.category-admin-row{display:grid;grid-template-columns:minmax(180px,1fr) minmax(180px,auto) auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.category-edit-fields{display:grid;grid-template-columns:minmax(130px,1fr) minmax(125px,180px);gap:8px;align-items:center}.category-edit-fields input,.category-edit-fields select{margin:0}.category-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.category-count,.category-state{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:var(--panel-alt);color:var(--text);font-size:12px;white-space:nowrap}.category-state{cursor:pointer}.category-state input{width:16px;height:16px;margin:0;accent-color:var(--accent)}.category-actions{display:flex;align-items:center;gap:5px}.category-actions button{padding:7px 10px}.category-actions .toggle-btn{padding:7px 9px}@media(max-width:800px){.cards{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.category-admin-row{grid-template-columns:1fr}}@media(max-width:600px){.category-create{grid-template-columns:1fr 1fr}.category-create input,.category-create select:first-of-type{grid-column:1/-1}.category-create button{grid-column:1/-1}.category-edit-fields{grid-template-columns:1fr 1fr}}
+.category-create{display:grid;grid-template-columns:minmax(150px,1fr) minmax(150px,180px) minmax(150px,180px) minmax(140px,190px) auto;gap:10px;align-items:center;margin-bottom:14px}.category-create input,.category-create select{margin:0}.category-list{display:grid;gap:10px}.category-admin-row{display:grid;grid-template-columns:minmax(180px,1fr) minmax(180px,auto) auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.category-edit-fields{display:grid;grid-template-columns:minmax(130px,1fr) minmax(120px,160px) minmax(125px,180px);gap:8px;align-items:center}.category-edit-fields input,.category-edit-fields select{margin:0}.category-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.category-count,.category-state{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:var(--panel-alt);color:var(--text);font-size:12px;white-space:nowrap}.category-state{cursor:pointer}.category-state input{width:16px;height:16px;margin:0;accent-color:var(--accent)}.category-actions{display:flex;align-items:center;gap:5px}.category-actions button{padding:7px 10px}.category-actions .toggle-btn{padding:7px 9px}@media(max-width:800px){.cards{grid-template-columns:repeat(2,1fr)}.row{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.category-admin-row{grid-template-columns:1fr}}@media(max-width:600px){.category-create{grid-template-columns:1fr 1fr}.category-create input,.category-create select:first-of-type,.category-create select:nth-of-type(2){grid-column:1/-1}.category-create button{grid-column:1/-1}.category-edit-fields{grid-template-columns:1fr 1fr}.category-edit-fields input{grid-column:1/-1}}
+.category-icon-manager{margin:0 0 16px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel-alt)}.category-icon-manager summary{font-weight:800;cursor:pointer}.category-icon-add,.category-icon-option{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:8px;align-items:end}.category-icon-add{margin:12px 0}.category-icon-option{padding:10px 0;border-top:1px solid var(--line)}.category-icon-add label,.category-icon-option label{font-size:12px;font-weight:700}.category-icon-add input,.category-icon-add select,.category-icon-option input,.category-icon-option select{margin:4px 0 0}.category-icon-option button{padding:7px 10px}@media(max-width:700px){.category-icon-add,.category-icon-option{grid-template-columns:1fr 1fr}.category-icon-add button,.category-icon-option button{grid-column:1/-1}}
+.category-icon-picker{position:relative;min-width:0}.category-icon-picker.category-icon-new{grid-column:auto}.category-icon-native{position:absolute!important;width:1px!important;height:1px!important;min-height:1px!important;padding:0!important;margin:0!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;clip-path:inset(50%)!important}.category-icon-trigger{display:flex;width:100%;min-height:44px;align-items:center;gap:10px;margin:0;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(145deg,var(--panel),var(--panel-alt));color:var(--text);font:inherit;font-size:13px;font-weight:750;text-align:start;box-shadow:0 3px 10px #11182708;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}.category-icon-trigger:hover{border-color:var(--accent);box-shadow:0 5px 15px #d4af3722;transform:translateY(-1px)}.category-icon-trigger:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 38%,transparent);outline-offset:2px}.category-icon-trigger[aria-expanded="true"]{border-color:var(--accent);border-radius:12px 12px 8px 8px;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 14%,transparent)}.category-icon-trigger-label{flex:1;min-width:0}.category-icon-trigger svg,.category-icon-choice svg{width:20px;height:20px;flex:0 0 20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.category-icon-trigger .category-icon-chevron{width:14px;height:14px;flex-basis:14px;transition:transform .18s ease}.category-icon-trigger[aria-expanded="true"] .category-icon-chevron{transform:rotate(180deg)}.category-icon-popup{position:absolute;inset-inline:0;top:calc(100% + 5px);z-index:80;max-height:min(280px,45vh);overflow:auto;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--panel);box-shadow:0 16px 36px #11182724;animation:categoryIconPopupIn .14s ease both}.category-icon-popup[hidden]{display:none}.category-icon-choice{display:flex;width:100%;min-height:42px;align-items:center;gap:10px;margin:0;padding:8px 10px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--text);font:inherit;font-size:13px;text-align:start;transition:background .15s ease,color .15s ease}.category-icon-choice:hover,.category-icon-choice:focus-visible{outline:none;background:var(--panel-alt);color:var(--text)}.category-icon-choice[aria-selected="true"]{border-color:color-mix(in srgb,var(--accent) 30%,transparent);background:color-mix(in srgb,var(--accent) 13%,var(--panel));color:var(--text);font-weight:800}.category-icon-choice[aria-selected="true"]:after{content:"✓";margin-inline-start:auto;color:var(--accent);font-weight:900}.category-icon-new .category-icon-popup{z-index:100}.category-admin-row:focus-within{z-index:5;position:relative}@keyframes categoryIconPopupIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}@media(prefers-reduced-motion:reduce){.category-icon-popup{animation:none}}body.dark .category-icon-popup{box-shadow:0 16px 36px #0007}
 .language-toggle{display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;gap:7px;min-width:78px;height:38px;padding:0 11px;border:1px solid #e8dfca;border-radius:999px;background:linear-gradient(135deg,#fff,#fbf7ed);color:#8d6821;box-shadow:0 3px 10px #6f53100c;transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease}.language-toggle:hover{transform:translateY(-1px);border-color:#d4af37;background:#fffaf0;box-shadow:0 5px 14px #c99a3b24}.language-toggle:focus-visible{outline:3px solid #d4af3766;outline-offset:2px}.language-toggle svg{width:19px;height:19px;flex:0 0 19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.language-toggle span{font-size:12px;font-weight:800;letter-spacing:.04em;line-height:1}
 body.dark .language-toggle{border-color:#564a2c;background:linear-gradient(135deg,#252317,#191a17);color:#fbbf24;box-shadow:0 3px 10px #0003}body.dark .language-toggle:hover{border-color:#fbbf24;background:#2b2819;box-shadow:0 5px 14px #fbbf2424}@media(max-width:800px){.toolbar{width:100%;flex-wrap:wrap;gap:6px}.toolbar button{padding:8px 10px}}@media(max-width:600px){.language-toggle{min-width:74px;height:36px}}
+.category-admin-row[data-category-child="true"]{margin-inline-start:22px;border-inline-start:3px solid var(--accent);background:var(--panel-alt)}
 </style></head><body>
 <style>
 .modal-backdrop{display:none;position:fixed;inset:0;z-index:120;background:#0009;align-items:center;justify-content:center;padding:16px}
@@ -19,6 +22,7 @@ body.dark .language-toggle{border-color:#564a2c;background:linear-gradient(135de
 .inventory-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}.inventory-metric{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel-alt)}.inventory-metric span{display:block;color:var(--muted);font-size:13px}.inventory-metric strong{display:block;margin-top:5px;font-size:24px;color:var(--accent)}.inventory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.inventory-subsection{min-width:0}.inventory-subsection h3{margin:8px 0}.inventory-table{min-width:520px}.inventory-table tr th,.inventory-table tr td{border:1px solid var(--table-line,#e6e6e6);padding:9px}.inventory-table tr th{background-color:var(--table-head,#f5f5f5)}.inventory-stock-zero{color:#dc2626;font-weight:800}.inventory-stock-ok{color:#15803d;font-weight:700}body.dark .inventory-stock-zero{color:#f87171}body.dark .inventory-stock-ok{color:#4ade80}.inventory-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 @media(max-width:700px){.inventory-summary{grid-template-columns:1fr}.inventory-grid{grid-template-columns:1fr}}
 .store-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}.store-settings-grid label{display:block;font-size:13px;font-weight:700;color:var(--text)}.store-settings-grid textarea{min-height:90px;resize:vertical}.settings-hint{margin:0 0 12px;color:var(--muted);font-size:13px}.hero-slider-settings{margin:20px 0;padding-top:12px;border-top:1px solid var(--line)}.hero-slider-settings h3{margin:0 0 4px}.hero-slider-settings .hero-slider-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}.hero-slider-settings label{display:block;font-size:13px;font-weight:700}.hero-slider-settings input[type=range]{padding:0;accent-color:var(--accent)}.hero-slider-settings input[type=file]{padding:8px}.hero-slider-settings output{color:var(--accent);font-weight:800}.hero-background-preview{display:block;max-width:100%;width:min(460px,100%);max-height:180px;margin:8px 0;object-fit:cover;border:1px solid var(--line);border-radius:10px}.hero-background-actions{display:flex;gap:8px;flex-wrap:wrap}.hero-settings-actions{margin-top:16px}@media(max-width:600px){.store-settings-grid,.hero-slider-settings .hero-slider-fields{grid-template-columns:1fr}}
+.navigation-manager{margin:20px 0;padding-top:16px;border-top:1px solid var(--line)}.navigation-manager h3{margin:0 0 4px}.navigation-link-add,.navigation-link-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:8px;align-items:end}.navigation-link-add{margin:12px 0 16px}.navigation-link-add label,.navigation-link-row label{display:block;font-size:12px;font-weight:700}.navigation-link-add input,.navigation-link-row input{margin:4px 0 0}.navigation-link-list{display:grid;gap:10px}.navigation-link-row{padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.navigation-link-actions{display:flex;gap:5px;align-items:center}.navigation-link-actions button{padding:7px 10px}.navigation-link-empty{color:var(--muted)}@media(max-width:900px){.navigation-link-row{grid-template-columns:repeat(2,minmax(0,1fr))}.navigation-link-actions{grid-column:1/-1}}@media(max-width:600px){.navigation-link-add,.navigation-link-row{grid-template-columns:1fr}.navigation-link-actions{grid-column:auto}}
 @media(max-width:600px){.modal-backdrop{padding:8px}.modal-card{padding:14px}}
 :root{--table-head:#f5f5f5;--table-line:#e6e6e6}body.dark{--table-head:#1e293b;--table-line:#334155}a{text-decoration:none;color:#464feb}th,td{text-align:start;border:1px solid var(--table-line)}th{background-color:var(--table-head)}body.dark .order-table tbody tr{background:var(--panel)}body.dark .order-table tbody tr:hover{background:var(--panel-alt)}.toast{left:auto;inset-inline-start:20px}.invoice-select{background-position:right 10px center;padding-left:10px;padding-right:28px}html[dir="rtl"] .invoice-select{background-position:left 10px center;padding-left:28px;padding-right:10px}.store-settings-grid input[type="url"],.store-settings-grid input[type="email"],.store-settings-grid input[type="tel"]{direction:ltr;text-align:left}.login>.language-toggle{float:inline-end}
 </style>
@@ -48,6 +52,7 @@ body{min-height:100vh;background:radial-gradient(ellipse at 12% 0,#fef3c733,tran
 table{border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:12px}
 th,td{padding:11px 12px;border-inline-start:0;border-top:0;border-bottom:1px solid var(--line);font-size:13px}
 th{position:sticky;top:0;z-index:1;background:var(--table-head);color:var(--text);font-weight:800}tr:last-child td{border-bottom:0}
+.product-order-hint{margin:0 0 10px;color:var(--muted);font-size:13px}.product-drag-handle{display:inline-grid;width:34px;height:34px;place-items:center;border:1px solid var(--line);border-radius:8px;background:var(--panel-alt);color:var(--muted);font-size:20px;cursor:grab;touch-action:none}.product-drag-handle:active{cursor:grabbing}.product-order-actions{display:flex;gap:4px}.product-order-actions button{padding:6px 9px}.product-row-dragging{opacity:.4}.product-row-drop-target td{box-shadow:inset 0 2px var(--accent)}
 .inventory-metric{padding:16px;border-radius:14px}.inventory-metric strong{font-size:28px}.inventory-grid{gap:18px}
 .category-admin-row{padding:14px;border-radius:13px;transition:border-color .16s ease,box-shadow .16s ease}.category-admin-row:hover{border-color:color-mix(in srgb,var(--accent) 45%,var(--line));box-shadow:var(--shadow)}
 .login{position:relative;margin:8vh auto;padding:34px;border:1px solid var(--line);background:var(--panel);box-shadow:0 24px 70px #17203318}
@@ -120,7 +125,7 @@ body.dark .stock-overview-item,body.dark th{background:var(--panel-alt)}
 <div class="box" id="productsDashboard"><h2 id="productsTitle">المنتجات</h2><div class="search-panel"><input id="productSearch" placeholder="بحث سريع ..."><button class="toggle-btn" onclick="showAllProducts()" id="showAllBtn">الكل</button><button class="gold" id="addProductBtn" onclick="newProduct()">إضافة منتج</button></div><div class="scroll" id="plist"></div></div>
 <div class="box" id="ordersDashboard"><h2 id="ordersTitle">الطلبات</h2><div class="export-bar"><select id="orderStatusFilter"><option value="all" id="allOrdersOpt">الكل</option><option value="new">جديد</option><option value="confirmed">مؤكد</option><option value="shipped">مشحون</option><option value="delivered">مسلّم</option><option value="cancelled">ملغى</option><option value="returned">مرتجع</option></select><button id="groupShipmentsBtn" onclick="createShipment()" disabled>إنشاء شحنة مجمعة</button><button onclick="exportOrdersExcel()" id="excelBtn">Excel</button></div><div class="scroll" id="orders"></div></div>
 <div class="modal-backdrop" id="productModal" onclick="if(event.target===this)closeProductForm()"><div class="modal-card"><div class="modal-head"><h2 id="formTitle">إضافة منتج</h2><button type="button" onclick="closeProductForm()" aria-label="Close">×</button></div><input type="hidden" id="pid"><div class="row"><div><input id="pn" placeholder="اسم المنتج"><textarea id="pd" rows="5" placeholder="الوصف"></textarea><select id="pc"></select></div><div><input id="pp" type="number" step=".01" placeholder="السعر"><input id="pCost" type="number" min="0" step=".01" placeholder="تكلفة الشراء (لحساب الربح)"><input id="pDelivery" type="number" min="0" step=".01" placeholder="سعر التوصيل للقطعة"><input id="po" type="number" step=".01" placeholder="السعر القديم"><input id="ps" type="number" min="0" placeholder="المخزون"><label class="ad-check"><input id="pAdvertised" type="checkbox"><span id="advertisedLabel">إظهار في الإعلان</span></label><label id="productImagesLabel">صور المنتج (يمكن اختيار عدة صور)</label><input id="pi" type="file" accept="image/*" multiple></div></div><div id="currentImages" class="thumbs"></div><button class="gold" id="saveProductBtn" onclick="saveProduct()">حفظ المنتج</button> <button id="newProductBtn" onclick="resetForm()">جديد</button></div></div>
-<div class="box" id="categoriesBox"><h2 id="categoriesTitle">الأقسام</h2><div class="category-create"><input id="newcat" maxlength="100" placeholder="اسم القسم الجديد"><select id="newCatPreset" aria-label="Modèles de catégories"></select><select id="newCatIcon" aria-label="أيقونة القسم"></select><button class="gold" id="addCatBtn" onclick="addCat()">إضافة</button></div><div id="cats" class="category-list"></div></div>
+<div class="box" id="categoriesBox"><h2 id="categoriesTitle">الأقسام</h2><div class="category-create"><input id="newcat" maxlength="100" placeholder="اسم القسم الجديد"><select id="newCatPreset" aria-label="Modèles de catégories"></select><select id="newCatParent" aria-label="الفئة الرئيسية"></select><select id="newCatIcon" aria-label="أيقونة القسم"></select><button class="gold" id="addCatBtn" onclick="addCat()">إضافة</button></div><details class="category-icon-manager"><summary id="categoryIconManagerTitle">إضافة أو حذف خيارات الأيقونات</summary><div id="categoryIconManagerBody"><p class="settings-hint" id="categoryIconManagerHint">أضف أسماء الخيارات بالعربية والفرنسية وحدد شكل الأيقونة، أو احذف الخيارات غير المستخدمة.</p><div class="category-icon-add"><label><span id="categoryIconArabicLabel">الاسم بالعربية</span><input id="newCategoryIconArabic" maxlength="40"></label><label><span id="categoryIconFrenchLabel">الاسم بالفرنسية</span><input id="newCategoryIconFrench" maxlength="40"></label><label><span id="categoryIconStyleLabel">شكل الأيقونة</span><select id="newCategoryIconStyle"></select></label><button class="gold" id="addCategoryIconBtn" type="button" onclick="addCategoryIconOption()">إضافة خيار</button></div><div id="categoryIconOptionsList"></div></div></details><div id="cats" class="category-list"></div></div>
 <div class="box" id="inventoryBox"><div class="export-bar"><h2 id="inventoryTitle">إدارة المخزون</h2><div class="inventory-actions"><button class="toggle-btn" id="refreshInventoryBtn" type="button" onclick="inventoryLoad()">تحديث</button><button class="gold" id="exportInventoryExcelBtn" type="button" onclick="exportInventory('csv')">Excel</button><button id="exportInventoryPdfBtn" type="button" onclick="exportInventory('pdf')">PDF</button></div></div><div class="inventory-summary"><div class="inventory-metric"><span id="inventoryProductsLabel">المنتجات النشطة</span><strong id="inventoryProductsCount">—</strong></div><div class="inventory-metric"><span id="inventoryUnitsLabel">الوحدات المتوفرة</span><strong id="inventoryUnitsCount">—</strong></div><div class="inventory-metric"><span id="inventoryOutLabel">منتجات نفد مخزونها</span><strong id="inventoryOutCount">—</strong></div></div><section class="inventory-subsection"><h3 id="inventoryLevelsTitle">مستوى المخزون الحالي</h3><div class="scroll" id="inventoryLevels"></div></section><div class="inventory-grid"><section class="inventory-subsection"><h3 id="inventoryAlertsTitle">تنبيهات نفاد المخزون</h3><div class="scroll" id="inventoryAlerts"></div></section><section class="inventory-subsection"><h3 id="inventoryTopTitle">المنتجات الأكثر مبيعاً</h3><div class="scroll" id="inventoryTopProducts"></div></section></div><section class="inventory-subsection"><h3 id="inventoryHistoryTitle">سجل حركات المخزون</h3><div class="scroll" id="inventoryMovements"></div></section></div>
 <div class="box" id="shipmentsDashboard"><h2 id="shipmentsTitle">الشحنات المجمعة</h2><div class="scroll" id="shipments"></div></div>
 <div class="box" id="customersDashboard"><h2 id="customersTitle">العملاء</h2><div class="scroll" id="customers"></div></div>
@@ -137,22 +142,35 @@ body.dark .stock-overview-item,body.dark th{background:var(--panel-alt)}
 <label><span id="settingsFacebookLabel">Facebook</span><input id="settingsFacebook" type="url" inputmode="url" maxlength="500" placeholder="https://www.facebook.com/..."></label>
 <label><span id="settingsInstagramLabel">Instagram</span><input id="settingsInstagram" type="url" inputmode="url" maxlength="500" placeholder="https://www.instagram.com/..."></label>
 <label><span id="settingsTiktokLabel">TikTok</span><input id="settingsTiktok" type="url" inputmode="url" maxlength="500" placeholder="https://www.tiktok.com/@..."></label>
+<label><span id="settingsProductColumnsLabel">عدد أعمدة المنتجات على الشاشات الكبيرة</span><select id="settingsProductColumns"><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option></select></label>
+<label><span id="settingsCategoryColumnsLabel">عدد أعمدة الأقسام على الشاشات الكبيرة</span><select id="settingsCategoryColumns"><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option></select></label>
 </div>
+<section class="navigation-manager" aria-labelledby="navigationTitle">
+<h3 id="navigationTitle">إدارة روابط شريط التنقل</h3>
+<p class="settings-hint" id="navigationHint">أضف الروابط أو عدّلها أو احذفها، وحدّد اسمًا بالعربية والفرنسية.</p>
+<div class="navigation-link-add">
+<label><span id="navigationArabicLabel">الاسم بالعربية</span><input id="navigationArabicInput" maxlength="60"></label>
+<label><span id="navigationFrenchLabel">الاسم بالفرنسية</span><input id="navigationFrenchInput" maxlength="60"></label>
+<label><span id="navigationHrefLabel">الرابط</span><input id="navigationHrefInput" maxlength="500" placeholder="#products"></label>
+<button class="gold" id="navigationAddBtn" type="button" onclick="navigationLinkAdd()">إضافة رابط</button>
+</div>
+<div class="navigation-link-list" id="navigationLinkList"></div>
+</section>
 <section class="hero-slider-settings" aria-labelledby="heroSettingsTitle">
 <h3 id="heroSettingsTitle">تخصيص السلايدر</h3>
 <p class="settings-hint" id="heroSettingsHint">غيّر الخلفية والشعار وموضع المحتوى وتعتيم الخلفية وحجم السعر، ثم احفظ الإعدادات.</p>
 <div class="hero-slider-fields">
 <label><span id="heroBackgroundLabel">رابط صورة الخلفية</span><input id="heroBackgroundUrl" type="url" inputmode="url" maxlength="2000" placeholder="https://..." onchange="updateHeroBackgroundPreview()"></label>
-<label><span id="heroBackgroundFileLabel">أو ارفع صورة (حتى 5 ميغابايت)</span><input id="heroBackgroundFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><img class="hero-background-preview" id="heroBackgroundPreview" alt="" hidden></label>
+<label><span id="heroBackgroundFileLabel">أو اختر صورة لرفعها وحفظها (حتى 5 ميغابايت)</span><input id="heroBackgroundFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="previewHeroBackgroundFile()"><img class="hero-background-preview" id="heroBackgroundPreview" alt="" hidden></label>
 <label><span id="heroCardXLabel">تحريك المحتوى أفقيًا</span><output id="heroCardXValue">0 px</output><input id="heroCardX" type="range" min="-200" max="200" step="5" value="0" oninput="updateHeroSettingValues()"></label>
 <label><span id="heroCardYLabel">تحريك المحتوى عموديًا</span><output id="heroCardYValue">0 px</output><input id="heroCardY" type="range" min="-200" max="200" step="5" value="0" oninput="updateHeroSettingValues()"></label>
-<label><span id="heroOverlayLabel">تعتيم الخلفية</span><output id="heroOverlayValue">35%</output><input id="heroOverlay" type="range" min="0" max="80" step="5" value="35" oninput="updateHeroSettingValues()"></label>
+<label><span id="heroOverlayLabel">تعتيم الخلفية</span><output id="heroOverlayValue">15%</output><input id="heroOverlay" type="range" min="0" max="80" step="5" value="15" oninput="updateHeroSettingValues()"></label>
 <label><span id="heroPriceSizeLabel">حجم السعر</span><output id="heroPriceSizeValue">29 px</output><input id="heroPriceSize" type="range" min="16" max="56" step="1" value="29" oninput="updateHeroSettingValues()"></label>
 <label><span id="heroLogoLabel">رابط صورة الشعار</span><input id="heroLogoUrl" type="url" inputmode="url" maxlength="2000" placeholder="https://..." onchange="updateHeroLogoPreview()"></label>
 <label><span id="heroLogoFileLabel">أو ارفع شعارًا (حتى 5 ميغابايت)</span><input id="heroLogoFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><img class="hero-background-preview" id="heroLogoPreview" alt="" hidden style="object-fit:contain;max-height:120px"></label>
 </div>
 <div class="hero-background-actions">
-<button type="button" id="uploadHeroBackgroundBtn" onclick="uploadHeroBackground()">رفع صورة الخلفية</button>
+<button type="button" id="uploadHeroBackgroundBtn" onclick="saveHeroBackground()">حفظ صورة الخلفية</button>
 <button type="button" class="toggle-btn" id="resetHeroBackgroundBtn" onclick="resetHeroBackground()">استعادة الخلفية الافتراضية</button>
 <button type="button" id="uploadHeroLogoBtn" onclick="uploadHeroLogo()">رفع شعار السلايدر</button>
 <button type="button" class="toggle-btn" id="resetHeroLogoBtn" onclick="resetHeroLogo()">استعادة شعار M&amp;D الافتراضي</button>
@@ -168,6 +186,8 @@ body.dark .stock-overview-item,body.dark th{background:var(--panel-alt)}
 let token=localStorage.getItem("md_admin"),allProducts=[],me=null,currentLang=localStorage.getItem("md_lang")||"ar",darkMode=localStorage.getItem("md_dark")==="1";
 let productSearchEl=null,orderStatusFilterEl=null,selectedOrderIds=new Set(),cachedCustomers=[],cachedUsers=[],cachedAuditEntries=null,activeHistoryOrderId=null;
 let cachedInventoryReport=null;
+let productOrderSaving=false,draggedProductId=null;
+let navigationLinks=[],navigationLinksLoaded=false,navigationSaveInProgress=false;
 let adminRefreshInProgress=false,adminRefreshTimer=null;
 const translations={
   ar:{dashboard:"لوحة الإدارة",shop:"المتجر",logout:"خروج",products:"المنتجات",customers:"العملاء",orders:"الطلبات",revenue:"المبيعات",chart:"الرسوم البيانية",saveProduct:"حفظ المنتج",newProduct:"جديد",createProduct:"إضافة منتج",deleteProduct:"حذف",editProduct:"تعديل",images:"الصور",search:"بحث سريع ...",all:"الكل",excel:"Excel",pdf:"PDF",newOrder:"طلب جديد",statusAll:"الكل",statusNew:"جديد",statusConfirmed:"مؤكد",statusShipped:"مشحون",statusDelivered:"مسلّم",statusCancelled:"ملغى",statusReturned:"مرتجع",returnCost:"تكلفة إرجاع الطرد",saveReturnCost:"حفظ",returnCostSaved:"تم حفظ تكلفة الإرجاع",returnCostFailed:"تعذر حفظ تكلفة الإرجاع",returnCostReturnedOnly:"تُسجّل تكلفة الإرجاع للطلب المرتجع فقط",productImages:"صور المنتج (يمكن اختيار عدة صور)",categories:"الأقسام",addCat:"إضافة",users:"المستخدمون",addUser:"إضافة مستخدم",login:"دخول",dashboardTitle:"لوحة الإدارة",loginSub:"لوحة الإدارة",customer:"العميل",phone:"الهاتف",total:"المجموع",payment:"الدفع",cashOnDelivery:"الدفع عند الاستلام",date:"التاريخ",status:"الحالة",invoice:"الفاتورة",action:"الإجراءات",product:"المنتج",section:"القسم",stock:"المخزون",price:"السعر",priceTnd:"السعر (د.ت)",deliveryTnd:"التوصيل (د.ت)",oldPrice:"السعر القديم",groupShipments:"إنشاء شحنة مجمعة",shipments:"الشحنات المجمعة",recipient:"المستلم",address:"العنوان",orderCount:"عدد الطلبات",deliveryFee:"رسوم التوصيل",shipmentDate:"تاريخ الشحن",select:"تحديد"},
@@ -177,10 +197,24 @@ Object.assign(translations.ar,{orderHistory:"سجل الطلب",history:"الس�
 Object.assign(translations.fr,{orderHistory:"Historique de la commande",history:"Historique",fromStatus:"Ancien statut",toStatus:"Nouveau statut",changedBy:"Par",adminHistory:"Journal des actions administrateur",refresh:"Actualiser",method:"Méthode",endpoint:"Route",noHistory:"Aucun événement enregistré",auditManualHint:"Cliquez sur Actualiser pour afficher le journal.",auditLoadFailed:"Impossible de charger le journal d’activité"});
 Object.assign(translations.ar,{categoryName:"اسم القسم",categoryIcon:"الأيقونة",saveCategory:"حفظ",deleteCategory:"حذف",productCount:"المنتجات",activeCategory:"مفعّل",inactiveCategory:"معطّل",moveUp:"تحريك لأعلى",moveDown:"تحريك لأسفل",iconTag:"عام",iconClothing:"ملابس",iconBag:"حقائب",iconWatch:"ساعات",iconAccessory:"إكسسوارات",deleteCategoryConfirm:"حذف هذا القسم؟ سيتم إلغاء ربط {count} منتج به."});
 Object.assign(translations.fr,{categoryName:"Nom de la catégorie",categoryIcon:"Icône",saveCategory:"Enregistrer",deleteCategory:"Supprimer",productCount:"Produits",activeCategory:"Activée",inactiveCategory:"Désactivée",moveUp:"Monter",moveDown:"Descendre",iconTag:"Générique",iconClothing:"Vêtements",iconBag:"Sacs",iconWatch:"Montres",iconAccessory:"Accessoires",deleteCategoryConfirm:"Supprimer cette catégorie ? {count} produit(s) en seront dissocié(s)."});
+Object.assign(translations.ar,{categoryParent:"القسم الرئيسي",categoryNoParent:"بدون قسم رئيسي"});
+Object.assign(translations.fr,{categoryParent:"Catégorie principale",categoryNoParent:"Sans catégorie principale"});
+Object.assign(translations.ar,{categoryIconManagerTitle:"إضافة أو حذف خيارات الأيقونات",categoryIconManagerHint:"أضف أسماء الخيارات بالعربية والفرنسية وحدد شكل الأيقونة، أو احذف الخيارات غير المستخدمة.",categoryIconArabicLabel:"الاسم بالعربية",categoryIconFrenchLabel:"الاسم بالفرنسية",categoryIconStyleLabel:"شكل الأيقونة",categoryIconAdd:"إضافة خيار",categoryIconDelete:"حذف",categoryIconDeleteConfirm:"هل تريد حذف خيار الأيقونة؟ ستُحوّل الأقسام التي تستخدمه إلى الخيار العام أو أول خيار متاح.",categoryIconLabelsRequired:"أدخل الاسم بالعربية والفرنسية.",categoryIconKeepOne:"يجب إبقاء خيار أيقونة واحد على الأقل.",categoryIconLoadFailed:"تعذر تحميل خيارات الأيقونات",categoryIconSaveFailed:"تعذر حفظ خيارات الأيقونات",categoryIconSaved:"تم حفظ خيارات الأيقونات"});
+Object.assign(translations.fr,{categoryIconManagerTitle:"Ajouter ou supprimer des icônes",categoryIconManagerHint:"Ajoutez les libellés arabe et français et choisissez la forme de l’icône, ou supprimez les options inutilisées.",categoryIconArabicLabel:"Nom en arabe",categoryIconFrenchLabel:"Nom en français",categoryIconStyleLabel:"Forme de l’icône",categoryIconAdd:"Ajouter une option",categoryIconDelete:"Supprimer",categoryIconDeleteConfirm:"Supprimer cette icône ? Les catégories qui l’utilisent passeront à l’option générale ou à la première option disponible.",categoryIconLabelsRequired:"Saisissez les noms en arabe et en français.",categoryIconKeepOne:"Conservez au moins une option d’icône.",categoryIconLoadFailed:"Impossible de charger les options d’icône",categoryIconSaveFailed:"Impossible d’enregistrer les options d’icône",categoryIconSaved:"Options d’icône enregistrées"});
 Object.assign(translations.ar,{categoryPreset:"اختر نموذجاً",presetSmartphones:"📱 هواتف ذكية",presetComputing:"💻 إعلامية",presetWatches:"⌚ ساعات",presetBags:"👜 حقائب",presetClothing:"👕 ملابس",presetShoes:"👟 أحذية",presetBeauty:"💄 جمال",presetHome:"🏠 منزل",presetGaming:"🎮 ألعاب",presetSport:"⚽ رياضة",presetChildren:"🧸 أطفال",presetPromotions:"🎁 عروض"});
 Object.assign(translations.fr,{categoryPreset:"Choisir un modèle",presetSmartphones:"📱 Smartphones",presetComputing:"💻 Informatique",presetWatches:"⌚ Montres",presetBags:"👜 Sacs",presetClothing:"👕 Vêtements",presetShoes:"👟 Chaussures",presetBeauty:"💄 Beauté",presetHome:"🏠 Maison",presetGaming:"🎮 Gaming",presetSport:"⚽ Sport",presetChildren:"🧸 Enfants",presetPromotions:"🎁 Promotions"});
-Object.assign(translations.ar,{storeSettings:"إعدادات المتجر",storeSettingsHint:"تظهر المعلومات المحفوظة مباشرة في المتجر.",whatsappNumber:"رقم WhatsApp الدولي",contactPhone:"رقم الهاتف",contactEmail:"البريد الإلكتروني",contactAddress:"العنوان",openingHours:"ساعات العمل",saveStoreSettings:"حفظ إعدادات المتجر",settingsSaved:"تم حفظ إعدادات المتجر",settingsFailed:"تعذر حفظ إعدادات المتجر",heroSettingsTitle:"تخصيص السلايدر",heroSettingsHint:"غيّر الخلفية والشعار وموضع المحتوى وتعتيم الخلفية وحجم السعر، ثم احفظ الإعدادات.",heroBackgroundLabel:"رابط صورة الخلفية",heroBackgroundFileLabel:"أو ارفع صورة (حتى 5 ميغابايت)",uploadHeroBackground:"رفع صورة الخلفية",resetHeroBackground:"استعادة الخلفية الافتراضية",heroCardXLabel:"تحريك المحتوى أفقيًا",heroCardYLabel:"تحريك المحتوى عموديًا",heroOverlayLabel:"تعتيم الخلفية",heroPriceSizeLabel:"حجم السعر",heroBackgroundUploaded:"تم رفع صورة الخلفية وحفظها",heroBackgroundUploadFailed:"تعذر رفع صورة الخلفية",heroBackgroundInvalid:"اختر صورة بصيغة JPEG أو PNG أو WebP أو GIF"});
-Object.assign(translations.fr,{storeSettings:"Paramètres de la boutique",storeSettingsHint:"Les informations enregistrées s’affichent dans la boutique.",whatsappNumber:"Numéro WhatsApp international",contactPhone:"Téléphone",contactEmail:"E-mail",contactAddress:"Adresse",openingHours:"Horaires d’ouverture",saveStoreSettings:"Enregistrer les paramètres",settingsSaved:"Paramètres de la boutique enregistrés",settingsFailed:"Impossible d’enregistrer les paramètres",heroSettingsTitle:"Personnaliser le diaporama",heroSettingsHint:"Modifiez l’image et le logo, la position du contenu, l’opacité du voile et la taille du prix, puis enregistrez.",heroBackgroundLabel:"URL de l’image d’arrière-plan",heroBackgroundFileLabel:"Ou importer une image (5 Mo maximum)",uploadHeroBackground:"Importer l’image d’arrière-plan",resetHeroBackground:"Restaurer l’image par défaut",heroCardXLabel:"Position horizontale du contenu",heroCardYLabel:"Position verticale du contenu",heroOverlayLabel:"Opacité du voile",heroPriceSizeLabel:"Taille du prix",heroBackgroundUploaded:"Image d’arrière-plan importée et enregistrée",heroBackgroundUploadFailed:"Impossible d’importer l’image d’arrière-plan",heroBackgroundInvalid:"Choisissez une image JPEG, PNG, WebP ou GIF"});
+Object.assign(translations.ar,{storeSettings:"إعدادات المتجر",storeSettingsHint:"تظهر المعلومات المحفوظة مباشرة في المتجر.",whatsappNumber:"رقم WhatsApp الدولي",contactPhone:"رقم الهاتف",contactEmail:"البريد الإلكتروني",contactAddress:"العنوان",openingHours:"ساعات العمل",saveStoreSettings:"حفظ إعدادات المتجر",settingsSaved:"تم حفظ إعدادات المتجر",settingsFailed:"تعذر حفظ إعدادات المتجر",heroSettingsTitle:"تخصيص السلايدر",heroSettingsHint:"غيّر الخلفية والشعار وموضع المحتوى وتعتيم الخلفية وحجم السعر، ثم احفظ الإعدادات.",heroBackgroundLabel:"رابط صورة الخلفية",heroBackgroundFileLabel:"أو اختر صورة لرفعها وحفظها (حتى 5 ميغابايت)",uploadHeroBackground:"حفظ صورة الخلفية",resetHeroBackground:"استعادة الخلفية الافتراضية",heroCardXLabel:"تحريك المحتوى أفقيًا",heroCardYLabel:"تحريك المحتوى عموديًا",heroOverlayLabel:"تعتيم الخلفية",heroPriceSizeLabel:"حجم السعر",heroBackgroundUploaded:"تم رفع صورة الخلفية وحفظها",heroBackgroundUploadFailed:"تعذر رفع صورة الخلفية",heroBackgroundInvalid:"اختر صورة بصيغة JPEG أو PNG أو WebP أو GIF"});
+Object.assign(translations.fr,{storeSettings:"Paramètres de la boutique",storeSettingsHint:"Les informations enregistrées s’affichent dans la boutique.",whatsappNumber:"Numéro WhatsApp international",contactPhone:"Téléphone",contactEmail:"E-mail",contactAddress:"Adresse",openingHours:"Horaires d’ouverture",saveStoreSettings:"Enregistrer les paramètres",settingsSaved:"Paramètres de la boutique enregistrés",settingsFailed:"Impossible d’enregistrer les paramètres",heroSettingsTitle:"Personnaliser le diaporama",heroSettingsHint:"Modifiez l’image et le logo, la position du contenu, l’opacité du voile et la taille du prix, puis enregistrez.",heroBackgroundLabel:"URL de l’image d’arrière-plan",heroBackgroundFileLabel:"Ou choisir une image à importer et enregistrer (5 Mo maximum)",uploadHeroBackground:"Enregistrer l’image d’arrière-plan",resetHeroBackground:"Restaurer l’image par défaut",heroCardXLabel:"Position horizontale du contenu",heroCardYLabel:"Position verticale du contenu",heroOverlayLabel:"Opacité du voile",heroPriceSizeLabel:"Taille du prix",heroBackgroundUploaded:"Image d’arrière-plan importée et enregistrée",heroBackgroundUploadFailed:"Impossible d’importer l’image d’arrière-plan",heroBackgroundInvalid:"Choisissez une image JPEG, PNG, WebP ou GIF"});
+Object.assign(translations.ar,{productColumnsLabel:"عدد أعمدة المنتجات على الشاشات الكبيرة"});
+Object.assign(translations.fr,{productColumnsLabel:"Nombre de colonnes de produits sur grand écran"});
+Object.assign(translations.ar,{categoryColumnsLabel:"عدد أعمدة الأقسام على الشاشات الكبيرة"});
+Object.assign(translations.fr,{categoryColumnsLabel:"Nombre de colonnes de catégories sur grand écran"});
+Object.assign(translations.ar,{navigationTitle:"إدارة روابط شريط التنقل",navigationHint:"أضف الروابط أو عدّلها أو احذفها، وحدّد اسمًا بالعربية والفرنسية. يقبل الرابط #products أو /page أو https://...",navigationArabicLabel:"الاسم بالعربية",navigationFrenchLabel:"الاسم بالفرنسية",navigationHrefLabel:"الرابط",navigationAdd:"إضافة رابط",navigationSave:"حفظ",navigationDelete:"حذف",navigationMoveUp:"تحريك لأعلى",navigationMoveDown:"تحريك لأسفل",navigationSaved:"تم حفظ روابط التنقل",navigationSaveFailed:"تعذر حفظ روابط التنقل",navigationDeleteConfirm:"هل تريد حذف هذا الرابط من شريط التنقل؟",navigationEmpty:"لا توجد روابط في شريط التنقل",navigationMaxLinks:"يمكن إضافة 12 رابطاً كحد أقصى"});
+Object.assign(translations.fr,{navigationTitle:"Gérer les liens du menu",navigationHint:"Ajoutez, modifiez ou supprimez les liens avec un libellé arabe et français. Lien accepté : #products, /page ou https://...",navigationArabicLabel:"Libellé en arabe",navigationFrenchLabel:"Libellé en français",navigationHrefLabel:"Lien",navigationAdd:"Ajouter un lien",navigationSave:"Enregistrer",navigationDelete:"Supprimer",navigationMoveUp:"Monter",navigationMoveDown:"Descendre",navigationSaved:"Liens du menu enregistrés",navigationSaveFailed:"Impossible d’enregistrer les liens du menu",navigationDeleteConfirm:"Supprimer ce lien du menu ?",navigationEmpty:"Aucun lien dans le menu",navigationMaxLinks:"Vous pouvez ajouter jusqu’à 12 liens"});
+Object.assign(translations.ar,{navigationLoadFailed:"تعذر تحميل روابط شريط التنقل",navigationLabelsRequired:"أدخل الاسم بالعربية والفرنسية والرابط"});
+Object.assign(translations.fr,{navigationLoadFailed:"Impossible de charger les liens du menu",navigationLabelsRequired:"Saisissez les libellés arabe et français ainsi que le lien"});
+Object.assign(translations.ar,{productOrderHint:"اسحب المنتجات لترتيبها يدويًا، أو استخدم السهمين. أزل نص البحث أولًا لتغيير الترتيب.",productOrderSaved:"تم حفظ ترتيب المنتجات",productOrderFailed:"تعذر حفظ ترتيب المنتجات",productMoveUp:"تحريك المنتج لأعلى",productMoveDown:"تحريك المنتج لأسفل",productDrag:"اسحب لترتيب المنتج"});
+Object.assign(translations.fr,{productOrderHint:"Faites glisser les produits pour les réorganiser, ou utilisez les flèches. Effacez la recherche avant de modifier l’ordre.",productOrderSaved:"Ordre des produits enregistré",productOrderFailed:"Impossible d’enregistrer l’ordre des produits",productMoveUp:"Monter le produit",productMoveDown:"Descendre le produit",productDrag:"Faire glisser pour réorganiser"});
 Object.assign(translations.ar,{heroLogoLabel:"رابط صورة الشعار",heroLogoFileLabel:"أو ارفع شعارًا (حتى 5 ميغابايت)",uploadHeroLogo:"رفع شعار السلايدر",resetHeroLogo:"استعادة شعار M&D الافتراضي",heroLogoUploaded:"تم رفع شعار السلايدر وحفظه",heroLogoUploadFailed:"تعذر رفع شعار السلايدر"});
 Object.assign(translations.fr,{heroLogoLabel:"URL de l’image du logo",heroLogoFileLabel:"Ou importer un logo (5 Mo maximum)",uploadHeroLogo:"Importer le logo du diaporama",resetHeroLogo:"Restaurer le logo M&D par défaut",heroLogoUploaded:"Logo du diaporama importé et enregistré",heroLogoUploadFailed:"Impossible d’importer le logo du diaporama"});
 Object.assign(translations.ar,{monthlyGrossProfit:"الربح بعد تكلفة الإرجاع هذا الشهر",monthlyProfitNote:"هامش المنتجات بعد خصم تكاليف الطرود المرتجعة؛ لا يشمل المصاريف الأخرى، وتُستثنى المنتجات بلا تكلفة شراء.",monthlyReturnedQuantity:"كمية المرتجعات هذا الشهر",lowStockMetric:"منتجات منخفضة المخزون",newOrdersToday:"الطلبات الجديدة اليوم",ordersInDelivery:"الطلبات قيد التوصيل",stockOverview:"حالة المخزون",stockTotal:"إجمالي المنتجات",stockAvailable:"متوفر",stockLow:"منخفض (1–5)",stockOut:"منتهي",purchaseCost:"تكلفة الشراء (لحساب الربح)",profitUnavailable:"—"});
@@ -208,21 +242,21 @@ const formatDate=value=>{const date=new Date(value);return Number.isNaN(date.get
 function applyTheme(){document.body.classList.toggle("dark",darkMode);themeToggle.textContent=darkMode?"☀️":"🌙";localStorage.setItem("md_dark",darkMode?"1":"0")}
 function toggleTheme(){darkMode=!darkMode;applyTheme()}
 function updateLanguageToggle(){const target=currentLang==="ar"?"fr":"ar",label=target==="fr"?"FR":"AR",accessibleLabel=target==="fr"?"Passer au français":"التبديل إلى العربية";languageTarget.textContent=label;langToggle.setAttribute("aria-label",accessibleLabel);langToggle.title=accessibleLabel;loginLanguageTarget.textContent=label;loginLangToggle.setAttribute("aria-label",accessibleLabel);loginLangToggle.title=accessibleLabel}
-function toggleLang(){currentLang=currentLang==="ar"?"fr":"ar";localStorage.setItem("md_lang",currentLang);document.documentElement.lang=currentLang;document.documentElement.dir=currentLang==="ar"?"rtl":"ltr";updateLanguageToggle();applyStaticTexts();renderCategories();renderProductsTable();renderOrdersTable();renderShipmentsTable();renderCustomersTable();renderUsersTable();renderAuditTable();renderInventoryReport();stats();if(activeHistoryOrderId)loadOrderHistory(activeHistoryOrderId)}
+function toggleLang(){if(navigationLinksLoaded)navigationLinks=readNavigationLinks();if(categoryIconDefinitions.length)categoryIconDefinitions=readCategoryIconDefinitions();currentLang=currentLang==="ar"?"fr":"ar";localStorage.setItem("md_lang",currentLang);document.documentElement.lang=currentLang;document.documentElement.dir=currentLang==="ar"?"rtl":"ltr";updateLanguageToggle();applyStaticTexts();renderCategories();renderCategoryIconManager();renderProductsTable();renderOrdersTable();renderShipmentsTable();renderCustomersTable();renderUsersTable();renderAuditTable();renderInventoryReport();stats();if(activeHistoryOrderId)loadOrderHistory(activeHistoryOrderId)}
 function applyStaticTexts(){
   document.title=`M&D Store — ${t("dashboardTitle")}`;dashboardTitle.textContent=t("dashboard");updateLanguageToggle();
   if(me)who.textContent=`${t("dashboardTitle")}: ${esc(me.username)} — ${t(me.role==="admin"?"adminRole":"managerRole")}`;
   productsLabel.textContent=t("products");customersLabel.textContent=t("customers");ordersLabel.textContent=t("orders");revenueLabel.textContent=t("revenue");navProducts.textContent=t("products");navOrders.textContent=t("orders");navInventory.textContent=t("inventoryTitle");navCategories.textContent=t("categories");navCustomers.textContent=t("customers");navShipments.textContent=t("shipments");navSettings.textContent=t("storeSettings");document.querySelector(".dashboard-nav").setAttribute("aria-label",currentLang==="ar"?"التنقل في لوحة الإدارة":"Navigation du tableau de bord");monthlyProfitLabel.textContent=t("monthlyGrossProfit");monthlyProfitNote.textContent=t("monthlyProfitNote");returnedQuantityLabel.textContent=t("monthlyReturnedQuantity");lowStockMetricLabel.textContent=t("lowStockMetric");newOrdersTodayLabel.textContent=t("newOrdersToday");inDeliveryLabel.textContent=t("ordersInDelivery");stockOverviewTitle.textContent=t("stockOverview");stockTotalLabel.textContent=t("stockTotal");stockAvailableLabel.textContent=t("stockAvailable");stockLowLabel.textContent=t("stockLow");stockOutLabel.textContent=t("stockOut");pCost.placeholder=t("purchaseCost");
   currencySuffix.textContent=t("currency");
   productImagesLabel.textContent=t("productImages");pDelivery.placeholder=t("deliveryPerProduct");advertisedLabel.textContent=t("advertisedProduct");saveProductBtn.textContent=t("saveProduct");newProductBtn.textContent=t("newProduct");addProductBtn.textContent=t("createProduct");
-  categoriesTitle.textContent=t("categories");addCatBtn.textContent=t("addCat");newcat.placeholder=t("categoryName");newCatIcon.setAttribute("aria-label",t("categoryIcon"));newCatIcon.innerHTML=categoryIconOptions("tag");newCatPreset.setAttribute("aria-label",t("categoryPreset"));newCatPreset.innerHTML=categoryPresetOptions();productsTitle.textContent=t("products");customersTitle.textContent=t("customers");ordersTitle.textContent=t("orders");shipmentsTitle.textContent=t("shipments");groupShipmentsBtn.textContent=t("groupShipments");usersTitle.textContent=t("users");addUserBtn.textContent=t("addUser");auditTitle.textContent=t("adminHistory");refreshAuditBtn.textContent=t("refresh");const auditPlaceholderEl=document.getElementById("auditPlaceholder");if(auditPlaceholderEl)auditPlaceholderEl.textContent=t("auditManualHint");loginBtn.textContent=t("login");loginSubtitle.textContent=t("loginSub");inventoryTitle.textContent=t("inventoryTitle");inventoryProductsLabel.textContent=t("inventoryProductsLabel");inventoryUnitsLabel.textContent=t("inventoryUnitsLabel");inventoryOutLabel.textContent=t("inventoryOutLabel");inventoryLevelsTitle.textContent=t("inventoryLevelsTitle");inventoryAlertsTitle.textContent=t("inventoryAlertsTitle");inventoryTopTitle.textContent=t("inventoryTopTitle");inventoryHistoryTitle.textContent=t("inventoryHistoryTitle");refreshInventoryBtn.textContent=t("inventoryRefresh");exportInventoryExcelBtn.textContent=t("excel");exportInventoryPdfBtn.textContent=t("pdf");
+  categoriesTitle.textContent=t("categories");addCatBtn.textContent=t("addCat");newcat.placeholder=t("categoryName");newCatIcon.setAttribute("aria-label",t("categoryIcon"));newCatPreset.setAttribute("aria-label",t("categoryPreset"));newCatPreset.innerHTML=categoryPresetOptions();categoryIconManagerTitle.textContent=t("categoryIconManagerTitle");categoryIconManagerHint.textContent=t("categoryIconManagerHint");categoryIconArabicLabel.textContent=t("categoryIconArabicLabel");categoryIconFrenchLabel.textContent=t("categoryIconFrenchLabel");categoryIconStyleLabel.textContent=t("categoryIconStyleLabel");addCategoryIconBtn.textContent=t("categoryIconAdd");productsTitle.textContent=t("products");customersTitle.textContent=t("customers");ordersTitle.textContent=t("orders");shipmentsTitle.textContent=t("shipments");groupShipmentsBtn.textContent=t("groupShipments");usersTitle.textContent=t("users");addUserBtn.textContent=t("addUser");auditTitle.textContent=t("adminHistory");refreshAuditBtn.textContent=t("refresh");const auditPlaceholderEl=document.getElementById("auditPlaceholder");if(auditPlaceholderEl)auditPlaceholderEl.textContent=t("auditManualHint");loginBtn.textContent=t("login");loginSubtitle.textContent=t("loginSub");inventoryTitle.textContent=t("inventoryTitle");inventoryProductsLabel.textContent=t("inventoryProductsLabel");inventoryUnitsLabel.textContent=t("inventoryUnitsLabel");inventoryOutLabel.textContent=t("inventoryOutLabel");inventoryLevelsTitle.textContent=t("inventoryLevelsTitle");inventoryAlertsTitle.textContent=t("inventoryAlertsTitle");inventoryTopTitle.textContent=t("inventoryTopTitle");inventoryHistoryTitle.textContent=t("inventoryHistoryTitle");refreshInventoryBtn.textContent=t("inventoryRefresh");exportInventoryExcelBtn.textContent=t("excel");exportInventoryPdfBtn.textContent=t("pdf");
   shopBtn.textContent=t("shop");logoutBtn.textContent=t("logout");allOrdersOpt.textContent=t("statusAll");
   if(productSearchEl) productSearchEl.placeholder=t("search");
   u.placeholder=t("username");p.placeholder=t("password");nu.placeholder=t("username");np.placeholder=t("passwordHint");newcat.placeholder=t("newCategory");pn.placeholder=t("productName");pd.placeholder=t("description");pp.placeholder=t("unitPrice");po.placeholder=t("oldPriceInput");ps.placeholder=t("stockInput");showAllBtn.textContent=t("showAll");nr.options[0].textContent=t("managerRole");nr.options[1].textContent=t("adminRole");document.querySelector('#pc option[value=""]')?.replaceChildren(t("withoutCategory"));productModal.querySelector(".modal-head button").setAttribute("aria-label",t("accessibilityClose"));orderHistoryModal.querySelector(".modal-head button").setAttribute("aria-label",t("orderHistoryClose"));imageViewer.setAttribute("aria-label",t("imagePreview"));themeToggle.setAttribute("aria-label",t(darkMode?"lightTheme":"darkTheme"));themeToggle.title=t(darkMode?"lightTheme":"darkTheme");
   const statuses=[{value:"new",key:"statusNew"},{value:"confirmed",key:"statusConfirmed"},{value:"shipped",key:"statusShipped"},{value:"delivered",key:"statusDelivered"},{value:"cancelled",key:"statusCancelled"},{value:"returned",key:"statusReturned"}];
   statuses.forEach(({value,key})=>{const opt=orderStatusFilterEl&&orderStatusFilterEl.querySelector('option[value="'+value+'"]');if(opt) opt.textContent=t(key);});
   excelBtn.textContent=t("excel");
-  storeSettingsTitle.textContent=t("storeSettings");storeSettingsHint.textContent=t("storeSettingsHint");settingsWhatsappLabel.textContent=t("whatsappNumber");settingsPhoneLabel.textContent=t("contactPhone");settingsEmailLabel.textContent=t("contactEmail");settingsAddressLabel.textContent=t("contactAddress");settingsHoursLabel.textContent=t("openingHours");settingsFacebookLabel.textContent=t("socialFacebook");settingsInstagramLabel.textContent=t("socialInstagram");settingsTiktokLabel.textContent=t("socialTiktok");saveStoreSettingsBtn.textContent=t("saveStoreSettings");heroSettingsTitle.textContent=t("heroSettingsTitle");heroSettingsHint.textContent=t("heroSettingsHint");heroBackgroundLabel.textContent=t("heroBackgroundLabel");heroBackgroundFileLabel.textContent=t("heroBackgroundFileLabel");heroCardXLabel.textContent=t("heroCardXLabel");heroCardYLabel.textContent=t("heroCardYLabel");heroOverlayLabel.textContent=t("heroOverlayLabel");heroPriceSizeLabel.textContent=t("heroPriceSizeLabel");uploadHeroBackgroundBtn.textContent=t("uploadHeroBackground");resetHeroBackgroundBtn.textContent=t("resetHeroBackground");updateHeroSettingValues();
+  storeSettingsTitle.textContent=t("storeSettings");storeSettingsHint.textContent=t("storeSettingsHint");settingsWhatsappLabel.textContent=t("whatsappNumber");settingsPhoneLabel.textContent=t("contactPhone");settingsEmailLabel.textContent=t("contactEmail");settingsAddressLabel.textContent=t("contactAddress");settingsHoursLabel.textContent=t("openingHours");settingsFacebookLabel.textContent=t("socialFacebook");settingsInstagramLabel.textContent=t("socialInstagram");settingsTiktokLabel.textContent=t("socialTiktok");settingsProductColumnsLabel.textContent=t("productColumnsLabel");settingsCategoryColumnsLabel.textContent=t("categoryColumnsLabel");saveStoreSettingsBtn.textContent=t("saveStoreSettings");navigationTitle.textContent=t("navigationTitle");navigationHint.textContent=t("navigationHint");navigationArabicLabel.textContent=t("navigationArabicLabel");navigationFrenchLabel.textContent=t("navigationFrenchLabel");navigationHrefLabel.textContent=t("navigationHrefLabel");navigationAddBtn.textContent=t("navigationAdd");renderNavigationLinks();heroSettingsTitle.textContent=t("heroSettingsTitle");heroSettingsHint.textContent=t("heroSettingsHint");heroBackgroundLabel.textContent=t("heroBackgroundLabel");heroBackgroundFileLabel.textContent=t("heroBackgroundFileLabel");heroCardXLabel.textContent=t("heroCardXLabel");heroCardYLabel.textContent=t("heroCardYLabel");heroOverlayLabel.textContent=t("heroOverlayLabel");heroPriceSizeLabel.textContent=t("heroPriceSizeLabel");uploadHeroBackgroundBtn.textContent=t("uploadHeroBackground");resetHeroBackgroundBtn.textContent=t("resetHeroBackground");updateHeroSettingValues();
   heroLogoLabel.textContent=t("heroLogoLabel");heroLogoFileLabel.textContent=t("heroLogoFileLabel");uploadHeroLogoBtn.textContent=t("uploadHeroLogo");resetHeroLogoBtn.textContent=t("resetHeroLogo");
   if(productModal.classList.contains("open"))formTitle.textContent=pid.value?t("editProduct"):t("createProduct");
   if(document.getElementById("loginTitle")) loginTitle.textContent="🔐 M&D Store";
@@ -239,8 +273,9 @@ async function init(){
   if(me.role!="admin"){categoriesBox.style.display="none";usersBox.style.display="none";auditBox.style.display="none";storeSettingsBox.style.display="none";navCategories.hidden=true;navSettings.hidden=true;}
   orderStatusFilterEl.addEventListener("change",()=>renderOrdersTable());
   productSearchEl.addEventListener("input",()=>renderProductsTable());
+  if(me.role==="admin")await categoryIconDefinitionsLoad();
   await Promise.all([catsLoad(),productsLoad(),ordersLoad(),shipmentsLoad(),customersLoad(),stats(),inventoryLoad(),...(me.role==="admin"?[storeSettingsLoad()]:[])]);
-  if(me.role==="admin")usersLoad();
+  if(me.role==="admin"){usersLoad();navigationLinksLoad().catch(error=>console.error("Could not load administrator navigation links:",error))}
   startAdminAutoRefresh();
   connectOrderNotifications();
 }
@@ -268,23 +303,117 @@ function startAdminAutoRefresh(){
 async function storeSettingsLoad(){
   const response=await api("/api/admin/settings"),settings=await response.json();
   if(!response.ok)throw new Error(settings.error||t("settingsFailed"));
-  settingsWhatsapp.value=settings.whatsapp;settingsPhone.value=settings.contact_phone;settingsEmail.value=settings.contact_email;settingsAddress.value=settings.contact_address;settingsHours.value=settings.opening_hours;settingsFacebook.value=settings.social_facebook;settingsInstagram.value=settings.social_instagram;settingsTiktok.value=settings.social_tiktok;
+  settingsWhatsapp.value=settings.whatsapp;settingsPhone.value=settings.contact_phone;settingsEmail.value=settings.contact_email;settingsAddress.value=settings.contact_address;settingsHours.value=settings.opening_hours;settingsFacebook.value=settings.social_facebook;settingsInstagram.value=settings.social_instagram;settingsTiktok.value=settings.social_tiktok;settingsProductColumns.value=settings.product_columns;settingsCategoryColumns.value=settings.category_columns;
   heroBackgroundUrl.value=settings.hero_background_url;heroCardX.value=settings.hero_card_x;heroCardY.value=settings.hero_card_y;heroOverlay.value=settings.hero_overlay;heroPriceSize.value=settings.hero_price_size;updateHeroSettingValues();updateHeroBackgroundPreview();
   heroLogoUrl.value=settings.hero_logo_url;updateHeroLogoPreview();
+}
+async function navigationLinksLoad(){
+  try{
+    const response=await api("/api/navigation-links"),links=await response.json();
+    if(!response.ok)throw new Error(links.error||t("navigationLoadFailed"));
+    if(!Array.isArray(links)||links.some(link=>!link||typeof link.label_ar!=="string"||typeof link.label_fr!=="string"||typeof link.href!=="string"))throw new Error(t("navigationLoadFailed"));
+    navigationLinks=links;
+    navigationLinksLoaded=true;
+    renderNavigationLinks();
+  }catch(error){
+    navigationLinksLoaded=false;
+    navigationLinkList.textContent=t("navigationLoadFailed");
+    throw error;
+  }
+}
+function renderNavigationLinks(){
+  if(!navigationLinkList)return;
+  navigationAddBtn.disabled=!navigationLinksLoaded||navigationSaveInProgress;
+  if(!navigationLinks.length){navigationLinkList.innerHTML=`<p class="navigation-link-empty">${t("navigationEmpty")}</p>`;return}
+  navigationLinkList.innerHTML=navigationLinks.map((link,index)=>`<div class="navigation-link-row" data-index="${index}">
+    <label>${t("navigationArabicLabel")}<input data-field="label_ar" maxlength="60" value="${esc(link.label_ar)}"></label>
+    <label>${t("navigationFrenchLabel")}<input data-field="label_fr" maxlength="60" value="${esc(link.label_fr)}"></label>
+    <label>${t("navigationHrefLabel")}<input data-field="href" maxlength="500" dir="ltr" value="${esc(link.href)}"></label>
+    <div class="navigation-link-actions">
+      <button class="toggle-btn" type="button" title="${t("navigationMoveUp")}" aria-label="${t("navigationMoveUp")}" onclick="navigationLinkMove(${index},-1)" ${index===0||navigationSaveInProgress?"disabled":""}>↑</button>
+      <button class="toggle-btn" type="button" title="${t("navigationMoveDown")}" aria-label="${t("navigationMoveDown")}" onclick="navigationLinkMove(${index},1)" ${index===navigationLinks.length-1||navigationSaveInProgress?"disabled":""}>↓</button>
+      <button class="gold" type="button" onclick="navigationLinkSave(${index})" ${navigationSaveInProgress?"disabled":""}>${t("navigationSave")}</button>
+      <button class="danger" type="button" onclick="navigationLinkDelete(${index})" ${navigationSaveInProgress?"disabled":""}>${t("navigationDelete")}</button>
+    </div>
+  </div>`).join("");
+}
+function readNavigationLinks(){
+  return [...navigationLinkList.querySelectorAll(".navigation-link-row")].map(row=>({
+    label_ar:row.querySelector('[data-field="label_ar"]').value,
+    label_fr:row.querySelector('[data-field="label_fr"]').value,
+    href:row.querySelector('[data-field="href"]').value
+  }));
+}
+async function navigationLinksSave(links){
+  if(navigationSaveInProgress||!navigationLinksLoaded)return false;
+  navigationLinks=links;
+  navigationSaveInProgress=true;
+  navigationManager.querySelectorAll("button").forEach(button=>button.disabled=true);
+  try{
+    const response=await api("/api/admin/navigation-links",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({links})});
+    const result=await response.json();
+    if(!response.ok){alert(result.error||t("navigationSaveFailed"));return false}
+    showToast(t("navigationSaved"));
+    return true;
+  }catch(error){
+    console.error("Could not save administrator navigation links:",error);
+    alert(t("navigationSaveFailed"));
+    return false;
+  }finally{
+    navigationSaveInProgress=false;
+    renderNavigationLinks();
+  }
+}
+async function navigationLinkAdd(){
+  const links=readNavigationLinks();
+  if(links.length>=12){alert(t("navigationMaxLinks"));return}
+  const link={label_ar:navigationArabicInput.value.trim(),label_fr:navigationFrenchInput.value.trim(),href:navigationHrefInput.value.trim()};
+  if(!link.label_ar||!link.label_fr||!link.href){alert(t("navigationLabelsRequired"));return}
+  if(await navigationLinksSave([...links,link])){
+    navigationArabicInput.value="";navigationFrenchInput.value="";navigationHrefInput.value="";
+  }
+}
+async function navigationLinkSave(index){
+  const links=readNavigationLinks();
+  if(!links[index])return;
+  await navigationLinksSave(links);
+}
+async function navigationLinkDelete(index){
+  const links=readNavigationLinks();
+  if(!links[index]||!confirm(t("navigationDeleteConfirm")))return;
+  await navigationLinksSave(links.filter((_,linkIndex)=>linkIndex!==index));
+}
+async function navigationLinkMove(index,direction){
+  const links=readNavigationLinks(),target=index+direction;
+  if(!links[index]||target<0||target>=links.length)return;
+  [links[index],links[target]]=[links[target],links[index]];
+  await navigationLinksSave(links);
 }
 function updateHeroSettingValues(){
   const suffix=currentLang==="fr"?"px":"بكسل";
   heroCardXValue.textContent=`${heroCardX.value} ${suffix}`;heroCardYValue.textContent=`${heroCardY.value} ${suffix}`;heroOverlayValue.textContent=`${heroOverlay.value}%`;heroPriceSizeValue.textContent=`${heroPriceSize.value} ${suffix}`;
 }
 function updateHeroBackgroundPreview(){
+  if(heroBackgroundObjectUrl){URL.revokeObjectURL(heroBackgroundObjectUrl);heroBackgroundObjectUrl="";}
   const url=heroBackgroundUrl.value.trim();
   if(!url){heroBackgroundPreview.removeAttribute("src");heroBackgroundPreview.hidden=true;return}
   heroBackgroundPreview.onerror=()=>{console.error("Could not preview the selected hero background image.");heroBackgroundPreview.hidden=true};
   heroBackgroundPreview.onload=()=>{heroBackgroundPreview.hidden=false};
   heroBackgroundPreview.src=url;
 }
+let heroBackgroundObjectUrl="";
+function previewHeroBackgroundFile(){
+  const file=heroBackgroundFile.files[0];
+  if(!file){updateHeroBackgroundPreview();return}
+  if(heroBackgroundObjectUrl)URL.revokeObjectURL(heroBackgroundObjectUrl);
+  heroBackgroundObjectUrl=URL.createObjectURL(file);
+  heroBackgroundPreview.onerror=()=>{console.error("Could not preview the selected hero background file.");heroBackgroundPreview.hidden=true};
+  heroBackgroundPreview.onload=()=>{heroBackgroundPreview.hidden=false};
+  heroBackgroundPreview.src=heroBackgroundObjectUrl;
+}
 function resetHeroBackground(){
   heroBackgroundUrl.value="";heroBackgroundFile.value="";updateHeroBackgroundPreview();
+  saveStoreSettings();
 }
 function updateHeroLogoPreview(){
   const url=heroLogoUrl.value.trim();
@@ -298,18 +427,25 @@ function resetHeroLogo(){
 }
 async function uploadHeroBackground(){
   const file=heroBackgroundFile.files[0];
-  if(!file){alert(t("heroBackgroundInvalid"));return}
+  if(!file)return false;
   uploadHeroBackgroundBtn.disabled=true;
   try{
     const formData=new FormData();formData.append("image",file);
     const response=await api("/api/admin/settings/hero-background",{method:"POST",body:formData}),result=await response.json();
-    if(!response.ok){alert(result.error||t("heroBackgroundUploadFailed"));return}
-    heroBackgroundUrl.value=result.hero_background_url;updateHeroBackgroundPreview();showToast(t("heroBackgroundUploaded"));
+    if(!response.ok){alert(result.error||t("heroBackgroundUploadFailed"));return false}
+    heroBackgroundUrl.value=result.hero_background_url;heroBackgroundFile.value="";updateHeroBackgroundPreview();showToast(t("heroBackgroundUploaded"));return true;
   }catch(error){
-    console.error("Could not upload the storefront hero background:",error);alert(t("heroBackgroundUploadFailed"));
+    console.error("Could not upload the storefront hero background:",error);alert(t("heroBackgroundUploadFailed"));return false;
   }finally{
     uploadHeroBackgroundBtn.disabled=false;
   }
+}
+async function saveHeroBackground(){
+  if(heroBackgroundFile.files[0]){
+    await uploadHeroBackground();
+    return;
+  }
+  await saveStoreSettings();
 }
 async function uploadHeroLogo(){
   const file=heroLogoFile.files[0];
@@ -329,7 +465,8 @@ async function uploadHeroLogo(){
 async function saveStoreSettings(){
   saveStoreSettingsBtn.disabled=true;
   try{
-    const response=await api("/api/admin/settings",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({whatsapp:settingsWhatsapp.value,contact_phone:settingsPhone.value,contact_email:settingsEmail.value,contact_address:settingsAddress.value,opening_hours:settingsHours.value,social_facebook:settingsFacebook.value,social_instagram:settingsInstagram.value,social_tiktok:settingsTiktok.value,hero_background_url:heroBackgroundUrl.value,hero_logo_url:heroLogoUrl.value,hero_card_x:Number(heroCardX.value),hero_card_y:Number(heroCardY.value),hero_overlay:Number(heroOverlay.value),hero_price_size:Number(heroPriceSize.value)})});
+    if(heroBackgroundFile.files[0]&&!await uploadHeroBackground())return;
+    const response=await api("/api/admin/settings",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({whatsapp:settingsWhatsapp.value,contact_phone:settingsPhone.value,contact_email:settingsEmail.value,contact_address:settingsAddress.value,opening_hours:settingsHours.value,social_facebook:settingsFacebook.value,social_instagram:settingsInstagram.value,social_tiktok:settingsTiktok.value,product_columns:Number(settingsProductColumns.value),category_columns:Number(settingsCategoryColumns.value),hero_background_url:heroBackgroundUrl.value,hero_logo_url:heroLogoUrl.value,hero_card_x:Number(heroCardX.value),hero_card_y:Number(heroCardY.value),hero_overlay:Number(heroOverlay.value),hero_price_size:Number(heroPriceSize.value)})});
     const result=await response.json();
     if(!response.ok){alert(result.error||t("settingsFailed"));return}
     showToast(t("settingsSaved"));
@@ -373,8 +510,9 @@ async function connectOrderNotifications(){
   }
 }
 async function stats(){const response=await api("/api/stats"),x=await response.json();if(!response.ok||x.error)throw new Error(x.error||"Could not load dashboard statistics");s1.textContent=x.products;s2.textContent=x.customers;s3.textContent=x.orders;s4.textContent=formatAmount(x.revenue);returnedQuantityValue.textContent=new Intl.NumberFormat(currentLang==="fr"?"fr-TN":"ar-TN").format(Number(x.monthlyReturnedQuantity)||0);monthlyProfitValue.textContent=x.monthlyGrossProfit===null?t("profitUnavailable"):formatAmount(x.monthlyGrossProfit);monthlyProfitCurrency.textContent=t("currency");monthlyProfitNote.textContent=x.monthlyUncostedItems?`${t("monthlyProfitNote")} ${currentLang==="fr"?`${x.monthlyUncostedItems} article(s) sans coût ignoré(s).`:`تم استبعاد ${x.monthlyUncostedItems} بندًا بلا تكلفة.`}`:t("monthlyProfitNote");lowStockMetricValue.textContent=x.lowStockProducts;newOrdersTodayValue.textContent=x.ordersNewToday;inDeliveryValue.textContent=x.ordersInDelivery;stockTotalValue.textContent=x.stockSummary.total_products;stockAvailableValue.textContent=x.stockSummary.available;stockLowValue.textContent=x.stockSummary.low_stock;stockOutValue.textContent=x.stockSummary.out_of_stock}
-let adminCategories=[];
-const categoryIcons=["tag","clothing","bag","watch","accessory"];
+let adminCategories=[],categoryIconDefinitions=[],categoryIconSaveInProgress=false;
+const categoryIconTypes=["tag","clothing","bag","watch","accessory"];
+const categoryIconTypeLabels={tag:"iconTag",clothing:"iconClothing",bag:"iconBag",watch:"iconWatch",accessory:"iconAccessory"};
 const categoryPresets=[
   {key:"presetSmartphones",name:"Smartphones",arabicName:"هواتف ذكية",icon:"tag"},
   {key:"presetComputing",name:"Informatique",arabicName:"إعلامية",icon:"tag"},
@@ -390,11 +528,73 @@ const categoryPresets=[
   {key:"presetPromotions",name:"Promotions",arabicName:"عروض",icon:"tag"}
 ];
 function categoryPresetOptions(){return `<option value="">${t("categoryPreset")}</option>`+categoryPresets.map(preset=>`<option value="${preset.key}">${t(preset.key)}</option>`).join("")}
-function categoryIconOptions(selected){const labels={tag:"iconTag",clothing:"iconClothing",bag:"iconBag",watch:"iconWatch",accessory:"iconAccessory"};return categoryIcons.map(icon=>`<option value="${icon}" ${selected===icon?"selected":""}>${t(labels[icon])}</option>`).join("")}
+function categoryIconOptions(selected){return categoryIconDefinitions.map(option=>`<option value="${esc(option.id)}" ${selected===option.id?"selected":""}>${esc(currentLang==="fr"?option.label_fr:option.label_ar)}</option>`).join("")}
+function categoryIconSvg(type){const paths={tag:'<path d="M20 13 13 20a2 2 0 0 1-3 0l-6-6V4h10l6 6a2 2 0 0 1 0 3Z"/><circle cx="8" cy="8" r="1"/>',clothing:'<path d="m8 4 4 2 4-2 5 3-2 5-3-1v9H8v-9l-3 1-2-5 5-3Z"/><path d="M9 5.5a3 3 0 0 0 6 0"/>',bag:'<path d="M5 8h14l1 12H4L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',watch:'<rect x="7" y="7" width="10" height="10" rx="3"/><path d="m9 7 1-4h4l1 4m-6 10 1 4h4l1-4"/><path d="M12 10v2l2 1"/>',accessory:'<path d="M12 3 14.8 8.7 21 9.6l-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z"/>'};return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[type]||paths.tag}</svg>`}
+function categoryIconPickerContents(selected,id){
+  const listId=`${id}-options`,option=categoryIconDefinitions.find(item=>item.id===selected)||categoryIconDefinitions[0],label=option?(currentLang==="fr"?option.label_fr:option.label_ar):"";
+  return `<button type="button" class="category-icon-trigger" role="combobox" aria-label="${t("categoryIcon")}" aria-haspopup="listbox" aria-expanded="false" aria-controls="${esc(listId)}" data-icon-trigger>${option?categoryIconSvg(option.icon_type):""}<span class="category-icon-trigger-label">${esc(label)}</span><svg class="category-icon-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="category-icon-popup" id="${esc(listId)}" role="listbox" hidden>${categoryIconDefinitions.map(item=>`<button type="button" class="category-icon-choice" role="option" tabindex="-1" aria-selected="${item.id===option?.id}" data-icon-value="${esc(item.id)}">${categoryIconSvg(item.icon_type)}<span>${esc(currentLang==="fr"?item.label_fr:item.label_ar)}</span></button>`).join("")}</div>`;
+}
+function categoryIconPickerMarkup(selected,id,attributes){
+  const option=categoryIconDefinitions.find(item=>item.id===selected)||categoryIconDefinitions[0];
+  return `<div class="category-icon-picker"><select id="${esc(id)}" class="category-icon-native" ${attributes} tabindex="-1" aria-hidden="true">${categoryIconOptions(option?.id)}</select>${categoryIconPickerContents(option?.id,id)}</div>`;
+}
+function mountNewCategoryIconPicker(){
+  if(newCatIcon.closest(".category-icon-picker"))return;
+  const wrapper=document.createElement("div");
+  wrapper.className="category-icon-picker category-icon-new";
+  newCatIcon.parentNode.insertBefore(wrapper,newCatIcon);
+  wrapper.appendChild(newCatIcon);
+  wrapper.insertAdjacentHTML("beforeend",categoryIconPickerContents(newCatIcon.value,newCatIcon.id));
+}
+function openCategoryIconPicker(wrapper){
+  const trigger=wrapper.querySelector("[data-icon-trigger]"),popup=wrapper.querySelector(".category-icon-popup");
+  if(!trigger||!popup)return;
+  document.querySelectorAll(".category-icon-picker .category-icon-trigger[aria-expanded='true']").forEach(openTrigger=>closeCategoryIconPicker(openTrigger.closest(".category-icon-picker")));
+  trigger.setAttribute("aria-expanded","true");popup.hidden=false;
+  (popup.querySelector('[aria-selected="true"]')||popup.querySelector('[role="option"]'))?.focus();
+}
+function syncCategoryIconPicker(select){
+  if(!select)return;
+  const wrapper=select.closest(".category-icon-picker");
+  if(!wrapper)return;
+  const option=categoryIconDefinitions.find(item=>item.id===select.value)||categoryIconDefinitions[0];
+  if(option&&select.value!==option.id)select.value=option.id;
+  const trigger=wrapper.querySelector("[data-icon-trigger]"),label=trigger?.querySelector(".category-icon-trigger-label");
+  if(!trigger||!option)return;
+  label.textContent=currentLang==="fr"?option.label_fr:option.label_ar;
+  trigger.querySelector("svg:not(.category-icon-chevron)")?.remove();
+  trigger.insertAdjacentHTML("afterbegin",categoryIconSvg(option.icon_type));
+  wrapper.querySelector(".category-icon-popup").innerHTML=categoryIconDefinitions.map(item=>`<button type="button" class="category-icon-choice" role="option" tabindex="-1" aria-selected="${item.id===option.id}" data-icon-value="${esc(item.id)}">${categoryIconSvg(item.icon_type)}<span>${esc(currentLang==="fr"?item.label_fr:item.label_ar)}</span></button>`).join("");
+}
+function closeCategoryIconPicker(wrapper,restoreFocus=false){
+  const trigger=wrapper?.querySelector("[data-icon-trigger]"),popup=wrapper?.querySelector(".category-icon-popup");
+  if(!trigger||!popup)return;
+  trigger.setAttribute("aria-expanded","false");popup.hidden=true;
+  if(restoreFocus)trigger.focus();
+}
+function categoryIconStyleOptions(selected){return categoryIconTypes.map(type=>`<option value="${type}" ${selected===type?"selected":""}>${t(categoryIconTypeLabels[type])}</option>`).join("")}
+function renderCategoryIconManager(){
+  newCategoryIconStyle.innerHTML=categoryIconStyleOptions(newCategoryIconStyle.value||"tag");
+  categoryIconOptionsList.innerHTML=categoryIconDefinitions.map(option=>`<div class="category-icon-option" data-icon-id="${esc(option.id)}"><label>${t("categoryIconArabicLabel")}<input data-icon-field="label_ar" maxlength="40" value="${esc(option.label_ar)}"></label><label>${t("categoryIconFrenchLabel")}<input data-icon-field="label_fr" maxlength="40" value="${esc(option.label_fr)}"></label><label>${t("categoryIconStyleLabel")}<select data-icon-field="icon_type">${categoryIconStyleOptions(option.icon_type)}</select></label><button class="danger" type="button" onclick="deleteCategoryIconOption('${esc(option.id)}')" ${categoryIconSaveInProgress?"disabled":""}>${t("categoryIconDelete")}</button></div>`).join("");
+  addCategoryIconBtn.disabled=categoryIconSaveInProgress||categoryIconDefinitions.length>=20;
+}
+function categoryParentOptions(selected,excludeId){
+  const parents=adminCategories.filter(category=>category.parent_id==null&&Number(category.id)!==Number(excludeId));
+  return `<option value="">${t("categoryNoParent")}</option>`+parents.map(category=>`<option value="${category.id}" ${Number(selected)===Number(category.id)?"selected":""}>${esc(category.name)}</option>`).join("");
+}
 function renderCategories(){
-  newCatIcon.innerHTML=categoryIconOptions(newCatIcon.value||"tag");
-  pc.innerHTML=`<option value="">${t("withoutCategory")}</option>`+adminCategories.map(category=>`<option value="${category.id}">${esc(category.name)}${category.active?"":` (${t("inactiveCategory")})`}</option>`).join("");
-  cats.innerHTML=adminCategories.map((category,index)=>`<div class="category-admin-row"><div class="category-edit-fields"><input data-category-field="name" data-category-id="${category.id}" maxlength="100" value="${esc(category.name)}" aria-label="${t("categoryName")}"><select data-category-field="icon" data-category-id="${category.id}" aria-label="${t("categoryIcon")}">${categoryIconOptions(category.icon)}</select></div><div class="category-meta"><span class="category-count">${t("productCount")}: ${Number(category.product_count)||0}</span><label class="category-state"><input type="checkbox" data-category-field="active" data-category-id="${category.id}" ${category.active?"checked":""}><span>${t(category.active?"activeCategory":"inactiveCategory")}</span></label></div><div class="category-actions"><button class="toggle-btn" type="button" data-category-action="up" data-id="${category.id}" title="${t("moveUp")}" aria-label="${t("moveUp")}" ${index===0?"disabled":""}>↑</button><button class="toggle-btn" type="button" data-category-action="down" data-id="${category.id}" title="${t("moveDown")}" aria-label="${t("moveDown")}" ${index===adminCategories.length-1?"disabled":""}>↓</button><button class="gold" type="button" data-category-action="save" data-id="${category.id}">${t("saveCategory")}</button><button class="danger" type="button" data-category-action="delete" data-id="${category.id}">${t("deleteCategory")}</button></div></div>`).join("");
+  const selectedNewIcon=newCatIcon.value;
+  newCatIcon.innerHTML=categoryIconOptions(selectedNewIcon||categoryIconDefinitions[0]?.id);
+  mountNewCategoryIconPicker();
+  syncCategoryIconPicker(newCatIcon);
+  const newCategoryParent=document.getElementById("newCatParent");
+  newCategoryParent.innerHTML=categoryParentOptions(newCategoryParent.value);
+  newCategoryParent.setAttribute("aria-label",t("categoryParent"));
+  pc.innerHTML=`<option value="">${t("withoutCategory")}</option>`+adminCategories.map(category=>`<option value="${category.id}">${category.parent_id==null?"":"— "}${esc(category.name)}${category.active?"":` (${t("inactiveCategory")})`}</option>`).join("");
+  cats.innerHTML=adminCategories.map((category,index)=>{
+    const hasChildren=adminCategories.some(item=>Number(item.parent_id)===Number(category.id));
+    return `<div class="category-admin-row" data-category-child="${category.parent_id==null?"false":"true"}"><div class="category-edit-fields"><input data-category-field="name" data-category-id="${category.id}" maxlength="100" value="${esc(category.name)}" aria-label="${t("categoryName")}"><select data-category-field="parent" data-category-id="${category.id}" aria-label="${t("categoryParent")}" ${hasChildren?"disabled":""}>${categoryParentOptions(category.parent_id,category.id)}</select>${categoryIconPickerMarkup(category.icon,`category-icon-${category.id}`,`data-category-field="icon" data-category-id="${category.id}"`)}</div><div class="category-meta"><span class="category-count">${t("productCount")}: ${Number(category.product_count)||0}</span><label class="category-state"><input type="checkbox" data-category-field="active" data-category-id="${category.id}" ${category.active?"checked":""}><span>${t(category.active?"activeCategory":"inactiveCategory")}</span></label></div><div class="category-actions"><button class="toggle-btn" type="button" data-category-action="up" data-id="${category.id}" title="${t("moveUp")}" aria-label="${t("moveUp")}" ${index===0?"disabled":""}>↑</button><button class="toggle-btn" type="button" data-category-action="down" data-id="${category.id}" title="${t("moveDown")}" aria-label="${t("moveDown")}" ${index===adminCategories.length-1?"disabled":""}>↓</button><button class="gold" type="button" data-category-action="save" data-id="${category.id}">${t("saveCategory")}</button><button class="danger" type="button" data-category-action="delete" data-id="${category.id}">${t("deleteCategory")}</button></div></div>`;
+  }).join("");
 }
 async function catsLoad(){
   const response=await api("/api/admin/categories"),data=await response.json();
@@ -405,18 +605,73 @@ async function catsLoad(){
 async function addCat(){
   const name=newcat.value.trim();
   if(!name)return;
-  const response=await api("/api/categories",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,icon:newCatIcon.value})}),data=await response.json();
+  const parentValue=document.getElementById("newCatParent").value;
+  const response=await api("/api/categories",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,icon:newCatIcon.value,parent_id:parentValue||null})}),data=await response.json();
   if(!response.ok)return alert(data.error);
   newcat.value="";
   newCatPreset.value="";
-  newCatIcon.value="tag";
+  document.getElementById("newCatParent").value="";
+  newCatIcon.value=categoryIconDefinitions[0]?.id||"";
+  syncCategoryIconPicker(newCatIcon);
   await catsLoad();
+}
+async function categoryIconDefinitionsLoad(){
+  const response=await api("/api/admin/category-icons"),options=await response.json();
+  if(!response.ok||!Array.isArray(options)||options.some(option=>!option||typeof option.id!=="string"||typeof option.label_ar!=="string"||typeof option.label_fr!=="string"||!categoryIconTypes.includes(option.icon_type)))throw new Error(options.error||t("categoryIconLoadFailed"));
+  categoryIconDefinitions=options;
+  renderCategoryIconManager();
+  renderCategories();
+}
+function readCategoryIconDefinitions(){
+  return [...categoryIconOptionsList.querySelectorAll(".category-icon-option")].map(row=>({
+    id:row.dataset.iconId,
+    label_ar:row.querySelector('[data-icon-field="label_ar"]').value.trim(),
+    label_fr:row.querySelector('[data-icon-field="label_fr"]').value.trim(),
+    icon_type:row.querySelector('[data-icon-field="icon_type"]').value
+  }));
+}
+async function saveCategoryIconDefinitions(options){
+  if(categoryIconSaveInProgress)return false;
+  categoryIconSaveInProgress=true;renderCategoryIconManager();
+  let saved=false;
+  try{
+    const response=await api("/api/admin/category-icons",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({options})}),result=await response.json();
+    if(!response.ok)throw new Error(result.error||t("categoryIconSaveFailed"));
+    categoryIconDefinitions=options;
+    saved=true;
+    showToast(t("categoryIconSaved"));
+  }catch(error){
+    console.error("Could not save category icon options:",error);
+    alert(error.message||t("categoryIconSaveFailed"));
+  }finally{
+    categoryIconSaveInProgress=false;renderCategoryIconManager();renderCategories();
+  }
+  if(saved){
+    try{await catsLoad()}catch(error){console.error("Could not reload categories after saving icon options:",error)}
+  }
+  return saved;
+}
+async function addCategoryIconOption(){
+  const options=readCategoryIconDefinitions();
+  if(options.length>=20)return;
+  const labelAr=newCategoryIconArabic.value.trim(),labelFr=newCategoryIconFrench.value.trim();
+  if(!labelAr||!labelFr){alert(t("categoryIconLabelsRequired"));return}
+  const id=`custom_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
+  if(await saveCategoryIconDefinitions([...options,{id,label_ar:labelAr,label_fr:labelFr,icon_type:newCategoryIconStyle.value}])){
+    newCategoryIconArabic.value="";newCategoryIconFrench.value="";
+  }
+}
+async function deleteCategoryIconOption(id){
+  if(categoryIconDefinitions.length<=1){alert(t("categoryIconKeepOne"));return}
+  if(!confirm(t("categoryIconDeleteConfirm")))return;
+  await saveCategoryIconDefinitions(readCategoryIconDefinitions().filter(option=>option.id!==id));
 }
 newCatPreset.addEventListener("change",()=>{
   const preset=categoryPresets.find(item=>item.key===newCatPreset.value);
   if(!preset)return;
   newcat.value=currentLang==="fr"?preset.name:preset.arabicName;
-  newCatIcon.value=preset.icon;
+  newCatIcon.value=categoryIconDefinitions.find(option=>option.icon_type===preset.icon)?.id||categoryIconDefinitions[0]?.id||"";
+  syncCategoryIconPicker(newCatIcon);
   newcat.focus();
 });
 async function saveCat(id){
@@ -425,7 +680,8 @@ async function saveCat(id){
   const name=cats.querySelector(`[data-category-field="name"][data-category-id="${id}"]`).value.trim();
   const icon=cats.querySelector(`[data-category-field="icon"][data-category-id="${id}"]`).value;
   const active=cats.querySelector(`[data-category-field="active"][data-category-id="${id}"]`).checked;
-  const response=await api(`/api/categories/${id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,icon,active})}),data=await response.json();
+  const parentValue=cats.querySelector(`[data-category-field="parent"][data-category-id="${id}"]`).value;
+  const response=await api(`/api/categories/${id}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,icon,active,parent_id:parentValue||null})}),data=await response.json();
   if(!response.ok)return alert(data.error);
   await catsLoad();
 }
@@ -441,7 +697,7 @@ async function reorderCat(id,direction){
 async function delCat(id){
   const category=adminCategories.find(item=>item.id===id);
   if(!category)return;
-  const confirmation=t("deleteCategoryConfirm").replace("{count}",String(category.product_count));
+  const confirmation=t("deleteCategoryConfirm").replace("{count}",String(category.direct_product_count||0));
   if(!confirm(confirmation))return;
   const response=await api(`/api/categories/${id}`,{method:"DELETE"}),data=await response.json();
   if(!response.ok)return alert(data.error);
@@ -460,8 +716,113 @@ cats.addEventListener("change",event=>{
   const input=event.target.closest('input[data-category-field="active"]');
   if(input)input.nextElementSibling.textContent=t(input.checked?"activeCategory":"inactiveCategory");
 });
-function renderProductsTable(){const query=(productSearchEl?productSearchEl.value:""
-).trim().toLowerCase();const filtered=allProducts.filter(p=>!query||`${p.name} ${p.description||""} ${p.category_name||""}`.toLowerCase().includes(query));plist.innerHTML=`<table><tr><th>${t("images")}</th><th>${t("product")}</th><th>${t("section")}</th><th>${t("priceTnd")}</th><th>${t("deliveryTnd")}</th><th>${t("stock")}</th><th>${t("action")}</th></tr>`+filtered.map(p=>`<tr><td><div class="thumbs">${p.images.map(im=>`<img class="thumb" src="${esc(im.path)}" alt="${esc(p.name)}" onclick="previewImage('${esc(im.path)}','${esc(p.name)}')">`).join("")}</div></td><td>${esc(p.name)}</td><td>${esc(p.category_name||"-")}</td><td>${formatCurrency(p.price)}</td><td>${formatCurrency(p.delivery_price||0)}</td><td>${p.stock}</td><td><button onclick="edit(${p.id})">${t("editProduct")}</button> <button class="danger" onclick="removeP(${p.id})">${t("deleteProduct")}</button></td></tr>`).join("")+"</table>"}
+categoriesBox.addEventListener("click",event=>{
+  const trigger=event.target instanceof Element?event.target.closest("[data-icon-trigger]"):null;
+  if(trigger){
+    const wrapper=trigger.closest(".category-icon-picker");
+    if(trigger.getAttribute("aria-expanded")==="true")closeCategoryIconPicker(wrapper);
+    else openCategoryIconPicker(wrapper);
+    return;
+  }
+  const choice=event.target instanceof Element?event.target.closest(".category-icon-choice"):null;
+  if(!choice)return;
+  const wrapper=choice.closest(".category-icon-picker"),select=wrapper?.querySelector("select.category-icon-native");
+  if(!select)return;
+  select.value=choice.dataset.iconValue;
+  syncCategoryIconPicker(select);
+  closeCategoryIconPicker(wrapper,true);
+  select.dispatchEvent(new Event("change",{bubbles:true}));
+});
+categoriesBox.addEventListener("keydown",event=>{
+  const trigger=event.target instanceof Element?event.target.closest("[data-icon-trigger]"):null;
+  if(trigger){
+    if(event.key==="Escape"){closeCategoryIconPicker(trigger.closest(".category-icon-picker"));return}
+    if(event.key==="ArrowDown"||event.key==="ArrowUp"){
+      event.preventDefault();
+      const wrapper=trigger.closest(".category-icon-picker");
+      if(trigger.getAttribute("aria-expanded")!=="true")openCategoryIconPicker(wrapper);
+      else (wrapper.querySelector(".category-icon-popup [aria-selected='true']")||wrapper.querySelector(".category-icon-choice"))?.focus();
+    }
+    return;
+  }
+  const choice=event.target instanceof Element?event.target.closest(".category-icon-choice"):null;
+  if(!choice)return;
+  const choices=[...choice.closest(".category-icon-popup").querySelectorAll(".category-icon-choice")],index=choices.indexOf(choice);
+  if(event.key==="ArrowDown"||event.key==="ArrowUp"||event.key==="Home"||event.key==="End"){
+    event.preventDefault();
+    const next=event.key==="Home"?0:event.key==="End"?choices.length-1:(index+(event.key==="ArrowDown"?1:-1)+choices.length)%choices.length;
+    choices[next]?.focus();
+  }else if(event.key==="Escape"){
+    event.preventDefault();closeCategoryIconPicker(choice.closest(".category-icon-picker"),true);
+  }else if(event.key==="Enter"||event.key===" "){
+    event.preventDefault();choice.click();
+  }
+});
+document.addEventListener("click",event=>{
+  if(event.target instanceof Element&&!event.target.closest(".category-icon-picker")){
+    document.querySelectorAll(".category-icon-picker .category-icon-trigger[aria-expanded='true']").forEach(trigger=>closeCategoryIconPicker(trigger.closest(".category-icon-picker")));
+  }
+});
+function renderProductsTable(){
+  const query=(productSearchEl?productSearchEl.value:"").trim().toLowerCase(),canReorder=!query&&!productOrderSaving;
+  const filtered=allProducts.filter(product=>!query||`${product.name} ${product.description||""} ${product.category_name||""}`.toLowerCase().includes(query));
+  plist.innerHTML=`<p class="product-order-hint">${t("productOrderHint")}</p><table><tr><th>${t("productDrag")}</th><th>${t("images")}</th><th>${t("product")}</th><th>${t("section")}</th><th>${t("priceTnd")}</th><th>${t("deliveryTnd")}</th><th>${t("stock")}</th><th>${t("action")}</th></tr><tbody>${filtered.map((product,index)=>`<tr data-product-id="${product.id}"><td><div class="product-order-actions"><span class="product-drag-handle" draggable="${canReorder}" data-product-drag title="${t("productDrag")}" aria-label="${t("productDrag")}">⠿</span><button class="toggle-btn" type="button" data-product-move="-1" data-id="${product.id}" title="${t("productMoveUp")}" aria-label="${t("productMoveUp")}" ${!canReorder||index===0?"disabled":""}>↑</button><button class="toggle-btn" type="button" data-product-move="1" data-id="${product.id}" title="${t("productMoveDown")}" aria-label="${t("productMoveDown")}" ${!canReorder||index===filtered.length-1?"disabled":""}>↓</button></div></td><td><div class="thumbs">${product.images.map(image=>`<img class="thumb" src="${esc(image.path)}" alt="${esc(product.name)}" onclick="previewImage('${esc(image.path)}','${esc(product.name)}')">`).join("")}</div></td><td>${esc(product.name)}</td><td>${esc(product.category_name||"-")}</td><td>${formatCurrency(product.price)}</td><td>${formatCurrency(product.delivery_price||0)}</td><td>${product.stock}</td><td><button onclick="edit(${product.id})">${t("editProduct")}</button> <button class="danger" onclick="removeP(${product.id})">${t("deleteProduct")}</button></td></tr>`).join("")}</tbody></table>`;
+}
+async function saveProductOrder(ids){
+  if(productOrderSaving)return;
+  productOrderSaving=true;renderProductsTable();
+  try{
+    const response=await api("/api/products/order",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({ids})}),result=await response.json();
+    if(!response.ok)throw new Error(result.error||t("productOrderFailed"));
+    await productsLoad();
+    showToast(t("productOrderSaved"));
+  }catch(error){
+    console.error("Could not save manual product order:",error);
+    alert(error.message||t("productOrderFailed"));
+    try{await productsLoad()}catch(loadError){console.error("Could not reload products after order save failed:",loadError)}
+  }finally{
+    productOrderSaving=false;renderProductsTable();
+  }
+}
+function reorderProduct(sourceId,targetId){
+  if(sourceId===targetId||productOrderSaving)return;
+  const ids=allProducts.map(product=>product.id),source=ids.indexOf(sourceId),target=ids.indexOf(targetId);
+  if(source<0||target<0)return;
+  ids.splice(source,1);ids.splice(target,0,sourceId);
+  saveProductOrder(ids);
+}
+function moveProduct(id,direction){
+  if((productSearchEl&&productSearchEl.value.trim())||productOrderSaving)return;
+  const ids=allProducts.map(product=>product.id),index=ids.indexOf(id),target=index+direction;
+  if(index<0||target<0||target>=ids.length)return;
+  [ids[index],ids[target]]=[ids[target],ids[index]];
+  saveProductOrder(ids);
+}
+plist.addEventListener("click",event=>{
+  const button=event.target instanceof Element?event.target.closest("button[data-product-move]"):null;
+  if(button)moveProduct(Number(button.dataset.id),Number(button.dataset.productMove));
+});
+plist.addEventListener("dragstart",event=>{
+  const handle=event.target instanceof Element?event.target.closest("[data-product-drag]"):null,row=handle?.closest("tr[data-product-id]");
+  if(!row||productOrderSaving||(productSearchEl&&productSearchEl.value.trim())){event.preventDefault();return}
+  draggedProductId=Number(row.dataset.productId);event.dataTransfer.effectAllowed="move";event.dataTransfer.setData("text/plain",String(draggedProductId));row.classList.add("product-row-dragging");
+});
+plist.addEventListener("dragover",event=>{
+  const row=event.target instanceof Element?event.target.closest("tr[data-product-id]"):null;
+  if(draggedProductId!==null&&row&&Number(row.dataset.productId)!==draggedProductId){event.preventDefault();event.dataTransfer.dropEffect="move";row.classList.add("product-row-drop-target")}
+});
+plist.addEventListener("dragleave",event=>{
+  const row=event.target instanceof Element?event.target.closest("tr[data-product-id]"):null;
+  if(row)row.classList.remove("product-row-drop-target");
+});
+plist.addEventListener("drop",event=>{
+  const row=event.target instanceof Element?event.target.closest("tr[data-product-id]"):null;
+  if(draggedProductId!==null&&row){event.preventDefault();reorderProduct(draggedProductId,Number(row.dataset.productId))}
+  plist.querySelectorAll(".product-row-drop-target,.product-row-dragging").forEach(item=>item.classList.remove("product-row-drop-target","product-row-dragging"));draggedProductId=null;
+});
+plist.addEventListener("dragend",()=>{
+  plist.querySelectorAll(".product-row-drop-target,.product-row-dragging").forEach(item=>item.classList.remove("product-row-drop-target","product-row-dragging"));draggedProductId=null;
+});
 async function inventoryLoad(){
   try{
     const response=await api("/api/admin/inventory"),report=await response.json();
@@ -509,7 +870,7 @@ async function exportInventory(format){
     button.disabled=false;
   }
 }
-async function productsLoad(){allProducts=await api("/api/admin/products").then(r=>r.json());renderProductsTable()}
+async function productsLoad(){const response=await api("/api/admin/products"),products=await response.json();if(!response.ok||!Array.isArray(products))throw new Error(products.error||"Could not load products");allProducts=products;renderProductsTable()}
 function openProductForm(){productModal.classList.add("open");pn.focus()}
 function closeProductForm(){productModal.classList.remove("open")}
 function newProduct(){resetForm();openProductForm()}
