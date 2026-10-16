@@ -295,21 +295,25 @@ body{background:var(--background);color:var(--text)}
   .modern-cta { height: 42px; border: 0; border-radius: 14px; padding: 0 14px; background: linear-gradient(180deg, #f3d46d, #e6b93a); color: #141414; font-weight: 900; box-shadow: 0 10px 22px rgba(225,179,63,.3); }
   .store-language { height: 42px; border: 1px solid rgba(15,35,58,.12); border-radius: 14px; background: #fff; color: #1b2b3c; font-weight: 800; padding: 0 14px; }
   .modern-hero { position: relative; isolation: isolate; overflow: hidden; min-height: 700px; background: radial-gradient(ellipse at 76% 18%, rgba(61,139,198,.22), transparent 34%), radial-gradient(ellipse at 17% 88%, rgba(201,154,59,.08), transparent 30%), linear-gradient(112deg, #071a2e 0%, #0a2b49 48%, #103e64 100%); }
-  .modern-hero::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(circle at 82% 78%, rgba(76,153,210,.14), transparent 24%), linear-gradient(135deg, rgba(255,255,255,.035), transparent 42%); }
+  .modern-hero::before { content: ""; position: absolute; inset: -36px 0; z-index: 0; pointer-events: none; background: radial-gradient(circle at 82% 78%, rgba(76,153,210,.14), transparent 24%), linear-gradient(135deg, rgba(255,255,255,.035), transparent 42%); transform: translate3d(0,var(--hero-parallax-y,0px),0) scale(1.06); will-change: transform; }
   .modern-hero::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(90deg,rgba(5,21,39,.5) 0%,rgba(6,29,53,.28) 45%,rgba(6,29,53,.02) 100%); }
   .modern-hero-inner { position: relative; z-index: 2; width: min(1280px, calc(100% - 60px)); min-height: 700px; margin: 0 auto; display: grid; grid-template-columns: 1.05fr .95fr; align-items: center; gap: 24px; direction: ltr; }
   .modern-copy { padding: 68px 0 64px; }
   html[dir="rtl"] .modern-copy { direction: rtl; text-align: right; }
   html[dir="ltr"] .modern-copy { direction: ltr; text-align: left; }
-  .campaign-visual { position: relative; min-width: 0; min-height: 620px; display: grid; place-items: center; overflow: hidden; perspective: 1500px; transform-style: preserve-3d; }
+  .campaign-visual { position: relative; min-width: 0; min-height: 620px; display: grid; place-items: center; overflow: hidden; perspective: 1500px; transform-style: preserve-3d; --campaign-parallax-y: 0px; }
   .campaign-visual::before { content: ""; position: absolute; z-index: 0; right: 9%; bottom: 9%; left: 9%; height: 12%; border-radius: 50%; background: rgba(1,9,18,.52); filter: blur(24px); transform: translateY(10px); }
+  .campaign-visual::after { content: ""; position: absolute; z-index: 2; inset: 5% 7%; border: 1px solid rgba(255,255,255,.28); border-radius: 18px; background: linear-gradient(145deg,rgba(255,255,255,.12),transparent 28%,transparent 72%,rgba(255,255,255,.05)); box-shadow: inset 0 1px 0 rgba(255,255,255,.28),0 0 32px rgba(175,218,255,.08); pointer-events: none; backdrop-filter: blur(1px); }
   .campaign-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center; opacity: 0; transform: scale(.985); transition: opacity .7s ease,transform .7s ease; }
   .campaign-image.reference-banner { object-fit: contain; object-position: center; }
   .campaign-image.is-active { opacity: 1; transform: scale(1); }
-  .campaign-image.reference-banner.is-active { transform: perspective(1500px) rotateY(-3deg) rotateX(1.4deg) scale(.92); filter: drop-shadow(0 25px 28px rgba(0,8,18,.32)) drop-shadow(0 5px 10px rgba(0,8,18,.2)); }
-  html[dir="rtl"] .campaign-image.reference-banner.is-active { transform: perspective(1500px) rotateY(3deg) rotateX(1.4deg) scale(.92); }
+  .campaign-image.reference-banner.is-active { transform: translate3d(0,var(--campaign-parallax-y,0px),0) perspective(1500px) rotateY(-3deg) rotateX(1.4deg) scale(.92); filter: drop-shadow(0 25px 28px rgba(0,8,18,.32)) drop-shadow(0 5px 10px rgba(0,8,18,.2)); animation: campaign-float 7s ease-in-out infinite; }
+  html[dir="rtl"] .campaign-image.reference-banner.is-active { transform: translate3d(0,var(--campaign-parallax-y,0px),0) perspective(1500px) rotateY(3deg) rotateX(1.4deg) scale(.92); }
+  @keyframes campaign-float { 0%,100% { translate: 0 0; } 50% { translate: 0 -7px; } }
   @media (prefers-reduced-motion: reduce) {
     .campaign-image { transition: none; }
+    .campaign-image.reference-banner.is-active { animation: none; }
+    .modern-hero::before { will-change: auto; }
   }
   .campaign-dots { position: absolute; z-index: 4; right: 0; bottom: 24px; left: 0; display: flex; justify-content: center; gap: 8px; }
   .campaign-dots button { width: 24px; height: 4px; padding: 0; border: 0; border-radius: 99px; background: #ffffff70; cursor: pointer; transition: width .2s ease,background .2s ease; }
@@ -620,8 +624,8 @@ body{background:var(--background);color:var(--text)}
     <input id="search" type="search" autocomplete="off" placeholder="Recherche" aria-label="Rechercher un produit ou une marque">
     <button class="search-clear" id="searchClear" type="button" aria-label="Effacer la recherche" hidden>×</button>
   </div>
-  <a class="modern-brand" href="/" aria-label="MA&DOR Store — Accueil" onclick="goToHome(event)">
-    <span class="modern-brand-text">MA<span class="gold">&amp;</span>DOR</span>
+  <a class="modern-brand" href="/" aria-label="MA-DOR Store — Accueil" onclick="goToHome(event)">
+    <span class="modern-brand-text">MA<span class="gold">-</span>DOR</span>
     <small class="modern-brand-tagline" id="storeBrandTagline">Achetez malin</small>
   </a>
   <nav class="nav modern-menu" aria-label="principal navigation">
@@ -757,7 +761,7 @@ body{background:var(--background);color:var(--text)}
 <footer class="footer" id="footer">
   <div class="footer-main">
     <section class="footer-brand">
-      <div class="footer-logo">MA&amp;DOR</div>
+      <div class="footer-logo">MA-DOR</div>
       <p data-i18n="footerIntro">منتجات مختارة بعناية لتجربة تسوّق سهلة وآمنة. شكراً لثقتكم بنا.</p>
       <div class="footer-trust"><span>♡</span><span data-i18n="happyCustomers">أكثر من 10,000 عميل سعيد</span></div>
     </section>
@@ -1296,6 +1300,34 @@ function showCampaignSlide(index){
 	renderCampaignDots();
 }
 function changeCampaignSlide(delta){showCampaignSlide(campaignSlideIndex+delta)}
+function initHeroParallax(){
+	const hero=document.querySelector(".modern-hero");
+	const visual=document.querySelector(".campaign-visual");
+	if(!hero||!visual)return;
+	const reducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)");
+	let frame=0;
+	const update=()=>{
+		frame=0;
+		if(reducedMotion.matches){
+			hero.style.removeProperty("--hero-parallax-y");
+			visual.style.removeProperty("--campaign-parallax-y");
+			return;
+		}
+		const bounds=hero.getBoundingClientRect();
+		if(bounds.bottom<0||bounds.top>window.innerHeight)return;
+		const limit=window.innerWidth<=900?16:30;
+		const offset=Math.max(-limit,Math.min(limit,-bounds.top*.055));
+		hero.style.setProperty("--hero-parallax-y",`${offset.toFixed(2)}px`);
+		visual.style.setProperty("--campaign-parallax-y",`${(offset*.45).toFixed(2)}px`);
+	};
+	const schedule=()=>{
+		if(!frame)frame=window.requestAnimationFrame(update);
+	};
+	window.addEventListener("scroll",schedule,{passive:true});
+	window.addEventListener("resize",schedule,{passive:true});
+	reducedMotion.addEventListener("change",schedule);
+	schedule();
+}
 function openFeaturedProduct(){
 	if(featuredProduct){
 		if(!products.some(product=>Number(product.id)===Number(featuredProduct.id)))products.unshift(featuredProduct);
@@ -1598,6 +1630,7 @@ applyStoreLanguage();
 if(shopMode)setMobileTab("shop");
 if(shopMode)applyShopPageVisibility();
 renderCampaignDots();
+initHeroParallax();
 if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches)campaignTimer=setInterval(()=>changeCampaignSlide(1),8000);
 loadStoreNavigation();
 Promise.all([fetch("/api/config").then(r=>r.json()).then(x=>{cfg=x;if(cur)cur.textContent=storeCurrencyLabel();updateStoreWhatsAppLinks();applyHeroDisplaySettings();applyProductGridSettings();applyCategoryGridSettings()}),loadCats()]).then(()=>Promise.all([load(),loadAdvertisement()]));
