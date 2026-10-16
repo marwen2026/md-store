@@ -25,8 +25,6 @@ const LOW_STOCK_THRESHOLD = 5;
 const DEFAULT_NAVIGATION_LINKS = [
   { label_ar: "الرئيسية", label_fr: "Accueil", href: "#" },
   { label_ar: "جديدنا", label_fr: "Nouveautés", href: "#products" },
-  { label_ar: "الملابس", label_fr: "Vêtements", href: "#products" },
-  { label_ar: "الحقائب", label_fr: "Sacs", href: "#products" },
   { label_ar: "إكسسوارات", label_fr: "Accessoires", href: "#products" },
   { label_ar: "العروض الخاصة", label_fr: "Offres spéciales", href: "#offers" },
   { label_ar: "اتصل بنا", label_fr: "Contactez-nous", href: "#footer" }
