@@ -164,10 +164,10 @@ body.dark .stock-overview-item,body.dark th{background:var(--panel-alt)}
 .chart-plot{display:block;width:100%;height:245px;overflow:visible}
 .chart-gridline{stroke:var(--line);stroke-width:1;stroke-dasharray:3 5}
 .chart-axis-label{fill:var(--muted);font:10px Cairo,Arial,sans-serif}
-.chart-line{fill:none;stroke:#c99a3b;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.chart-line{fill:none;stroke:var(--chart-series-color,#c99a3b);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .chart-area-fill{fill:url(#dashboardChartGradient)}
-.chart-point{fill:var(--panel);stroke:#bd8a2a;stroke-width:2.5;cursor:pointer;transition:r .15s ease,fill .15s ease}
-.chart-point:hover,.chart-point:focus{r:6;fill:#f8e7bd;outline:none}
+.chart-point{fill:var(--panel);stroke:var(--chart-series-color,#bd8a2a);stroke-width:2.5;cursor:pointer;transition:r .15s ease,fill .15s ease}
+.chart-point:hover,.chart-point:focus{r:6;fill:var(--chart-series-soft,#f8e7bd);outline:none}
 .chart-tooltip{position:absolute;z-index:4;display:none;min-width:110px;padding:8px 10px;border:1px solid #c99a3b55;border-radius:10px;background:var(--panel);color:var(--text);font-size:11px;line-height:1.55;box-shadow:0 8px 22px #1118271c;pointer-events:none}
 .chart-tooltip.is-visible{display:block}
 .chart-empty{display:grid;min-height:220px;place-items:center;color:var(--muted);font-size:13px}
@@ -650,7 +650,9 @@ function renderDashboardTrendChart(){
   const circles=points.map(point=>`<circle class="chart-point" cx="${point.x.toFixed(2)}" cy="${point.y.toFixed(2)}" r="3.7" tabindex="0" role="img" aria-label="${point.day.key}: ${point.day.value}" data-date="${point.day.key}" data-value="${point.day.value}"><title>${point.day.key}: ${point.day.value}</title></circle>`).join("");
   chart.setAttribute("aria-label",t("chartPeriodDays").replace("{days}",String(dashboardChartDays)));
   const noActivity=values.every(value=>value===0)?`<text class="chart-axis-label" x="380" y="115" text-anchor="middle">${t("chartNoData")}</text>`:"";
-  chart.innerHTML=`<defs><linearGradient id="dashboardChartGradient" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#c99a3b" stop-opacity=".24"/><stop offset="100%" stop-color="#c99a3b" stop-opacity="0"/></linearGradient></defs>${grid}${noActivity}<path class="chart-area-fill" d="${area}"/><path class="chart-line" d="${line}"/>${circles}${labels}`;
+  const seriesColor=dashboardChartMode==="sales"?"#cf3f4f":"#168a57",seriesSoft=dashboardChartMode==="sales"?"#f8dfe2":"#d9f0e4";
+  chart.style.setProperty("--chart-series-color",seriesColor);chart.style.setProperty("--chart-series-soft",seriesSoft);
+  chart.innerHTML=`<defs><linearGradient id="dashboardChartGradient" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="${seriesColor}" stop-opacity=".24"/><stop offset="100%" stop-color="${seriesColor}" stop-opacity="0"/></linearGradient></defs>${grid}${noActivity}<path class="chart-area-fill" d="${area}"/><path class="chart-line" d="${line}"/>${circles}${labels}`;
   chart.querySelectorAll(".chart-point").forEach(point=>{point.addEventListener("pointerenter",event=>showDashboardTooltip(event,point));point.addEventListener("pointerleave",hideDashboardTooltip);point.addEventListener("focus",event=>showDashboardTooltip(event,point));point.addEventListener("blur",hideDashboardTooltip)});
 }
 function filterOrdersByStatus(status){
@@ -659,7 +661,7 @@ function filterOrdersByStatus(status){
 }
 function renderDashboardStatusChart(){
   const orders=Array.isArray(window.__ordersCache)?window.__ordersCache:[],knownStatuses=["new","confirmed","shipped","delivered","cancelled","returned"];
-  const colors={new:"#c99a3b",confirmed:"#4b8bd8",shipped:"#7957c8",delivered:"#3c9b72",cancelled:"#d85b5b",returned:"#d48a45"};
+  const colors={new:"#168a57",confirmed:"#35a96f",shipped:"#cf5964",delivered:"#087647",cancelled:"#b83243",returned:"#e47b83"};
   const counts=knownStatuses.map(status=>({status,count:orders.filter(order=>order.status===status).length})).filter(item=>item.count>0);
   const total=counts.reduce((sum,item)=>sum+item.count,0),radius=42,circumference=2*Math.PI*radius;
   let offset=0;
