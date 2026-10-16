@@ -294,21 +294,24 @@ body{background:var(--background);color:var(--text)}
   .modern-promo-badge { display: inline-flex; align-items: center; justify-content: center; margin-inline-start: 5px; padding: 3px 6px; border-radius: 999px; background: #e84a52; color: #fff; font-size: 9px; font-weight: 900; line-height: 1.2; vertical-align: middle; }
   .modern-cta { height: 42px; border: 0; border-radius: 14px; padding: 0 14px; background: linear-gradient(180deg, #f3d46d, #e6b93a); color: #141414; font-weight: 900; box-shadow: 0 10px 22px rgba(225,179,63,.3); }
   .store-language { height: 42px; border: 1px solid rgba(15,35,58,.12); border-radius: 14px; background: #fff; color: #1b2b3c; font-weight: 800; padding: 0 14px; }
-  .modern-hero { position: relative; isolation: isolate; overflow: hidden; min-height: 700px; background: radial-gradient(ellipse at 76% 18%, rgba(61,139,198,.22), transparent 34%), radial-gradient(ellipse at 17% 88%, rgba(201,154,59,.08), transparent 30%), linear-gradient(112deg, #071a2e 0%, #0a2b49 48%, #103e64 100%); }
-  .modern-hero::before { content: ""; position: absolute; inset: -36px 0; z-index: 0; pointer-events: none; background: radial-gradient(circle at 82% 78%, rgba(76,153,210,.14), transparent 24%), linear-gradient(135deg, rgba(255,255,255,.035), transparent 42%); transform: translate3d(0,var(--hero-parallax-y,0px),0) scale(1.06); will-change: transform; }
-  .modern-hero::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(90deg,rgba(5,21,39,.5) 0%,rgba(6,29,53,.28) 45%,rgba(6,29,53,.02) 100%); }
+  .modern-hero { position: relative; isolation: isolate; overflow: hidden; min-height: 700px; background: radial-gradient(ellipse at 76% 18%, rgba(236,192,97,.24), transparent 34%), radial-gradient(ellipse at 17% 88%, rgba(201,154,59,.12), transparent 30%), linear-gradient(112deg, #35230d 0%, #60420f 48%, #8b641c 100%); }
+  .modern-hero::before { content: ""; position: absolute; inset: -36px 0; z-index: 0; pointer-events: none; background: radial-gradient(circle at 82% 78%, rgba(244,207,122,.16), transparent 24%), linear-gradient(135deg, rgba(255,255,255,.055), transparent 42%); transform: translate3d(0,var(--hero-parallax-y,0px),0) scale(1.06); will-change: transform; }
+  .modern-hero::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(90deg,rgba(36,23,8,.32) 0%,rgba(50,32,9,.16) 45%,rgba(50,32,9,.02) 100%); }
   .modern-hero-inner { position: relative; z-index: 2; width: min(1280px, calc(100% - 60px)); min-height: 700px; margin: 0 auto; display: grid; grid-template-columns: 1.05fr .95fr; align-items: center; gap: 24px; direction: ltr; }
   .modern-copy { padding: 68px 0 64px; }
   html[dir="rtl"] .modern-copy { direction: rtl; text-align: right; }
   html[dir="ltr"] .modern-copy { direction: ltr; text-align: left; }
   .campaign-visual { position: relative; min-width: 0; min-height: 620px; display: grid; place-items: center; overflow: hidden; perspective: 1500px; transform-style: preserve-3d; --campaign-parallax-y: 0px; }
+  .campaign-visual.has-wide-slide { min-height: 0; aspect-ratio: 3 / 2; }
+  .campaign-visual.has-panorama-slide { min-height: 0; aspect-ratio: 2129 / 739; }
   .campaign-visual::before { content: ""; position: absolute; z-index: 0; right: 9%; bottom: 9%; left: 9%; height: 12%; border-radius: 50%; background: rgba(1,9,18,.52); filter: blur(24px); transform: translateY(10px); }
-  .campaign-visual::after { content: ""; position: absolute; z-index: 2; inset: 5% 7%; border: 1px solid rgba(255,255,255,.28); border-radius: 18px; background: linear-gradient(145deg,rgba(255,255,255,.12),transparent 28%,transparent 72%,rgba(255,255,255,.05)); box-shadow: inset 0 1px 0 rgba(255,255,255,.28),0 0 32px rgba(175,218,255,.08); pointer-events: none; backdrop-filter: blur(1px); }
+  .campaign-visual::after { content: ""; position: absolute; z-index: 2; inset: 5% 7%; border: 1px solid rgba(255,255,255,.28); border-radius: 18px; background: linear-gradient(145deg,rgba(255,255,255,.12),transparent 28%,transparent 72%,rgba(255,255,255,.05)); box-shadow: inset 0 1px 0 rgba(255,255,255,.28),0 0 32px rgba(175,218,255,.08); pointer-events: none; }
   .campaign-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center; opacity: 0; transform: scale(.985); transition: opacity .7s ease,transform .7s ease; }
+  .campaign-image.campaign-panorama { object-fit: contain; }
   .campaign-image.reference-banner { object-fit: contain; object-position: center; }
   .campaign-image.is-active { opacity: 1; transform: scale(1); }
-  .campaign-image.reference-banner.is-active { transform: translate3d(0,var(--campaign-parallax-y,0px),0) perspective(1500px) rotateY(-3deg) rotateX(1.4deg) scale(.92); filter: drop-shadow(0 25px 28px rgba(0,8,18,.32)) drop-shadow(0 5px 10px rgba(0,8,18,.2)); animation: campaign-float 7s ease-in-out infinite; }
-  html[dir="rtl"] .campaign-image.reference-banner.is-active { transform: translate3d(0,var(--campaign-parallax-y,0px),0) perspective(1500px) rotateY(3deg) rotateX(1.4deg) scale(.92); }
+  .campaign-image.reference-banner.is-active { transform: translate3d(0,var(--campaign-parallax-y,0px),0) perspective(1500px) rotateY(-3deg) rotateX(1.4deg) scale(1); filter: drop-shadow(0 25px 28px rgba(0,8,18,.32)) drop-shadow(0 5px 10px rgba(0,8,18,.2)); animation: campaign-float 7s ease-in-out infinite; }
+  html[dir="rtl"] .campaign-image.reference-banner.is-active { transform: translate3d(0,var(--campaign-parallax-y,0px),0) perspective(1500px) rotateY(3deg) rotateX(1.4deg) scale(1); }
   @keyframes campaign-float { 0%,100% { translate: 0 0; } 50% { translate: 0 -7px; } }
   @media (prefers-reduced-motion: reduce) {
     .campaign-image { transition: none; }
@@ -465,26 +468,28 @@ body{background:var(--background);color:var(--text)}
     .modern-menu { display: contents; }
     .modern-menu-left, .modern-menu-right { position: absolute; top: 50%; display: flex; min-width: 0; align-items: center; gap: clamp(12px,1.35vw,24px); transform: translateY(-50%); }
     .modern-menu-left { inset-inline-start: min(340px,27vw); inset-inline-end: calc(50% + 120px); justify-content: flex-end; }
-    .modern-menu-right { inset-inline-start: calc(50% + 120px); inset-inline-end: 110px; justify-content: flex-start; }
+    .modern-menu-right { inset-inline-start: calc(50% + 120px); inset-inline-end: 160px; justify-content: flex-start; }
     .modern-menu a { font-size: 14px; }
     .nav-shop-trigger { height: auto !important; padding: 8px 0 !important; }
     .modern-header-tools { position: absolute; top: 50%; inset-inline-end: -20px; gap: clamp(9px,1.1vw,18px); transform: translateY(-50%); }
     .modern-menu a { white-space: nowrap; }
     .modern-header-tools .header-icon, .modern-header-tools .cart-trigger { width: 28px; flex-basis: 28px; }
     .modern-header-tools .header-icon svg, .modern-header-tools .cart-trigger svg { width: 23px; height: 23px; }
-    .modern-header-tools .store-language { display: none; }
+    .modern-header-tools .store-language { display: inline-flex; align-items: center; justify-content: center; min-width: 42px; height: 34px; padding: 0 9px; border-color: #e7d8b7; border-radius: 999px; background: #fff; color: #29384a; font-size: 11px; font-weight: 800; }
+    .modern-header-tools .store-language:hover { border-color: #c99a3b; background: #fffaf0; }
+    .modern-header-tools .store-language:focus-visible { outline: 2px solid #c99a3b; outline-offset: 2px; }
     .modern-header-tools .modern-cta { display: none; }
   }
   @media (min-width: 1200px) and (max-width: 1300px) {
     .modern-menu-left { inset-inline-end: calc(50% + 112px); }
-    .modern-menu-right { inset-inline-start: calc(50% + 112px); inset-inline-end: 104px; gap: 6px; }
+    .modern-menu-right { inset-inline-start: calc(50% + 112px); inset-inline-end: 152px; gap: 6px; }
     .modern-menu-right a { font-size: 12px; }
     .modern-search { inset-inline-start: -8px; }
     .modern-header-tools { inset-inline-end: -16px; }
   }
   @media (min-width: 1301px) and (max-width: 1399px) {
     .modern-menu-left { inset-inline-end: calc(50% + 112px); }
-    .modern-menu-right { inset-inline-start: calc(50% + 112px); inset-inline-end: 104px; gap: 8px; }
+    .modern-menu-right { inset-inline-start: calc(50% + 112px); inset-inline-end: 152px; gap: 8px; }
     .modern-menu-right a { font-size: 13px; }
     .modern-header-tools { inset-inline-end: -8px; }
   }
@@ -509,7 +514,9 @@ body{background:var(--background);color:var(--text)}
     .modern-copy { text-align: center; }
     .modern-copy p { margin: 0 auto; }
     .modern-actions { justify-content: center; }
-    .campaign-visual { width: min(100%,560px); min-height: 480px; margin: -35px auto 0; }
+    .campaign-visual { width: min(100%,560px); height: auto; aspect-ratio: 591 / 620; min-height: 0; margin: -35px auto 0; }
+    .campaign-visual.has-wide-slide { aspect-ratio: 3 / 2; }
+    .campaign-visual.has-panorama-slide { aspect-ratio: 2129 / 739; }
   }
   @media (max-width: 620px) {
     .modern-topbar-inner, .modern-header-row, .modern-hero-inner { width: min(100%, calc(100% - 28px)); }
@@ -576,9 +583,9 @@ body{background:var(--background);color:var(--text)}
     .mega-menu-layout { grid-template-columns: 1fr; }
     .mega-menu-columns { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
     .mega-menu-promo { min-height: 150px; }
-    .modern-hero { height: auto; min-height: 0; max-height: none; background: radial-gradient(ellipse at 82% 10%, rgba(61,139,198,.18), transparent 32%), linear-gradient(160deg, #071a2e 0%, #0b3152 56%, #0d385d 100%); }
-    .modern-hero::before { background: radial-gradient(ellipse at 12% 82%, rgba(201,154,59,.07), transparent 30%); }
-    .modern-hero::after { background: linear-gradient(180deg,rgba(7,22,40,.04),transparent 45%,rgba(7,22,40,.16)); }
+    .modern-hero { height: auto; min-height: 0; max-height: none; background: radial-gradient(ellipse at 82% 10%, rgba(236,192,97,.2), transparent 32%), linear-gradient(160deg, #35230d 0%, #60420f 56%, #8b641c 100%); }
+    .modern-hero::before { background: radial-gradient(ellipse at 12% 82%, rgba(244,207,122,.1), transparent 30%); }
+    .modern-hero::after { background: linear-gradient(180deg,rgba(36,23,8,.08),transparent 45%,rgba(50,32,9,.12)); }
     .modern-hero-inner { width: 100%; height: auto; min-height: 0; padding: 34px 14px 0; display: flex; flex-direction: column; gap: 20px; }
     .modern-copy { display: block; width: 100%; padding: 0 4px; text-align: center; }
     .modern-chip { font-size: 9px; }
@@ -588,7 +595,10 @@ body{background:var(--background);color:var(--text)}
     .modern-actions { display: grid; width: min(100%,400px); grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap: 8px; margin: 18px auto 0; }
     .modern-actions .btn-primary, .modern-actions .btn-secondary { width: 100%; min-width: 0; min-height: 48px; padding: 0 8px; font-size: clamp(11px,3.4vw,13px); }
     .campaign-visual { position: relative; inset: auto; width: min(100%,440px); height: auto; aspect-ratio: 591 / 620; min-height: 0; margin: 0 auto 34px; overflow: hidden; border-radius: 14px; }
+    .campaign-visual.has-wide-slide { aspect-ratio: 3 / 2; }
+    .campaign-visual.has-panorama-slide { aspect-ratio: 2129 / 739; }
     .campaign-image { object-fit: cover; object-position: center; }
+    .campaign-image.campaign-panorama { object-fit: contain; }
     .modern-hero .arrow { display: none; }
     .campaign-dots { bottom: 18px; }
     .mobile-bottom-nav { position: fixed; z-index: 80; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); min-height: calc(70px + env(safe-area-inset-bottom)); padding: 7px 8px calc(7px + env(safe-area-inset-bottom)); border-top: 1px solid #e8ebf0; background: rgba(255,255,255,.97); box-shadow: 0 -8px 24px rgba(15,23,42,.08); backdrop-filter: blur(14px); }
@@ -664,6 +674,8 @@ body{background:var(--background);color:var(--text)}
     <div class="campaign-visual" aria-label="M&D Store campaign images">
       <img class="campaign-image reference-banner is-active" src="/hero-reference-art.png" alt="Sélection M&D Store : high-tech, mode, maison, cadeaux, livraison rapide et offres avantageuses en Tunisie" fetchpriority="high">
       <img class="campaign-image" src="/hero-campaign-2.png" alt="M&D Store — Découvrez notre sélection de produits" loading="lazy">
+      <img class="campaign-image campaign-wide" src="/hero-campaign-3.png" alt="Présentation MA-DOR : téléphone, casque audio, sac noir et décoration sur un présentoir doré" loading="lazy">
+      <img class="campaign-image campaign-panorama" src="/hero-campaign-4.png" alt="MA-DOR : tout ce dont vous avez besoin au même endroit, avec livraison rapide, paiement sécurisé et service client en Tunisie" loading="lazy">
       <div class="campaign-dots" id="campaignDots" aria-label="Campaign images"></div>
     </div>
   </div>
@@ -1297,6 +1309,9 @@ function showCampaignSlide(index){
 	if(!images.length)return;
 	campaignSlideIndex=(index+images.length)%images.length;
 	images.forEach((image,imageIndex)=>image.classList.toggle("is-active",imageIndex===campaignSlideIndex));
+	const visual=document.querySelector(".campaign-visual"),activeImage=images[campaignSlideIndex];
+	visual.classList.toggle("has-wide-slide",activeImage.classList.contains("campaign-wide"));
+	visual.classList.toggle("has-panorama-slide",activeImage.classList.contains("campaign-panorama"));
 	renderCampaignDots();
 }
 function changeCampaignSlide(delta){showCampaignSlide(campaignSlideIndex+delta)}
