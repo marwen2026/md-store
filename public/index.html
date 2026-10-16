@@ -1305,9 +1305,27 @@ function renderCampaignDots(){
 	if(!dots)return;
 	const images=[...document.querySelectorAll(".campaign-image")];
 	const slideLabel=currentStoreLanguage==="fr"?"Visuel de campagne":"صورة الحملة";
+	images.filter(image=>image.dataset.campaignImageId).forEach(image=>image.alt=currentStoreLanguage==="fr"?"Image de campagne MA-DOR":"صورة من عروض MA-DOR");
 	dots.innerHTML=images.map((_,index)=>`<button type="button" aria-label="${slideLabel} ${index+1}" aria-current="${index===campaignSlideIndex}" onclick="showCampaignSlide(${index})"></button>`).join("");
 	dots.hidden=images.length<2;
 	document.querySelectorAll(".modern-hero .arrow").forEach(button=>button.hidden=images.length<2);
+}
+function renderCampaignSlides(uploadedImages=[]){
+	const visual=document.querySelector(".campaign-visual"),dots=document.getElementById("campaignDots");
+	if(!visual||!dots)return;
+	visual.querySelectorAll(".campaign-image[data-campaign-image-id]").forEach(image=>image.remove());
+	uploadedImages.forEach(image=>{
+		if(!image||typeof image.id!=="string"||!/^[a-f0-9]{32}$/.test(image.id))return;
+		const slide=document.createElement("img");
+		slide.className="campaign-image";
+		slide.dataset.campaignImageId=image.id;
+		slide.src=`/api/store-assets/campaign/${image.id}`;
+		slide.alt=currentStoreLanguage==="fr"?"Image de campagne MA-DOR":"صورة من عروض MA-DOR";
+		slide.loading="lazy";
+		visual.insertBefore(slide,dots);
+	});
+	campaignSlideIndex=Math.min(campaignSlideIndex,visual.querySelectorAll(".campaign-image").length-1);
+	showCampaignSlide(campaignSlideIndex);
 }
 function showCampaignSlide(index){
 	const images=[...document.querySelectorAll(".campaign-image")];
@@ -1653,6 +1671,6 @@ renderCampaignDots();
 initHeroParallax();
 if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches)campaignTimer=setInterval(()=>changeCampaignSlide(1),8000);
 loadStoreNavigation();
-Promise.all([fetch("/api/config").then(r=>r.json()).then(x=>{cfg=x;if(cur)cur.textContent=storeCurrencyLabel();updateStoreWhatsAppLinks();applyHeroDisplaySettings();applyProductGridSettings();applyCategoryGridSettings()}),loadCats()]).then(()=>Promise.all([load(),loadAdvertisement()]));
+Promise.all([fetch("/api/config").then(r=>r.json()).then(x=>{cfg=x;if(cur)cur.textContent=storeCurrencyLabel();updateStoreWhatsAppLinks();renderCampaignSlides(x.campaignImages||[]);applyHeroDisplaySettings();applyProductGridSettings();applyCategoryGridSettings()}),loadCats()]).then(()=>Promise.all([load(),loadAdvertisement()]));
 render();
 </script></body></html>h

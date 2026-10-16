@@ -98,6 +98,15 @@ body.login-page .login #loginBtn:hover{background:#f5be2d;box-shadow:0 10px 20px
 .login-back:hover{color:#a87925;text-decoration:underline}
 body.login-page #msg{margin:8px 0 0;text-align:center}
 @media(max-width:500px){body.login-page{padding:16px}body.login-page .login{padding:38px 24px 28px;border-radius:22px}.login-brand{margin-bottom:28px}}
+.campaign-image-manager{grid-column:1/-1;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel-alt)}
+.campaign-image-manager label{display:block;font-size:13px;font-weight:700}
+.campaign-image-manager input[type=file]{margin-top:7px}
+.campaign-image-count{margin:8px 0;color:var(--muted);font-size:12px}
+.campaign-image-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px}
+.campaign-image-item{position:relative;min-width:0;aspect-ratio:4/3;overflow:hidden;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.campaign-image-item img{display:block;width:100%;height:100%;object-fit:cover}
+.campaign-image-item button{position:absolute;top:5px;inset-inline-end:5px;width:28px;height:28px;padding:0;border:1px solid #fff9;border-radius:50%;background:#a52835;color:#fff;font-size:17px;line-height:1}
+.campaign-image-item button:hover{background:#811b27}
 .app{max-width:1540px;padding:26px clamp(16px,3vw,44px)}
 .top{top:10px;padding:15px 20px;border-color:#e8e5dc;border-radius:17px;background:#ffffffed;box-shadow:0 8px 24px #1720330b}
 .top h1:before{border:1px solid #ead8aa;background:linear-gradient(145deg,#fff9e9,#ecd69e);color:#8f671f}
@@ -262,6 +271,7 @@ body.dark .chart-controls button[aria-pressed="true"]{box-shadow:0 2px 7px #0004
 <div class="hero-slider-fields">
 <label><span id="heroBackgroundLabel">رابط صورة الخلفية</span><input id="heroBackgroundUrl" type="url" inputmode="url" maxlength="2000" placeholder="https://..." onchange="updateHeroBackgroundPreview()"></label>
 <label><span id="heroBackgroundFileLabel">أو اختر صورة لرفعها وحفظها (حتى 5 ميغابايت)</span><input id="heroBackgroundFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="previewHeroBackgroundFile()"><img class="hero-background-preview" id="heroBackgroundPreview" alt="" hidden></label>
+<div class="campaign-image-manager"><label><span id="campaignImagesLabel">Importer des images dans le diaporama (5 Mo maximum par image)</span><input id="campaignImagesFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple></label><p class="campaign-image-count" id="campaignImageCount" aria-live="polite"></p><div class="hero-background-actions"><button type="button" id="uploadCampaignImagesBtn" onclick="uploadCampaignImages()">Ajouter au diaporama</button></div><div class="campaign-image-gallery" id="campaignImageGallery"></div></div>
 <label><span id="heroCardXLabel">تحريك المحتوى أفقيًا</span><output id="heroCardXValue">0 px</output><input id="heroCardX" type="range" min="-200" max="200" step="5" value="0" oninput="updateHeroSettingValues()"></label>
 <label><span id="heroCardYLabel">تحريك المحتوى عموديًا</span><output id="heroCardYValue">0 px</output><input id="heroCardY" type="range" min="-200" max="200" step="5" value="0" oninput="updateHeroSettingValues()"></label>
 <label><span id="heroOverlayLabel">تعتيم الخلفية</span><output id="heroOverlayValue">15%</output><input id="heroOverlay" type="range" min="0" max="80" step="5" value="15" oninput="updateHeroSettingValues()"></label>
@@ -296,6 +306,8 @@ const translations={
 };
 Object.assign(translations.ar,{loginTitle:"مساحة الإدارة",returnToStore:"العودة إلى المتجر",showPassword:"إظهار كلمة المرور",hidePassword:"إخفاء كلمة المرور"});
 Object.assign(translations.fr,{loginTitle:"Espace administration",returnToStore:"Retour à la boutique",showPassword:"Afficher le mot de passe",hidePassword:"Masquer le mot de passe"});
+Object.assign(translations.ar,{campaignImagesLabel:"أضف صورًا إلى السلايدر (حتى 5 ميغابايت للصورة)",campaignImageCount:"{count} من 20 صورة في السلايدر",campaignImagesAdd:"إضافة إلى السلايدر",campaignImagesDelete:"حذف الصورة",campaignImagesDeleteConfirm:"هل تريد حذف هذه الصورة من السلايدر؟",campaignImagesUploaded:"تمت إضافة الصور إلى السلايدر",campaignImagesUploadFailed:"تعذرت إضافة الصور إلى السلايدر",campaignImagesLimit:"يسمح السلايدر بـ 20 صورة إجمالًا، بما فيها الصور الأربع الافتراضية"});
+Object.assign(translations.fr,{campaignImagesLabel:"Ajouter des images au diaporama (5 Mo maximum par image)",campaignImageCount:"{count} image(s) sur 20 dans le diaporama",campaignImagesAdd:"Ajouter au diaporama",campaignImagesDelete:"Supprimer l’image",campaignImagesDeleteConfirm:"Supprimer cette image du diaporama ?",campaignImagesUploaded:"Images ajoutées au diaporama",campaignImagesUploadFailed:"Impossible d’ajouter les images au diaporama",campaignImagesLimit:"Le diaporama est limité à 20 images au total, dont 4 images par défaut"});
 Object.assign(translations.ar,{orderHistory:"سجل الطلب",history:"السجل",fromStatus:"من الحالة",toStatus:"إلى الحالة",changedBy:"بواسطة",adminHistory:"سجل إجراءات المسؤولين",refresh:"تحديث",method:"الطريقة",endpoint:"المسار",noHistory:"لا توجد أحداث مسجلة",auditManualHint:"اضغط على تحديث لعرض السجل.",auditLoadFailed:"تعذر تحميل سجل إجراءات المسؤولين",overviewLabel:"نظرة عامة على لوحة الإدارة",chartsLabel:"رسوم لوحة الإدارة",trendChartTitle:"الأداء خلال الفترة",trendChartSubtitle:"ملخص المبيعات والطلبات من بيانات الطلبات",chartMetricLabel:"مقياس الرسم البياني",chartRangeLabel:"الفترة الزمنية للرسم البياني",chartSales:"المبيعات",chartOrders:"الطلبات",statusChartTitle:"الطلبات حسب الحالة",statusChartSubtitle:"اضغط على حالة لتصفية جدول الطلبات",chartNoData:"لا توجد بيانات خلال هذه الفترة",chartNoOrdersStatus:"لا توجد طلبات",chartPeriodDays:"آخر {days} يومًا"});
 Object.assign(translations.fr,{orderHistory:"Historique de la commande",history:"Historique",fromStatus:"Ancien statut",toStatus:"Nouveau statut",changedBy:"Par",adminHistory:"Journal des actions administrateur",refresh:"Actualiser",method:"Méthode",endpoint:"Route",noHistory:"Aucun événement enregistré",auditManualHint:"Cliquez sur Actualiser pour afficher le journal d’activité",overviewLabel:"Vue d’ensemble du tableau de bord",chartsLabel:"Graphiques du tableau de bord",trendChartTitle:"Performance sur la période",trendChartSubtitle:"Ventes et commandes calculées à partir des commandes",chartMetricLabel:"Mesure du graphique",chartRangeLabel:"Période du graphique",chartSales:"Ventes",chartOrders:"Commandes",statusChartTitle:"Commandes par statut",statusChartSubtitle:"Cliquez sur un statut pour filtrer les commandes",chartNoData:"Aucune donnée sur cette période",chartNoOrdersStatus:"Aucune commande",chartPeriodDays:"{days} derniers jours"});
 Object.assign(translations.ar,{categoryName:"اسم القسم",categoryIcon:"الأيقونة",saveCategory:"حفظ",deleteCategory:"حذف",productCount:"المنتجات",activeCategory:"مفعّل",inactiveCategory:"معطّل",moveUp:"تحريك لأعلى",moveDown:"تحريك لأسفل",iconTag:"عام",iconClothing:"ملابس",iconBag:"حقائب",iconWatch:"ساعات",iconAccessory:"إكسسوارات",deleteCategoryConfirm:"حذف هذا القسم؟ سيتم إلغاء ربط {count} منتج به."});
@@ -348,6 +360,7 @@ function updateLanguageToggle(){const target=currentLang==="ar"?"fr":"ar",label=
 function toggleLang(){if(navigationLinksLoaded)navigationLinks=readNavigationLinks();if(categoryIconDefinitions.length)categoryIconDefinitions=readCategoryIconDefinitions();currentLang=currentLang==="ar"?"fr":"ar";localStorage.setItem("md_lang",currentLang);document.documentElement.lang=currentLang;document.documentElement.dir=currentLang==="ar"?"rtl":"ltr";updateLanguageToggle();applyStaticTexts();renderCategories();renderCategoryIconManager();renderProductsTable();renderOrdersTable();renderShipmentsTable();renderCustomersTable();renderUsersTable();renderAuditTable();renderInventoryReport();stats();if(activeHistoryOrderId)loadOrderHistory(activeHistoryOrderId)}
 function applyStaticTexts(){
   loginTitle.textContent=t("loginTitle");loginUsernameLabel.textContent=t("username");loginPasswordLabel.textContent=t("password");loginBack.textContent=`← ${t("returnToStore")}`;loginPasswordToggle.setAttribute("aria-label",t(document.getElementById("p").type==="password"?"showPassword":"hidePassword"));
+  campaignImagesLabel.textContent=t("campaignImagesLabel");uploadCampaignImagesBtn.textContent=t("campaignImagesAdd");renderCampaignImageManager();
   document.title=`M&D Store — ${t("dashboardTitle")}`;dashboardTitle.textContent=t("dashboard");updateLanguageToggle();
   document.querySelector(".dashboard-overview").setAttribute("aria-label",t("overviewLabel"));document.querySelector(".dashboard-charts").setAttribute("aria-label",t("chartsLabel"));trendChartTitle.textContent=t("trendChartTitle");trendChartSubtitle.textContent=t("trendChartSubtitle");statusChartTitle.textContent=t("statusChartTitle");statusChartSubtitle.textContent=t("statusChartSubtitle");chartModeSales.textContent=t("chartSales");chartModeOrders.textContent=t("chartOrders");chartMetricControl.setAttribute("aria-label",t("chartMetricLabel"));chartRangeControl.setAttribute("aria-label",t("chartRangeLabel"));
   if(me)who.textContent=`${t("dashboardTitle")}: ${esc(me.username)} — ${t(me.role==="admin"?"adminRole":"managerRole")}`;
@@ -413,6 +426,8 @@ async function storeSettingsLoad(){
   settingsWhatsapp.value=settings.whatsapp;settingsPhone.value=settings.contact_phone;settingsEmail.value=settings.contact_email;settingsAddress.value=settings.contact_address;settingsHours.value=settings.opening_hours;settingsFacebook.value=settings.social_facebook;settingsInstagram.value=settings.social_instagram;settingsTiktok.value=settings.social_tiktok;settingsProductColumns.value=settings.product_columns;settingsCategoryColumns.value=settings.category_columns;
   heroBackgroundUrl.value=settings.hero_background_url;heroCardX.value=settings.hero_card_x;heroCardY.value=settings.hero_card_y;heroOverlay.value=settings.hero_overlay;heroPriceSize.value=settings.hero_price_size;updateHeroSettingValues();updateHeroBackgroundPreview();
   heroLogoUrl.value=settings.hero_logo_url;updateHeroLogoPreview();
+  campaignImages=Array.isArray(settings.campaign_images)?settings.campaign_images:[];
+  renderCampaignImageManager();
 }
 async function navigationLinksLoad(){
   try{
@@ -495,6 +510,49 @@ async function navigationLinkMove(index,direction){
   if(!links[index]||target<0||target>=links.length)return;
   [links[index],links[target]]=[links[target],links[index]];
   await navigationLinksSave(links);
+}
+let campaignImages=[];
+function renderCampaignImageManager(){
+  if(!document.getElementById("campaignImageGallery"))return;
+  campaignImageCount.textContent=t("campaignImageCount").replace("{count}",String(4+campaignImages.length));
+  campaignImageGallery.replaceChildren();
+  campaignImages.forEach(image=>{
+    if(!/^[a-f0-9]{32}$/.test(image.id))return;
+    const item=document.createElement("div"),preview=document.createElement("img"),remove=document.createElement("button");
+    item.className="campaign-image-item";preview.src=`/api/store-assets/campaign/${image.id}`;preview.alt=t("campaignImagesDelete");preview.loading="lazy";
+    remove.type="button";remove.textContent="×";remove.title=t("campaignImagesDelete");remove.setAttribute("aria-label",t("campaignImagesDelete"));remove.addEventListener("click",()=>deleteCampaignImage(image.id));
+    item.append(preview,remove);campaignImageGallery.append(item);
+  });
+  const remaining=Math.max(0,20-4-campaignImages.length);
+  campaignImagesFile.disabled=remaining===0;uploadCampaignImagesBtn.disabled=remaining===0;
+}
+async function uploadCampaignImages(){
+  const files=[...campaignImagesFile.files],remaining=20-4-campaignImages.length;
+  if(!files.length)return;
+  if(files.length>remaining){alert(t("campaignImagesLimit"));return}
+  const supportedTypes=new Set(["image/jpeg","image/png","image/webp","image/gif"]);
+  if(files.some(file=>!supportedTypes.has(file.type)||file.size>5*1024*1024)){alert(t("heroBackgroundInvalid"));return}
+  uploadCampaignImagesBtn.disabled=true;
+  try{
+    const formData=new FormData();files.forEach(file=>formData.append("images",file));
+    const response=await api("/api/admin/settings/campaign-images",{method:"POST",body:formData}),result=await response.json();
+    if(!response.ok){alert(result.error||t("campaignImagesUploadFailed"));return}
+    campaignImages=result.campaign_images;campaignImagesFile.value="";renderCampaignImageManager();showToast(t("campaignImagesUploaded"));
+  }catch(error){
+    console.error("Could not upload campaign slideshow images:",error);alert(t("campaignImagesUploadFailed"));
+  }finally{
+    uploadCampaignImagesBtn.disabled=campaignImages.length>=16;
+  }
+}
+async function deleteCampaignImage(id){
+  if(!confirm(t("campaignImagesDeleteConfirm")))return;
+  try{
+    const response=await api(`/api/admin/settings/campaign-images/${encodeURIComponent(id)}`,{method:"DELETE"}),result=await response.json();
+    if(!response.ok){alert(result.error||t("campaignImagesUploadFailed"));return}
+    campaignImages=result.campaign_images;renderCampaignImageManager();
+  }catch(error){
+    console.error("Could not delete campaign slideshow image:",error);alert(t("campaignImagesUploadFailed"));
+  }
 }
 function updateHeroSettingValues(){
   const suffix=currentLang==="fr"?"px":"بكسل";

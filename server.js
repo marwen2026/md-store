@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
+const crypto = require("crypto");
 const { Pool } = require("pg");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -22,6 +23,9 @@ const PAYMENT_METHOD = "cash_on_delivery";
 const MAX_MONEY = 9999999999.99;
 const FREE_SHIPPING_THRESHOLD = 199;
 const LOW_STOCK_THRESHOLD = 5;
+const DEFAULT_CAMPAIGN_IMAGE_COUNT = 4;
+const MAX_CAMPAIGN_IMAGE_COUNT = 20;
+const MAX_CUSTOM_CAMPAIGN_IMAGE_COUNT = MAX_CAMPAIGN_IMAGE_COUNT - DEFAULT_CAMPAIGN_IMAGE_COUNT;
 const DEFAULT_NAVIGATION_LINKS = [
   { label_ar: "الرئيسية", label_fr: "Accueil", href: "#" },
   { label_ar: "جديدنا", label_fr: "Nouveautés", href: "#products" },
@@ -406,6 +410,18 @@ const heroBackgroundUpload = multer({
     callback(null, true);
   }
 });
+const campaignImagesUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024, files: MAX_CUSTOM_CAMPAIGN_IMAGE_COUNT },
+  fileFilter: (req, file, callback) => {
+    if (!/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) {
+      const error = new Error("Seuls les fichiers JPEG, PNG, WebP et GIF sont acceptés");
+      error.status = 400;
+      return callback(error);
+    }
+    callback(null, true);
+  }
+});
 const productUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
@@ -437,6 +453,14 @@ async function readStoreSettings() {
   return Object.fromEntries(rows.map(({ key, value }) => [key, value]));
 }
 
+function parseCampaignImageIds(value) {
+  const ids = JSON.parse(value || "[]");
+  if (!Array.isArray(ids) || ids.some(id => typeof id !== "string" || !/^[a-f0-9]{32}$/.test(id))) {
+    throw new Error("Saved campaign image list is invalid");
+  }
+  return ids;
+}
+
 async function categoryIconIsValid(icon) {
   const result = await pool.query("SELECT 1 FROM category_icon_options WHERE id = $1", [icon]);
   return result.rowCount > 0;
@@ -466,6 +490,10 @@ app.get("/api/config", async (req, res) => {
       socialFacebook: settings.social_facebook || "",
       socialInstagram: settings.social_instagram || "",
       socialTiktok: settings.social_tiktok || "",
+      campaignImages: parseCampaignImageIds(settings.campaign_images).map(id => ({
+        id,
+        url: `/api/store-assets/campaign/${id}`
+      })),
       heroBackgroundUrl: settings.hero_background_url || "",
       heroLogoUrl: settings.hero_logo_url || "",
       heroCardX: Number.isFinite(heroCardX) ? heroCardX : 0,
@@ -499,6 +527,28 @@ app.get("/api/store-assets/hero-background", async (req, res) => {
   } catch (error) {
     console.error("Could not load saved storefront background image:", error);
     res.status(500).json({ error: "Could not load hero background image" });
+  }
+});
+
+app.get("/api/store-assets/campaign/:id", async (req, res) => {
+  const { id } = req.params;
+  if (!/^[a-f0-9]{32}$/.test(id)) return res.status(404).json({ error: "Campaign image not found" });
+  try {
+    const { rows } = await pool.query(
+      "SELECT image_data, content_type FROM store_assets WHERE asset_key = $1",
+      [`campaign_${id}`]
+    );
+    const asset = rows[0];
+    if (!asset?.image_data || !asset.content_type) {
+      return res.status(404).json({ error: "Campaign image not found" });
+    }
+    res.set({
+      "Cache-Control": "public, max-age=3600",
+      "X-Content-Type-Options": "nosniff"
+    }).type(asset.content_type).send(asset.image_data);
+  } catch (error) {
+    console.error("Could not load campaign slide image:", error);
+    res.status(500).json({ error: "Could not load campaign image" });
   }
 });
 
@@ -659,6 +709,10 @@ app.get("/api/admin/settings", auth, role("admin"), async (req, res) => {
       social_facebook: settings.social_facebook || "",
       social_instagram: settings.social_instagram || "",
       social_tiktok: settings.social_tiktok || "",
+      campaign_images: parseCampaignImageIds(settings.campaign_images).map(id => ({
+        id,
+        url: `/api/store-assets/campaign/${id}`
+      })),
       hero_background_url: settings.hero_background_url || "",
       hero_logo_url: settings.hero_logo_url || "",
       hero_card_x: settings.hero_card_x || "0",
@@ -801,6 +855,92 @@ app.post("/api/admin/settings/hero-background", auth, role("admin"), heroBackgro
   } catch (error) {
     console.error("Could not save storefront hero background image:", error);
     res.status(500).json({ error: "Could not save hero background image" });
+  }
+});
+app.post("/api/admin/settings/campaign-images", auth, role("admin"), campaignImagesUpload.array("images", MAX_CUSTOM_CAMPAIGN_IMAGE_COUNT), async (req, res) => {
+  const files = req.files || [];
+  if (!files.length) return res.status(400).json({ error: "Select at least one image to upload" });
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query(
+      `INSERT INTO store_settings(key, value) VALUES('campaign_images', '[]')
+       ON CONFLICT (key) DO NOTHING`
+    );
+    const { rows } = await client.query(
+      "SELECT value FROM store_settings WHERE key = 'campaign_images' FOR UPDATE"
+    );
+    const currentIds = parseCampaignImageIds(rows[0]?.value);
+    if (DEFAULT_CAMPAIGN_IMAGE_COUNT + currentIds.length + files.length > MAX_CAMPAIGN_IMAGE_COUNT) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        error: `The slideshow supports up to ${MAX_CAMPAIGN_IMAGE_COUNT} images, including its ${DEFAULT_CAMPAIGN_IMAGE_COUNT} default images`
+      });
+    }
+    const ids = files.map(() => crypto.randomBytes(16).toString("hex"));
+    for (let index = 0; index < files.length; index++) {
+      await client.query(
+        `INSERT INTO store_assets(asset_key, image_data, content_type)
+         VALUES($1, $2, $3)`,
+        [`campaign_${ids[index]}`, files[index].buffer, files[index].mimetype]
+      );
+    }
+    const nextIds = [...currentIds, ...ids];
+    await client.query(
+      `UPDATE store_settings SET value = $1 WHERE key = 'campaign_images'`,
+      [JSON.stringify(nextIds)]
+    );
+    await client.query("COMMIT");
+    res.json({
+      ok: true,
+      campaign_images: nextIds.map(id => ({ id, url: `/api/store-assets/campaign/${id}` })),
+      total_images: DEFAULT_CAMPAIGN_IMAGE_COUNT + nextIds.length,
+      max_images: MAX_CAMPAIGN_IMAGE_COUNT
+    });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Could not upload campaign slideshow images:", error);
+    res.status(500).json({ error: "Could not save campaign slideshow images" });
+  } finally {
+    client.release();
+  }
+});
+app.delete("/api/admin/settings/campaign-images/:id", auth, role("admin"), async (req, res) => {
+  const { id } = req.params;
+  if (!/^[a-f0-9]{32}$/.test(id)) return res.status(400).json({ error: "Invalid campaign image ID" });
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const { rows } = await client.query(
+      "SELECT value FROM store_settings WHERE key = 'campaign_images' FOR UPDATE"
+    );
+    const currentIds = parseCampaignImageIds(rows[0]?.value);
+    if (!currentIds.includes(id)) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Campaign image not found" });
+    }
+    const nextIds = currentIds.filter(currentId => currentId !== id);
+    await client.query(
+      "UPDATE store_settings SET value = $1 WHERE key = 'campaign_images'",
+      [JSON.stringify(nextIds)]
+    );
+    await client.query("DELETE FROM store_assets WHERE asset_key = $1", [`campaign_${id}`]);
+    await client.query("COMMIT");
+    res.json({
+      ok: true,
+      campaign_images: nextIds.map(currentId => ({
+        id: currentId,
+        url: `/api/store-assets/campaign/${currentId}`
+      })),
+      total_images: DEFAULT_CAMPAIGN_IMAGE_COUNT + nextIds.length,
+      max_images: MAX_CAMPAIGN_IMAGE_COUNT
+    });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Could not delete campaign slideshow image:", error);
+    res.status(500).json({ error: "Could not delete campaign image" });
+  } finally {
+    client.release();
   }
 });
 app.post("/api/admin/settings/hero-logo", auth, role("admin"), upload.single("image"), async (req, res) => {
