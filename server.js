@@ -26,6 +26,17 @@ const LOW_STOCK_THRESHOLD = 5;
 const DEFAULT_CAMPAIGN_IMAGE_COUNT = 4;
 const MAX_CAMPAIGN_IMAGE_COUNT = 20;
 const MAX_CUSTOM_CAMPAIGN_IMAGE_COUNT = MAX_CAMPAIGN_IMAGE_COUNT - DEFAULT_CAMPAIGN_IMAGE_COUNT;
+const HERO_DRAFT_SETTINGS = [
+  "hero_background_url",
+  "hero_logo_url",
+  "hero_card_x",
+  "hero_card_y",
+  "hero_overlay",
+  "hero_price_size",
+  "product_columns",
+  "category_columns",
+  "mobile_logo_url"
+];
 const DEFAULT_NAVIGATION_LINKS = [
   { label_ar: "الرئيسية", label_fr: "Accueil", href: "#" },
   { label_ar: "جديدنا", label_fr: "Nouveautés", href: "#products" },
@@ -496,6 +507,7 @@ app.get("/api/config", async (req, res) => {
       })),
       heroBackgroundUrl: settings.hero_background_url || "",
       heroLogoUrl: settings.hero_logo_url || "",
+      mobileLogoUrl: settings.mobile_logo_url || "",
       heroCardX: Number.isFinite(heroCardX) ? heroCardX : 0,
       heroCardY: Number.isFinite(heroCardY) ? heroCardY : 0,
       heroOverlay: Number.isFinite(heroOverlay) ? heroOverlay : 15,
@@ -530,13 +542,35 @@ app.get("/api/store-assets/hero-background", async (req, res) => {
   }
 });
 
+app.get("/api/store-assets/hero-background-draft", async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      "SELECT image_data, content_type FROM store_assets WHERE asset_key = 'hero_background_draft'"
+    );
+    const asset = rows[0];
+    if (!asset?.image_data || !asset.content_type) {
+      return res.status(404).json({ error: "Draft hero background image not found" });
+    }
+    res.set({
+      "Cache-Control": "no-cache",
+      "X-Content-Type-Options": "nosniff"
+    }).type(asset.content_type).send(asset.image_data);
+  } catch (error) {
+    console.error("Could not load draft storefront background image:", error);
+    res.status(500).json({ error: "Could not load draft hero background image" });
+  }
+});
+
 app.get("/api/store-assets/campaign/:id", async (req, res) => {
   const { id } = req.params;
   if (!/^[a-f0-9]{32}$/.test(id)) return res.status(404).json({ error: "Campaign image not found" });
   try {
     const { rows } = await pool.query(
-      "SELECT image_data, content_type FROM store_assets WHERE asset_key = $1",
-      [`campaign_${id}`]
+      `SELECT image_data, content_type FROM store_assets
+       WHERE asset_key = ANY($1::text[])
+       ORDER BY CASE WHEN asset_key = $2 THEN 0 ELSE 1 END
+       LIMIT 1`,
+      [[`campaign_${id}`, `draft_campaign_${id}`], `campaign_${id}`]
     );
     const asset = rows[0];
     if (!asset?.image_data || !asset.content_type) {
@@ -700,6 +734,7 @@ app.put("/api/admin/navigation-links", auth, role("admin"), async (req, res) => 
 app.get("/api/admin/settings", auth, role("admin"), async (req, res) => {
   try {
     const settings = await readStoreSettings();
+    const draftCampaignImages = settings.draft_campaign_images ?? settings.campaign_images;
     res.json({
       whatsapp: settings.whatsapp || "",
       contact_phone: settings.contact_phone || "",
@@ -709,18 +744,21 @@ app.get("/api/admin/settings", auth, role("admin"), async (req, res) => {
       social_facebook: settings.social_facebook || "",
       social_instagram: settings.social_instagram || "",
       social_tiktok: settings.social_tiktok || "",
-      campaign_images: parseCampaignImageIds(settings.campaign_images).map(id => ({
+      campaign_images: parseCampaignImageIds(draftCampaignImages).map(id => ({
         id,
         url: `/api/store-assets/campaign/${id}`
       })),
-      hero_background_url: settings.hero_background_url || "",
-      hero_logo_url: settings.hero_logo_url || "",
-      hero_card_x: settings.hero_card_x || "0",
-      hero_card_y: settings.hero_card_y || "0",
-      hero_overlay: settings.hero_overlay || "15",
-      hero_price_size: settings.hero_price_size || "29",
-      product_columns: settings.product_columns || "4",
-      category_columns: settings.category_columns || "4"
+      hero_background_url: settings.draft_hero_background_url ?? settings.hero_background_url ?? "",
+      hero_logo_url: settings.draft_hero_logo_url ?? settings.hero_logo_url ?? "",
+      mobile_logo_url: settings.draft_mobile_logo_url ?? settings.mobile_logo_url ?? "",
+      hero_card_x: settings.draft_hero_card_x ?? settings.hero_card_x ?? "0",
+      hero_card_y: settings.draft_hero_card_y ?? settings.hero_card_y ?? "0",
+      hero_overlay: settings.draft_hero_overlay ?? settings.hero_overlay ?? "15",
+      hero_price_size: settings.draft_hero_price_size ?? settings.hero_price_size ?? "29",
+      product_columns: settings.draft_product_columns ?? settings.product_columns ?? "4",
+      category_columns: settings.draft_category_columns ?? settings.category_columns ?? "4",
+      hero_settings_has_draft: HERO_DRAFT_SETTINGS.some(key => settings[`draft_${key}`] !== undefined) ||
+        settings.draft_campaign_images !== undefined
     });
   } catch (error) {
     console.error("Could not load administrator store settings:", error);
@@ -772,9 +810,19 @@ app.put("/api/admin/settings", auth, role("admin"), async (req, res) => {
     }
     settings[key] = url.toString();
   }
-  for (const key of ["hero_background_url", "hero_logo_url"]) {
+  if (req.body.mobile_logo_url !== undefined) {
+    if (typeof req.body.mobile_logo_url !== "string") {
+      return res.status(400).json({ error: "Invalid mobile_logo_url" });
+    }
+    settings.mobile_logo_url = req.body.mobile_logo_url.trim();
+    if (settings.mobile_logo_url.length > 2000) {
+      return res.status(400).json({ error: "mobile_logo_url is too long" });
+    }
+  }
+  for (const key of ["hero_background_url", "hero_logo_url", "mobile_logo_url"]) {
+    if (settings[key] === undefined) continue;
     if (key === "hero_background_url" &&
-      ["/api/store-assets/hero-background", "/hero-background.png"].includes(settings[key])) continue;
+      ["/api/store-assets/hero-background", "/api/store-assets/hero-background-draft", "/hero-background.png"].includes(settings[key])) continue;
     if (!settings[key] || /^\/uploads\/[A-Za-z0-9._-]+$/.test(settings[key])) continue;
     let url;
     try {
@@ -787,6 +835,7 @@ app.put("/api/admin/settings", auth, role("admin"), async (req, res) => {
     }
     settings[key] = url.toString();
   }
+  const draftSettings = {};
   for (const [key, min, max] of [
     ["hero_card_x", -200, 200],
     ["hero_card_y", -200, 200],
@@ -797,18 +846,25 @@ app.put("/api/admin/settings", auth, role("admin"), async (req, res) => {
     if (typeof value !== "number" || !Number.isFinite(value) || value < min || value > max) {
       return res.status(400).json({ error: `Invalid ${key}` });
     }
-    settings[key] = String(value);
+    draftSettings[`draft_${key}`] = String(value);
   }
   if (!Number.isInteger(req.body.product_columns) || req.body.product_columns < 2 || req.body.product_columns > 6) {
     return res.status(400).json({ error: "Invalid product_columns" });
   }
-  settings.product_columns = String(req.body.product_columns);
+  draftSettings.draft_product_columns = String(req.body.product_columns);
   if (!Number.isInteger(req.body.category_columns) || req.body.category_columns < 2 || req.body.category_columns > 6) {
     return res.status(400).json({ error: "Invalid category_columns" });
   }
-  settings.category_columns = String(req.body.category_columns);
+  draftSettings.draft_category_columns = String(req.body.category_columns);
 
-  const entries = Object.entries(settings);
+  draftSettings.draft_hero_background_url = settings.hero_background_url;
+  draftSettings.draft_hero_logo_url = settings.hero_logo_url;
+  if (settings.mobile_logo_url !== undefined) {
+    draftSettings.draft_mobile_logo_url = settings.mobile_logo_url;
+  }
+  for (const key of ["hero_background_url", "hero_logo_url", "mobile_logo_url"]) delete settings[key];
+
+  const entries = [...Object.entries(settings), ...Object.entries(draftSettings)];
   try {
     await pool.query(
       `INSERT INTO store_settings(key, value)
@@ -823,16 +879,116 @@ app.put("/api/admin/settings", auth, role("admin"), async (req, res) => {
   }
 });
 
+app.post("/api/admin/settings/activate", auth, role("admin"), async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const draftKeys = [...HERO_DRAFT_SETTINGS.map(key => `draft_${key}`), "draft_campaign_images"];
+    const { rows } = await client.query(
+      "SELECT key, value FROM store_settings WHERE key = ANY($1::text[]) FOR UPDATE",
+      [draftKeys]
+    );
+    if (!rows.length) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "Save slider changes before activating them" });
+    }
+    const draft = Object.fromEntries(rows.map(({ key, value }) => [key, value]));
+    if (draft.draft_campaign_images !== undefined) {
+      const campaignIds = parseCampaignImageIds(draft.draft_campaign_images);
+      if (campaignIds.length > MAX_CUSTOM_CAMPAIGN_IMAGE_COUNT) {
+        throw new Error("Draft campaign image list exceeds the supported limit");
+      }
+      for (const id of campaignIds) {
+        const { rows: assets } = await client.query(
+          `SELECT asset_key, image_data, content_type FROM store_assets
+           WHERE asset_key = ANY($1::text[])
+           ORDER BY CASE WHEN asset_key = $2 THEN 0 ELSE 1 END
+           LIMIT 1`,
+          [[`draft_campaign_${id}`, `campaign_${id}`], `draft_campaign_${id}`]
+        );
+        const asset = assets[0];
+        if (!asset?.image_data || !asset.content_type) {
+          throw new Error(`Draft campaign image ${id} is missing`);
+        }
+        await client.query(
+          `INSERT INTO store_assets(asset_key, image_data, content_type)
+           VALUES($1, $2, $3)
+           ON CONFLICT (asset_key) DO UPDATE
+             SET image_data = EXCLUDED.image_data,
+                 content_type = EXCLUDED.content_type,
+                 updated_at = NOW()`,
+          [`campaign_${id}`, asset.image_data, asset.content_type]
+        );
+      }
+      await client.query(
+        `DELETE FROM store_assets
+         WHERE asset_key ~ '^campaign_[a-f0-9]{32}$'
+           AND asset_key <> ALL($1::text[])`,
+        [campaignIds.map(id => `campaign_${id}`)]
+      );
+      await client.query(
+        `INSERT INTO store_settings(key, value) VALUES('campaign_images', $1)
+         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+        [JSON.stringify(campaignIds)]
+      );
+    }
+    for (const key of HERO_DRAFT_SETTINGS) {
+      const draftKey = `draft_${key}`;
+      if (draft[draftKey] === undefined) continue;
+      let value = draft[draftKey];
+      if (key === "hero_background_url" && value === "/api/store-assets/hero-background-draft") {
+        const { rows: backgroundRows } = await client.query(
+          "SELECT image_data, content_type FROM store_assets WHERE asset_key = 'hero_background_draft'"
+        );
+        const background = backgroundRows[0];
+        if (!background?.image_data || !background.content_type) {
+          throw new Error("Draft hero background image is missing");
+        }
+        await client.query(
+          `INSERT INTO store_assets(asset_key, image_data, content_type)
+           VALUES('hero_background', $1, $2)
+           ON CONFLICT (asset_key) DO UPDATE
+             SET image_data = EXCLUDED.image_data,
+                 content_type = EXCLUDED.content_type,
+                 updated_at = NOW()`,
+          [background.image_data, background.content_type]
+        );
+        value = "/api/store-assets/hero-background";
+      }
+      await client.query(
+        `INSERT INTO store_settings(key, value) VALUES($1, $2)
+         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+        [key, value]
+      );
+    }
+    await client.query(
+      "DELETE FROM store_settings WHERE key = ANY($1::text[])",
+      [draftKeys]
+    );
+    await client.query(
+      "DELETE FROM store_assets WHERE asset_key = 'hero_background_draft' OR asset_key ~ '^draft_campaign_[a-f0-9]{32}$'"
+    );
+    await client.query("COMMIT");
+    res.json({ ok: true });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Could not activate draft storefront hero settings:", error);
+    res.status(500).json({ error: "Could not activate slider settings" });
+  } finally {
+    client.release();
+  }
+});
+
 app.post("/api/admin/settings/hero-background", auth, role("admin"), heroBackgroundUpload.single("image"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "Select an image to upload" });
-  const imagePath = "/api/store-assets/hero-background";
+  const imagePath = "/api/store-assets/hero-background-draft";
   try {
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
       await client.query(
         `INSERT INTO store_assets(asset_key, image_data, content_type)
-         VALUES('hero_background', $1, $2)
+         VALUES('hero_background_draft', $1, $2)
          ON CONFLICT (asset_key) DO UPDATE
            SET image_data = EXCLUDED.image_data,
                content_type = EXCLUDED.content_type,
@@ -840,7 +996,7 @@ app.post("/api/admin/settings/hero-background", auth, role("admin"), heroBackgro
         [req.file.buffer, req.file.mimetype]
       );
       await client.query(
-        `INSERT INTO store_settings(key, value) VALUES('hero_background_url', $1)
+        `INSERT INTO store_settings(key, value) VALUES('draft_hero_background_url', $1)
          ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
         [imagePath]
       );
@@ -864,13 +1020,18 @@ app.post("/api/admin/settings/campaign-images", auth, role("admin"), campaignIma
   try {
     await client.query("BEGIN");
     await client.query(
-      `INSERT INTO store_settings(key, value) VALUES('campaign_images', '[]')
+      `INSERT INTO store_settings(key, value)
+       SELECT 'draft_campaign_images', COALESCE(
+         (SELECT value FROM store_settings WHERE key = 'campaign_images'), '[]'
+       )
        ON CONFLICT (key) DO NOTHING`
     );
     const { rows } = await client.query(
-      "SELECT value FROM store_settings WHERE key = 'campaign_images' FOR UPDATE"
+      `SELECT key, value FROM store_settings
+       WHERE key IN ('draft_campaign_images', 'campaign_images')
+       ORDER BY key FOR UPDATE`
     );
-    const currentIds = parseCampaignImageIds(rows[0]?.value);
+    const currentIds = parseCampaignImageIds(rows.find(row => row.key === "draft_campaign_images")?.value);
     if (DEFAULT_CAMPAIGN_IMAGE_COUNT + currentIds.length + files.length > MAX_CAMPAIGN_IMAGE_COUNT) {
       await client.query("ROLLBACK");
       return res.status(400).json({
@@ -882,12 +1043,12 @@ app.post("/api/admin/settings/campaign-images", auth, role("admin"), campaignIma
       await client.query(
         `INSERT INTO store_assets(asset_key, image_data, content_type)
          VALUES($1, $2, $3)`,
-        [`campaign_${ids[index]}`, files[index].buffer, files[index].mimetype]
+        [`draft_campaign_${ids[index]}`, files[index].buffer, files[index].mimetype]
       );
     }
     const nextIds = [...currentIds, ...ids];
     await client.query(
-      `UPDATE store_settings SET value = $1 WHERE key = 'campaign_images'`,
+      `UPDATE store_settings SET value = $1 WHERE key = 'draft_campaign_images'`,
       [JSON.stringify(nextIds)]
     );
     await client.query("COMMIT");
@@ -911,20 +1072,29 @@ app.delete("/api/admin/settings/campaign-images/:id", auth, role("admin"), async
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    const { rows } = await client.query(
-      "SELECT value FROM store_settings WHERE key = 'campaign_images' FOR UPDATE"
+    await client.query(
+      `INSERT INTO store_settings(key, value)
+       SELECT 'draft_campaign_images', COALESCE(
+         (SELECT value FROM store_settings WHERE key = 'campaign_images'), '[]'
+       )
+       ON CONFLICT (key) DO NOTHING`
     );
-    const currentIds = parseCampaignImageIds(rows[0]?.value);
+    const { rows } = await client.query(
+      `SELECT key, value FROM store_settings
+       WHERE key IN ('draft_campaign_images', 'campaign_images')
+       ORDER BY key FOR UPDATE`
+    );
+    const currentIds = parseCampaignImageIds(rows.find(row => row.key === "draft_campaign_images")?.value);
     if (!currentIds.includes(id)) {
       await client.query("ROLLBACK");
       return res.status(404).json({ error: "Campaign image not found" });
     }
     const nextIds = currentIds.filter(currentId => currentId !== id);
     await client.query(
-      "UPDATE store_settings SET value = $1 WHERE key = 'campaign_images'",
+      "UPDATE store_settings SET value = $1 WHERE key = 'draft_campaign_images'",
       [JSON.stringify(nextIds)]
     );
-    await client.query("DELETE FROM store_assets WHERE asset_key = $1", [`campaign_${id}`]);
+    await client.query("DELETE FROM store_assets WHERE asset_key = $1", [`draft_campaign_${id}`]);
     await client.query("COMMIT");
     res.json({
       ok: true,
@@ -948,7 +1118,7 @@ app.post("/api/admin/settings/hero-logo", auth, role("admin"), upload.single("im
   const imagePath = `/uploads/${req.file.filename}`;
   try {
     await pool.query(
-      `INSERT INTO store_settings(key, value) VALUES('hero_logo_url', $1)
+      `INSERT INTO store_settings(key, value) VALUES('draft_hero_logo_url', $1)
        ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
       [imagePath]
     );
@@ -961,6 +1131,26 @@ app.post("/api/admin/settings/hero-logo", auth, role("admin"), upload.single("im
       console.error("Could not remove the failed hero logo upload:", cleanupError);
     }
     res.status(500).json({ error: "Could not save hero logo image" });
+  }
+});
+app.post("/api/admin/settings/mobile-logo", auth, role("admin"), upload.single("image"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "Select a logo image to upload" });
+  const imagePath = `/uploads/${req.file.filename}`;
+  try {
+    await pool.query(
+      `INSERT INTO store_settings(key, value) VALUES('draft_mobile_logo_url', $1)
+       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+      [imagePath]
+    );
+    res.json({ ok: true, mobile_logo_url: imagePath });
+  } catch (error) {
+    console.error("Could not save draft mobile menu logo:", error);
+    try {
+      await fs.promises.unlink(path.join(uploadDir, req.file.filename));
+    } catch (cleanupError) {
+      console.error("Could not remove the failed mobile logo upload:", cleanupError);
+    }
+    res.status(500).json({ error: "Could not save mobile menu logo" });
   }
 });
 app.get("/api/admin/events", auth, (req, res) => {

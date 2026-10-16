@@ -15,6 +15,7 @@ body.dark .language-toggle{border-color:#564a2c;background:linear-gradient(135de
 <style>
 .modal-backdrop{display:none;position:fixed;inset:0;z-index:120;background:#0009;align-items:center;justify-content:center;padding:16px}
 .modal-backdrop.open{display:flex}.modal-card{width:min(760px,100%);max-height:92vh;overflow:auto;background:var(--panel);color:var(--text);padding:20px;border-radius:12px;box-shadow:0 20px 60px #0005}
+.store-settings-modal,.dashboard-section-modal{display:flex;width:min(1200px,100%);flex-direction:column;overflow:hidden;padding:0}.store-settings-modal{width:min(1100px,100%)}.store-settings-modal .modal-head,.dashboard-section-modal .modal-head{flex:0 0 auto;padding:16px 20px;border-bottom:1px solid var(--line)}.store-settings-modal .modal-head h2,.dashboard-section-modal .modal-head h2{font-size:19px}.store-settings-modal .modal-head button,.dashboard-section-modal .modal-head button{width:38px;height:38px;padding:0;border:1px solid var(--line);border-radius:10px;background:var(--panel-alt);color:var(--text);font-size:24px}.store-settings-body,.dashboard-section-body{min-height:0;overflow:auto;padding:0 20px 20px}.store-settings-body .box,.dashboard-section-body .box{margin:0;padding:18px 0 0;border:0;border-radius:0;box-shadow:none}
 .modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.modal-head h2{margin:0}.image-viewer img{display:block;max-width:min(92vw,1200px);max-height:86vh;object-fit:contain;cursor:zoom-out}.zoom-image{position:fixed;inset:0;background:#000e;z-index:150;display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}.zoom-image.open{display:flex}.zoom-image img{max-width:100%;max-height:100%;object-fit:contain;transition:transform .2s;cursor:zoom-in}.zoom-image img.zoomed{transform:scale(1.7);cursor:zoom-out}.thumbs img,.thumb{cursor:zoom-in}
 .ad-check{display:flex;align-items:center;gap:8px;margin:8px 0 12px}.ad-check input{width:auto;margin:0}
 .shipment-select{width:18px;height:18px;margin:0;accent-color:var(--accent)}button:disabled{opacity:.45;cursor:not-allowed}.shipment-address{min-width:180px}
@@ -36,8 +37,8 @@ body{min-height:100vh;background:radial-gradient(ellipse at 12% 0,#fef3c733,tran
 .toolbar button,.export-bar button,.search-panel button,.category-create button{min-height:39px;border-radius:10px;font-weight:700;transition:transform .16s ease,box-shadow .16s ease,background .16s ease}
 .toolbar button:hover,.export-bar button:hover,.search-panel button:hover,.category-create button:hover{transform:translateY(-1px);box-shadow:0 5px 14px #11182718}
 .dashboard-nav{display:flex;gap:7px;align-items:center;overflow:auto;margin:0 0 18px;padding:5px;border:1px solid var(--line);border-radius:14px;background:var(--panel);box-shadow:var(--shadow);scrollbar-width:thin}
-.dashboard-nav a{flex:0 0 auto;padding:9px 14px;border-radius:10px;background:transparent;color:var(--muted);font-size:13px;font-weight:700;transition:background .16s ease,color .16s ease}.dashboard-nav a[hidden]{display:none}
-.dashboard-nav a:hover,.dashboard-nav a:focus-visible{outline:none;background:var(--accent-soft);color:var(--text)}
+.dashboard-nav a,.dashboard-nav button{flex:0 0 auto;padding:9px 14px;border:0;border-radius:10px;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer;transition:background .16s ease,color .16s ease}.dashboard-nav a[hidden],.dashboard-nav button[hidden]{display:none}
+.dashboard-nav a:hover,.dashboard-nav a:focus-visible,.dashboard-nav button:hover,.dashboard-nav button:focus-visible{outline:none;background:var(--accent-soft);color:var(--text)}
 .cards{gap:14px;margin-bottom:20px}.stat{position:relative;min-height:120px;margin:0;padding:20px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,var(--panel),var(--panel-alt));box-shadow:var(--shadow);overflow:hidden}
 .stat:after{content:"";position:absolute;inset-inline-end:-22px;bottom:-42px;width:112px;height:112px;border:16px solid color-mix(in srgb,var(--accent) 13%,transparent);border-radius:50%}
 .stat span:first-child{color:var(--muted);font-size:13px;font-weight:700}.stat b{display:inline-block;margin-top:9px;font-size:31px;line-height:1.2;color:var(--text);font-variant-numeric:tabular-nums}.stat #currencySuffix{font-size:12px;color:var(--muted)}
@@ -146,7 +147,7 @@ body.dark .stat,body.dark .stock-overview,body.dark .box,body.dark .modal-card{b
 body.dark .stock-overview-item,body.dark th{background:var(--panel-alt)}
 @media(max-width:1000px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}.dashboard-nav{top:10px}}
 @media(max-width:800px){.app{padding:16px 14px}.top{top:0}.dashboard-nav{position:relative;top:auto}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.stat{min-height:112px}}
-@media(max-width:600px){.app{padding:12px 10px}.top{padding:14px;border-radius:14px}.top h1{font-size:20px}.toolbar{justify-content:flex-start}.toolbar button{flex:1;padding-inline:8px}.dashboard-nav{gap:3px;padding:4px}.dashboard-nav a{padding:8px 10px;font-size:12px}.cards{gap:8px}.stat{min-height:104px;padding:13px;border-radius:13px}.stat b{font-size:23px}.box,.stock-overview{padding:14px;border-radius:14px}.stock-overview-grid{gap:7px}.stock-overview-item{padding:11px}.login{margin:8vh auto;padding:30px 24px;border-radius:20px}.login>.language-toggle{top:16px;inset-inline-end:16px}.login h2{font-size:24px}}
+@media(max-width:600px){.app{padding:12px 10px}.top{padding:14px;border-radius:14px}.top h1{font-size:20px}.toolbar{justify-content:flex-start}.toolbar button{flex:1;padding-inline:8px}.dashboard-nav{gap:3px;padding:4px}.dashboard-nav a,.dashboard-nav button{padding:8px 10px;font-size:12px}.store-settings-modal .modal-head,.dashboard-section-modal .modal-head{padding:12px 14px}.store-settings-body,.dashboard-section-body{padding:0 14px 14px}.cards{gap:8px}.stat{min-height:104px;padding:13px;border-radius:13px}.stat b{font-size:23px}.box,.stock-overview{padding:14px;border-radius:14px}.stock-overview-grid{gap:7px}.stock-overview-item{padding:11px}.login{margin:8vh auto;padding:30px 24px;border-radius:20px}.login>.language-toggle{top:16px;inset-inline-end:16px}.login h2{font-size:24px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
 .dashboard-overview{display:grid;gap:18px;margin-bottom:20px}
 .dashboard-overview .cards{grid-template-columns:repeat(3,minmax(0,1fr));margin:0}
@@ -204,7 +205,7 @@ body.dark .chart-controls button[aria-pressed="true"]{box-shadow:0 2px 7px #0004
 </style>
 <section class="login" id="login" aria-labelledby="loginTitle"><button class="language-toggle" id="loginLangToggle" type="button" onclick="toggleLang()" aria-label="Passer au français" title="Passer au français"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.25"/><path d="M2.9 9h18.2M2.9 15h18.2M12 2.75c2.1 2.3 3.2 5.4 3.2 9.25S14.1 19 12 21.25C9.9 19 8.8 15.85 8.8 12S9.9 5.05 12 2.75Z"/></svg><span id="loginLanguageTarget">FR</span></button><div class="login-brand" aria-label="MA-DOR"><span class="login-brand-mark">MA-DOR</span></div><h2 id="loginTitle">Espace administration</h2><p class="muted" id="loginSubtitle">Connectez-vous pour gérer votre boutique</p><form id="loginForm" onsubmit="doLogin(event)"><label class="login-field" for="u"><span id="loginUsernameLabel">Nom d’utilisateur</span><input id="u" name="username" value="admin" autocomplete="username" placeholder="Nom d’utilisateur" required></label><label class="login-field" for="p"><span id="loginPasswordLabel">Mot de passe</span><span class="login-password-wrap"><input id="p" name="password" type="password" autocomplete="current-password" placeholder="Mot de passe" required><button class="login-password-toggle" id="loginPasswordToggle" type="button" onclick="toggleLoginPassword()" aria-label="Afficher le mot de passe" title="Afficher le mot de passe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.6"/></svg></button></span></label><button id="loginBtn" type="submit">Connexion</button></form><p id="msg" role="alert" aria-live="polite"></p><a class="login-back" id="loginBack" href="/">← Retour à la boutique</a></section>
 <div class="app" id="app"><div class="top"><div><h1 id="dashboardTitle">لوحة الإدارة</h1><span id="who" class="muted"></span></div><div class="toolbar"><button class="language-toggle" id="langToggle" type="button" onclick="toggleLang()" aria-label="Passer au français" title="Passer au français"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.25"/><path d="M2.9 9h18.2M2.9 15h18.2M12 2.75c2.1 2.3 3.2 5.4 3.2 9.25S14.1 19 12 21.25C9.9 19 8.8 15.85 8.8 12S9.9 5.05 8.8 2.75Z"/></svg><span id="languageTarget">FR</span></button><button class="toggle-btn" id="themeToggle" onclick="toggleTheme()">🌙</button><button onclick="location.href='/'" id="shopBtn">المتجر</button> <button onclick="logout()" id="logoutBtn">خروج</button></div></div>
-<nav class="dashboard-nav" aria-label="التنقل في لوحة الإدارة"><a href="#productsDashboard" id="navProducts">المنتجات</a><a href="#ordersDashboard" id="navOrders">الطلبات</a><a href="#inventoryBox" id="navInventory">المخزون</a><a href="#categoriesBox" id="navCategories">الأقسام</a><a href="#customersDashboard" id="navCustomers">العملاء</a><a href="#shipmentsDashboard" id="navShipments">الشحنات</a><a href="#storeSettingsBox" id="navSettings">إعدادات المتجر</a></nav>
+<nav class="dashboard-nav" aria-label="التنقل في لوحة الإدارة"><button type="button" id="navProducts" onclick="openDashboardSection('productsDashboard')">المنتجات</button><button type="button" id="navOrders" onclick="openDashboardSection('ordersDashboard')">الطلبات</button><button type="button" id="navInventory" onclick="openDashboardSection('inventoryBox')">المخزون</button><button type="button" id="navCategories" onclick="openDashboardSection('categoriesBox')">الأقسام</button><button type="button" id="navCustomers" onclick="openDashboardSection('customersDashboard')">العملاء</button><button type="button" id="navShipments" onclick="openDashboardSection('shipmentsDashboard')">الشحنات</button><button type="button" id="navSettings" onclick="openStoreSettings()">إعدادات المتجر</button></nav>
 <section class="dashboard-overview" aria-label="Dashboard overview">
 <div class="cards">
 <div class="stat"><span class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16v13H4zM8 7V4h8v3M8 12h8"/></svg></span><span id="productsLabel">المنتجات</span><b id="s1">0</b></div>
@@ -231,16 +232,17 @@ body.dark .chart-controls button[aria-pressed="true"]{box-shadow:0 2px 7px #0004
 </section>
 </section>
 <section class="stock-overview" aria-labelledby="stockOverviewTitle"><div class="stock-overview-head"><span class="stock-overview-icon" aria-hidden="true">📦</span><h2 id="stockOverviewTitle">حالة المخزون</h2></div><div class="stock-overview-grid"><div class="stock-overview-item"><span id="stockTotalLabel">إجمالي المنتجات</span><strong id="stockTotalValue">0</strong></div><div class="stock-overview-item"><span id="stockAvailableLabel">متوفر</span><strong id="stockAvailableValue">0</strong></div><div class="stock-overview-item low"><span id="stockLowLabel">منخفض (1–5)</span><strong id="stockLowValue">0</strong></div><div class="stock-overview-item out"><span id="stockOutLabel">منتهي</span><strong id="stockOutValue">0</strong></div></div></section>
-<div class="box" id="productsDashboard"><h2 id="productsTitle">المنتجات</h2><div class="search-panel"><input id="productSearch" placeholder="بحث سريع ..."><button class="toggle-btn" onclick="showAllProducts()" id="showAllBtn">الكل</button><button class="gold" id="addProductBtn" onclick="newProduct()">إضافة منتج</button></div><div class="scroll" id="plist"></div></div>
-<div class="box" id="ordersDashboard"><h2 id="ordersTitle">الطلبات</h2><div class="export-bar"><select id="orderStatusFilter"><option value="all" id="allOrdersOpt">الكل</option><option value="new">جديد</option><option value="confirmed">مؤكد</option><option value="shipped">مشحون</option><option value="delivered">مسلّم</option><option value="cancelled">ملغى</option><option value="returned">مرتجع</option></select><button id="groupShipmentsBtn" onclick="createShipment()" disabled>إنشاء شحنة مجمعة</button><button onclick="exportOrdersExcel()" id="excelBtn">Excel</button></div><div class="scroll" id="orders"></div></div>
+<div class="modal-backdrop dashboard-section-backdrop" id="productsDashboardModal" onclick="if(event.target===this)closeDashboardSection('productsDashboard')"><section class="modal-card dashboard-section-modal" role="dialog" aria-modal="true" aria-labelledby="productsTitle"><div class="modal-head"><h2 id="productsTitle">المنتجات</h2><button type="button" onclick="closeDashboardSection('productsDashboard')" aria-label="إغلاق">×</button></div><div class="dashboard-section-body"><div class="box" id="productsDashboard"><div class="search-panel"><input id="productSearch" placeholder="بحث سريع ..."><button class="toggle-btn" onclick="showAllProducts()" id="showAllBtn">الكل</button><button class="gold" id="addProductBtn" onclick="newProduct()">إضافة منتج</button></div><div class="scroll" id="plist"></div></div></div></section></div>
+<div class="modal-backdrop dashboard-section-backdrop" id="ordersDashboardModal" onclick="if(event.target===this)closeDashboardSection('ordersDashboard')"><section class="modal-card dashboard-section-modal" role="dialog" aria-modal="true" aria-labelledby="ordersTitle"><div class="modal-head"><h2 id="ordersTitle">الطلبات</h2><button type="button" onclick="closeDashboardSection('ordersDashboard')" aria-label="إغلاق">×</button></div><div class="dashboard-section-body"><div class="box" id="ordersDashboard"><div class="export-bar"><select id="orderStatusFilter"><option value="all" id="allOrdersOpt">الكل</option><option value="new">جديد</option><option value="confirmed">مؤكد</option><option value="shipped">مشحون</option><option value="delivered">مسلّم</option><option value="cancelled">ملغى</option><option value="returned">مرتجع</option></select><button id="groupShipmentsBtn" onclick="createShipment()" disabled>إنشاء شحنة مجمعة</button><button onclick="exportOrdersExcel()" id="excelBtn">Excel</button></div><div class="scroll" id="orders"></div></div></div></section></div>
 <div class="modal-backdrop" id="productModal" onclick="if(event.target===this)closeProductForm()"><div class="modal-card"><div class="modal-head"><h2 id="formTitle">إضافة منتج</h2><button type="button" onclick="closeProductForm()" aria-label="Close">×</button></div><input type="hidden" id="pid"><div class="row"><div><input id="pn" placeholder="اسم المنتج"><textarea id="pd" rows="5" placeholder="الوصف"></textarea><select id="pc"></select></div><div><input id="pp" type="number" step=".01" placeholder="السعر"><input id="pCost" type="number" min="0" step=".01" placeholder="تكلفة الشراء (لحساب الربح)"><input id="pDelivery" type="number" min="0" step=".01" placeholder="سعر التوصيل للقطعة"><input id="po" type="number" step=".01" placeholder="السعر القديم"><input id="ps" type="number" min="0" placeholder="المخزون"><label class="ad-check"><input id="pAdvertised" type="checkbox"><span id="advertisedLabel">إظهار في الإعلان</span></label><label id="productImagesLabel">صور المنتج (يمكن اختيار عدة صور)</label><input id="pi" type="file" accept="image/*" multiple></div></div><div id="currentImages" class="thumbs"></div><button class="gold" id="saveProductBtn" onclick="saveProduct()">حفظ المنتج</button> <button id="newProductBtn" onclick="resetForm()">جديد</button></div></div>
-<div class="box" id="categoriesBox"><h2 id="categoriesTitle">الأقسام</h2><div class="category-create"><input id="newcat" maxlength="100" placeholder="اسم القسم الجديد"><select id="newCatPreset" aria-label="Modèles de catégories"></select><select id="newCatParent" aria-label="الفئة الرئيسية"></select><select id="newCatIcon" aria-label="أيقونة القسم"></select><button class="gold" id="addCatBtn" onclick="addCat()">إضافة</button></div><details class="category-icon-manager"><summary id="categoryIconManagerTitle">إضافة أو حذف خيارات الأيقونات</summary><div id="categoryIconManagerBody"><p class="settings-hint" id="categoryIconManagerHint">أضف أسماء الخيارات بالعربية والفرنسية وحدد شكل الأيقونة، أو احذف الخيارات غير المستخدمة.</p><div class="category-icon-add"><label><span id="categoryIconArabicLabel">الاسم بالعربية</span><input id="newCategoryIconArabic" maxlength="40"></label><label><span id="categoryIconFrenchLabel">الاسم بالفرنسية</span><input id="newCategoryIconFrench" maxlength="40"></label><label><span id="categoryIconStyleLabel">شكل الأيقونة</span><select id="newCategoryIconStyle"></select></label><button class="gold" id="addCategoryIconBtn" type="button" onclick="addCategoryIconOption()">إضافة خيار</button></div><div id="categoryIconOptionsList"></div></div></details><div id="cats" class="category-list"></div></div>
-<div class="box" id="inventoryBox"><div class="export-bar"><h2 id="inventoryTitle">إدارة المخزون</h2><div class="inventory-actions"><button class="toggle-btn" id="refreshInventoryBtn" type="button" onclick="inventoryLoad()">تحديث</button><button class="gold" id="exportInventoryExcelBtn" type="button" onclick="exportInventory('csv')">Excel</button><button id="exportInventoryPdfBtn" type="button" onclick="exportInventory('pdf')">PDF</button></div></div><div class="inventory-summary"><div class="inventory-metric"><span id="inventoryProductsLabel">المنتجات النشطة</span><strong id="inventoryProductsCount">—</strong></div><div class="inventory-metric"><span id="inventoryUnitsLabel">الوحدات المتوفرة</span><strong id="inventoryUnitsCount">—</strong></div><div class="inventory-metric"><span id="inventoryOutLabel">منتجات نفد مخزونها</span><strong id="inventoryOutCount">—</strong></div></div><section class="inventory-subsection"><h3 id="inventoryLevelsTitle">مستوى المخزون الحالي</h3><div class="scroll" id="inventoryLevels"></div></section><div class="inventory-grid"><section class="inventory-subsection"><h3 id="inventoryAlertsTitle">تنبيهات نفاد المخزون</h3><div class="scroll" id="inventoryAlerts"></div></section><section class="inventory-subsection"><h3 id="inventoryTopTitle">المنتجات الأكثر مبيعاً</h3><div class="scroll" id="inventoryTopProducts"></div></section></div><section class="inventory-subsection"><h3 id="inventoryHistoryTitle">سجل حركات المخزون</h3><div class="scroll" id="inventoryMovements"></div></section></div>
-<div class="box" id="shipmentsDashboard"><h2 id="shipmentsTitle">الشحنات المجمعة</h2><div class="scroll" id="shipments"></div></div>
-<div class="box" id="customersDashboard"><h2 id="customersTitle">العملاء</h2><div class="scroll" id="customers"></div></div>
+<div class="modal-backdrop dashboard-section-backdrop" id="categoriesBoxModal" onclick="if(event.target===this)closeDashboardSection('categoriesBox')"><section class="modal-card dashboard-section-modal" role="dialog" aria-modal="true" aria-labelledby="categoriesTitle"><div class="modal-head"><h2 id="categoriesTitle">الأقسام</h2><button type="button" onclick="closeDashboardSection('categoriesBox')" aria-label="إغلاق">×</button></div><div class="dashboard-section-body"><div class="box" id="categoriesBox"><div class="category-create"><input id="newcat" maxlength="100" placeholder="اسم القسم الجديد"><select id="newCatPreset" aria-label="Modèles de catégories"></select><select id="newCatParent" aria-label="الفئة الرئيسية"></select><select id="newCatIcon" aria-label="أيقونة القسم"></select><button class="gold" id="addCatBtn" onclick="addCat()">إضافة</button></div><details class="category-icon-manager"><summary id="categoryIconManagerTitle">إضافة أو حذف خيارات الأيقونات</summary><div id="categoryIconManagerBody"><p class="settings-hint" id="categoryIconManagerHint">أضف أسماء الخيارات بالعربية والفرنسية وحدد شكل الأيقونة، أو احذف الخيارات غير المستخدمة.</p><div class="category-icon-add"><label><span id="categoryIconArabicLabel">الاسم بالعربية</span><input id="newCategoryIconArabic" maxlength="40"></label><label><span id="categoryIconFrenchLabel">الاسم بالفرنسية</span><input id="newCategoryIconFrench" maxlength="40"></label><label><span id="categoryIconStyleLabel">شكل الأيقونة</span><select id="newCategoryIconStyle"></select></label><button class="gold" id="addCategoryIconBtn" type="button" onclick="addCategoryIconOption()">إضافة خيار</button></div><div id="categoryIconOptionsList"></div></div></details><div id="cats" class="category-list"></div></div></div></section></div>
+<div class="modal-backdrop dashboard-section-backdrop" id="inventoryBoxModal" onclick="if(event.target===this)closeDashboardSection('inventoryBox')"><section class="modal-card dashboard-section-modal" role="dialog" aria-modal="true" aria-labelledby="inventoryTitle"><div class="modal-head"><h2 id="inventoryTitle">إدارة المخزون</h2><button type="button" onclick="closeDashboardSection('inventoryBox')" aria-label="إغلاق">×</button></div><div class="dashboard-section-body"><div class="box" id="inventoryBox"><div class="export-bar"><div class="inventory-actions"><button class="toggle-btn" id="refreshInventoryBtn" type="button" onclick="inventoryLoad()">تحديث</button><button class="gold" id="exportInventoryExcelBtn" type="button" onclick="exportInventory('csv')">Excel</button><button id="exportInventoryPdfBtn" type="button" onclick="exportInventory('pdf')">PDF</button></div></div><div class="inventory-summary"><div class="inventory-metric"><span id="inventoryProductsLabel">المنتجات النشطة</span><strong id="inventoryProductsCount">—</strong></div><div class="inventory-metric"><span id="inventoryUnitsLabel">الوحدات المتوفرة</span><strong id="inventoryUnitsCount">—</strong></div><div class="inventory-metric"><span id="inventoryOutLabel">منتجات نفد مخزونها</span><strong id="inventoryOutCount">—</strong></div></div><section class="inventory-subsection"><h3 id="inventoryLevelsTitle">مستوى المخزون الحالي</h3><div class="scroll" id="inventoryLevels"></div></section><div class="inventory-grid"><section class="inventory-subsection"><h3 id="inventoryAlertsTitle">تنبيهات نفاد المخزون</h3><div class="scroll" id="inventoryAlerts"></div></section><section class="inventory-subsection"><h3 id="inventoryTopTitle">المنتجات الأكثر مبيعاً</h3><div class="scroll" id="inventoryTopProducts"></div></section></div><section class="inventory-subsection"><h3 id="inventoryHistoryTitle">سجل حركات المخزون</h3><div class="scroll" id="inventoryMovements"></div></section></div></div></section></div>
+<div class="modal-backdrop dashboard-section-backdrop" id="shipmentsDashboardModal" onclick="if(event.target===this)closeDashboardSection('shipmentsDashboard')"><section class="modal-card dashboard-section-modal" role="dialog" aria-modal="true" aria-labelledby="shipmentsTitle"><div class="modal-head"><h2 id="shipmentsTitle">الشحنات المجمعة</h2><button type="button" onclick="closeDashboardSection('shipmentsDashboard')" aria-label="إغلاق">×</button></div><div class="dashboard-section-body"><div class="box" id="shipmentsDashboard"><div class="scroll" id="shipments"></div></div></div></section></div>
+<div class="modal-backdrop dashboard-section-backdrop" id="customersDashboardModal" onclick="if(event.target===this)closeDashboardSection('customersDashboard')"><section class="modal-card dashboard-section-modal" role="dialog" aria-modal="true" aria-labelledby="customersTitle"><div class="modal-head"><h2 id="customersTitle">العملاء</h2><button type="button" onclick="closeDashboardSection('customersDashboard')" aria-label="إغلاق">×</button></div><div class="dashboard-section-body"><div class="box" id="customersDashboard"><div class="scroll" id="customers"></div></div></div></section></div>
 <div class="box" id="usersBox"><h2 id="usersTitle">المستخدمون</h2><div class="row"><input id="nu" placeholder="اسم المستخدم"><input id="np" type="password" placeholder="كلمة المرور (6 أحرف+)"></div><select id="nr"><option value="manager">مدير</option><option value="admin">مسؤول</option></select><button id="addUserBtn" onclick="addUser()">إضافة مستخدم</button><div id="users"></div></div>
-<div class="box" id="storeSettingsBox">
-<h2 id="storeSettingsTitle">إعدادات المتجر</h2>
+<div class="modal-backdrop" id="storeSettingsModal" onclick="if(event.target===this)closeStoreSettings()"><section class="modal-card store-settings-modal" role="dialog" aria-modal="true" aria-labelledby="storeSettingsTitle">
+<div class="modal-head"><h2 id="storeSettingsTitle">إعدادات المتجر</h2><button type="button" id="closeStoreSettingsBtn" onclick="closeStoreSettings()" aria-label="إغلاق">×</button></div>
+<div class="store-settings-body"><div class="box" id="storeSettingsBox">
 <p class="settings-hint" id="storeSettingsHint">تظهر المعلومات المحفوظة مباشرة في المتجر.</p>
 <div class="store-settings-grid">
 <label><span id="settingsWhatsappLabel">WhatsApp</span><input id="settingsWhatsapp" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="+216..."></label>
@@ -268,6 +270,7 @@ body.dark .chart-controls button[aria-pressed="true"]{box-shadow:0 2px 7px #0004
 <section class="hero-slider-settings" aria-labelledby="heroSettingsTitle">
 <h3 id="heroSettingsTitle">تخصيص السلايدر</h3>
 <p class="settings-hint" id="heroSettingsHint">غيّر الخلفية والشعار وموضع المحتوى وتعتيم الخلفية وحجم السعر، ثم احفظ الإعدادات.</p>
+<p class="settings-hint" id="heroSettingsStatus" aria-live="polite"></p>
 <div class="hero-slider-fields">
 <label><span id="heroBackgroundLabel">رابط صورة الخلفية</span><input id="heroBackgroundUrl" type="url" inputmode="url" maxlength="2000" placeholder="https://..." onchange="updateHeroBackgroundPreview()"></label>
 <label><span id="heroBackgroundFileLabel">أو اختر صورة لرفعها وحفظها (حتى 5 ميغابايت)</span><input id="heroBackgroundFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="previewHeroBackgroundFile()"><img class="hero-background-preview" id="heroBackgroundPreview" alt="" hidden></label>
@@ -278,6 +281,7 @@ body.dark .chart-controls button[aria-pressed="true"]{box-shadow:0 2px 7px #0004
 <label><span id="heroPriceSizeLabel">حجم السعر</span><output id="heroPriceSizeValue">29 px</output><input id="heroPriceSize" type="range" min="16" max="56" step="1" value="29" oninput="updateHeroSettingValues()"></label>
 <label><span id="heroLogoLabel">رابط صورة الشعار</span><input id="heroLogoUrl" type="url" inputmode="url" maxlength="2000" placeholder="https://..." onchange="updateHeroLogoPreview()"></label>
 <label><span id="heroLogoFileLabel">أو ارفع شعارًا (حتى 5 ميغابايت)</span><input id="heroLogoFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><img class="hero-background-preview" id="heroLogoPreview" alt="" hidden style="object-fit:contain;max-height:120px"></label>
+<div class="campaign-image-manager"><label><span id="mobileLogoLabel">شعار القائمة الجانبية على الهاتف</span><input id="mobileLogoFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onchange="previewMobileLogoFile()"><input id="mobileLogoUrl" type="hidden"><img class="hero-background-preview" id="mobileLogoPreview" alt="" hidden style="object-fit:contain;max-height:100px"></label><p class="settings-hint" id="mobileLogoDraftHint">سيبقى الشعار مسودة ولن يظهر للزوار حتى تفعيله.</p><div class="hero-background-actions"><button type="button" id="uploadMobileLogoBtn" onclick="uploadMobileLogo()">حفظ شعار القائمة كمسودة</button><button type="button" class="toggle-btn" id="resetMobileLogoBtn" onclick="resetMobileLogo()">إزالة الشعار</button></div></div>
 </div>
 <div class="hero-background-actions">
 <button type="button" id="uploadHeroBackgroundBtn" onclick="saveHeroBackground()">حفظ صورة الخلفية</button>
@@ -286,8 +290,8 @@ body.dark .chart-controls button[aria-pressed="true"]{box-shadow:0 2px 7px #0004
 <button type="button" class="toggle-btn" id="resetHeroLogoBtn" onclick="resetHeroLogo()">استعادة شعار M&amp;D الافتراضي</button>
 </div>
 </section>
-<button class="gold hero-settings-actions" id="saveStoreSettingsBtn" type="button" onclick="saveStoreSettings()">حفظ إعدادات المتجر</button>
-</div>
+<div class="hero-background-actions hero-settings-actions"><button class="gold" id="saveStoreSettingsBtn" type="button" onclick="saveStoreSettings()">حفظ إعدادات المتجر</button><button class="toggle-btn" id="activateHeroSettingsBtn" type="button" onclick="activateHeroSettings()" hidden>تفعيل على المتجر</button></div>
+</div></div></section></div>
 <div class="box" id="auditBox"><div class="export-bar"><h2 id="auditTitle">سجل إجراءات المسؤولين</h2><button class="toggle-btn" id="refreshAuditBtn" type="button" onclick="adminAuditLoad()">تحديث</button></div><div class="scroll" id="auditLogs"><p class="muted" id="auditPlaceholder">اضغط على تحديث لعرض السجل.</p></div></div>
 </div>
 <div class="modal-backdrop" id="orderHistoryModal" onclick="if(event.target===this)closeOrderHistory()"><div class="modal-card"><div class="modal-head"><h2 id="orderHistoryTitle">سجل الطلب</h2><button type="button" onclick="closeOrderHistory()" aria-label="Close">×</button></div><div class="scroll" id="orderHistoryRows"></div></div></div>
@@ -332,6 +336,12 @@ Object.assign(translations.ar,{productOrderHint:"اسحب المنتجات لت�
 Object.assign(translations.fr,{productOrderHint:"Faites glisser les produits pour les réorganiser, ou utilisez les flèches. Effacez la recherche avant de modifier l’ordre.",productOrderSaved:"Ordre des produits enregistré",productOrderFailed:"Impossible d’enregistrer l’ordre des produits",productMoveUp:"Monter le produit",productMoveDown:"Descendre le produit",productDrag:"Faire glisser pour réorganiser"});
 Object.assign(translations.ar,{heroLogoLabel:"رابط صورة الشعار",heroLogoFileLabel:"أو ارفع شعارًا (حتى 5 ميغابايت)",uploadHeroLogo:"رفع شعار السلايدر",resetHeroLogo:"استعادة شعار M&D الافتراضي",heroLogoUploaded:"تم رفع شعار السلايدر وحفظه",heroLogoUploadFailed:"تعذر رفع شعار السلايدر"});
 Object.assign(translations.fr,{heroLogoLabel:"URL de l’image du logo",heroLogoFileLabel:"Ou importer un logo (5 Mo maximum)",uploadHeroLogo:"Importer le logo du diaporama",resetHeroLogo:"Restaurer le logo M&D par défaut",heroLogoUploaded:"Logo du diaporama importé et enregistré",heroLogoUploadFailed:"Impossible d’importer le logo du diaporama"});
+Object.assign(translations.ar,{heroSettingsActive:"إعدادات المتجر الحالية منشورة.",heroSettingsDraft:"التغييرات وشعار القائمة المحفوظة مسودات، ولن تظهر للزوار حتى تضغط «تفعيل المسودات على المتجر».",heroSettingsDraftSaved:"تم حفظ التغييرات كمسودة. لم تُفعّل على المتجر.",heroSettingsActivated:"تم تفعيل إعدادات السلايدر والصور وشعار القائمة على المتجر.",heroSettingsActivate:"تفعيل المسودات على المتجر",heroSettingsActivateFailed:"تعذر تفعيل مسودات المتجر",heroSettingsActivateConfirm:"هل تريد نشر إعدادات السلايدر والصور وشعار القائمة الجانبية المحفوظة على المتجر؟",heroBackgroundUploaded:"تم حفظ الخلفية كمسودة؛ لن تظهر للزوار حتى تفعيلها.",heroLogoUploaded:"تم حفظ الشعار كمسودة؛ لن يظهر للزوار حتى تفعيله.",campaignImagesUploaded:"تم حفظ الصور كمسودة؛ لن تظهر للزوار حتى تفعيلها."});
+Object.assign(translations.fr,{heroSettingsActive:"Les réglages actuels de la boutique sont publiés.",heroSettingsDraft:"Les modifications et le logo du menu restent en brouillon jusqu’à l’activation explicite.",heroSettingsDraftSaved:"Modifications enregistrées en brouillon. Elles ne sont pas publiées.",heroSettingsActivated:"Les réglages, les images du diaporama et le logo du menu sont publiés sur la boutique.",heroSettingsActivate:"Activer les brouillons sur la boutique",heroSettingsActivateFailed:"Impossible d’activer les brouillons de la boutique",heroSettingsActivateConfirm:"Publier sur la boutique les réglages, les images et le logo du menu latéral enregistrés ?",heroBackgroundUploaded:"Arrière-plan enregistré en brouillon ; il ne sera visible qu’après activation.",heroLogoUploaded:"Logo enregistré en brouillon ; il ne sera visible qu’après activation.",campaignImagesUploaded:"Images enregistrées en brouillon ; elles ne seront visibles qu’après activation."});
+Object.assign(translations.ar,{heroSettingsHint:"عدّل إعدادات السلايدر والصور وشعار القائمة الجانبية، ثم احفظها كمسودة. لن تظهر على المتجر حتى تفعّلها صراحةً."});
+Object.assign(translations.fr,{heroSettingsHint:"Modifiez les réglages, les images du diaporama et le logo du menu, puis enregistrez-les en brouillon. Rien ne sera publié sans activation explicite."});
+Object.assign(translations.ar,{mobileLogoLabel:"شعار القائمة الجانبية على الهاتف",mobileLogoDraftHint:"سيبقى الشعار مسودة ولن يظهر للزوار حتى تفعيله.",uploadMobileLogo:"حفظ شعار القائمة كمسودة",resetMobileLogo:"إزالة الشعار",mobileLogoUploaded:"تم حفظ الشعار كمسودة. لم يظهر للزوار.",mobileLogoUploadFailed:"تعذر حفظ شعار القائمة"});
+Object.assign(translations.fr,{mobileLogoLabel:"Logo du menu latéral mobile",mobileLogoDraftHint:"Le logo reste en brouillon et ne sera visible qu’après activation.",uploadMobileLogo:"Enregistrer le logo en brouillon",resetMobileLogo:"Retirer le logo",mobileLogoUploaded:"Logo enregistré en brouillon. Il n’est pas visible par les visiteurs.",mobileLogoUploadFailed:"Impossible d’enregistrer le logo du menu"});
 Object.assign(translations.ar,{monthlyGrossProfit:"الربح بعد تكلفة الإرجاع هذا الشهر",monthlyProfitNote:"هامش المنتجات بعد خصم تكاليف الطرود المرتجعة؛ لا يشمل المصاريف الأخرى، وتُستثنى المنتجات بلا تكلفة شراء.",monthlyReturnedQuantity:"كمية المرتجعات هذا الشهر",lowStockMetric:"منتجات منخفضة المخزون",newOrdersToday:"الطلبات الجديدة اليوم",ordersInDelivery:"الطلبات قيد التوصيل",stockOverview:"حالة المخزون",stockTotal:"إجمالي المنتجات",stockAvailable:"متوفر",stockLow:"منخفض (1–5)",stockOut:"منتهي",purchaseCost:"تكلفة الشراء (لحساب الربح)",profitUnavailable:"—"});
 Object.assign(translations.fr,{monthlyGrossProfit:"Marge après frais de retour ce mois",monthlyProfitNote:"Marge des produits moins les frais des colis retournés ; hors autres dépenses et produits sans coût d’achat.",monthlyReturnedQuantity:"Articles retournés ce mois",lowStockMetric:"Produits en stock faible",newOrdersToday:"Nouvelles commandes aujourd’hui",ordersInDelivery:"Commandes en livraison",stockOverview:"État du stock",stockTotal:"Nombre total de produits",stockAvailable:"Disponibles",stockLow:"Stock faible (1–5)",stockOut:"Épuisés",purchaseCost:"Coût d’achat (pour calculer la marge)",profitUnavailable:"—"});
 Object.assign(translations.ar,{socialFacebook:"رابط Facebook",socialInstagram:"رابط Instagram",socialTiktok:"رابط TikTok"});
@@ -348,6 +358,10 @@ Object.assign(translations.ar,{inventoryTitle:"إدارة المخزون",invent
 Object.assign(translations.fr,{inventoryTitle:"Gestion du stock",inventoryProductsLabel:"Produits actifs",inventoryUnitsLabel:"Unités en stock",inventoryOutLabel:"Produits en rupture",inventoryLevelsTitle:"État actuel des stocks",inventoryAlertsTitle:"Alertes de rupture",inventoryTopTitle:"Meilleures ventes",inventoryHistoryTitle:"Historique des mouvements",inventoryProduct:"Produit",inventoryCategory:"Catégorie",inventoryStock:"Stock",inventorySold:"Unités vendues",inventoryChange:"Variation",inventoryBefore:"Avant",inventoryAfter:"Après",inventoryType:"Type de mouvement",inventoryReference:"Commande",inventoryActor:"Effectué par",inventoryDate:"Date",inventoryNoProducts:"Aucun produit",inventoryNoOut:"Aucun produit en rupture",inventoryNoSales:"Aucune vente enregistrée",inventoryNoMoves:"Aucun mouvement de stock enregistré",movementInitial:"Stock initial",movementRestock:"Réapprovisionnement",movementAdjustment:"Ajustement",movementSale:"Vente",movementReturn:"Retour au stock",inventoryLoadFailed:"Impossible de charger le rapport de stock",inventoryExportFailed:"Impossible d’exporter le rapport de stock",inventoryRefresh:"Actualiser",inventoryAllInStock:"En stock"});
 Object.assign(translations.ar,{currency:"د.ت"});
 Object.assign(translations.fr,{currency:"TND"});
+Object.assign(translations.ar,{closeStoreSettings:"إغلاق إعدادات المتجر"});
+Object.assign(translations.fr,{closeStoreSettings:"Fermer les paramètres de la boutique"});
+Object.assign(translations.ar,{closeSection:"إغلاق القسم"});
+Object.assign(translations.fr,{closeSection:"Fermer la section"});
 const api=async(u,o={})=>{o.headers={...(o.headers||{}),Authorization:"Bearer "+token};const response=await fetch(u,o);if(response.status===401&&token){localStorage.removeItem("md_admin");token="";location.reload()}return response};
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 const t=(key)=>translations[currentLang][key]||key;
@@ -360,6 +374,9 @@ function updateLanguageToggle(){const target=currentLang==="ar"?"fr":"ar",label=
 function toggleLang(){if(navigationLinksLoaded)navigationLinks=readNavigationLinks();if(categoryIconDefinitions.length)categoryIconDefinitions=readCategoryIconDefinitions();currentLang=currentLang==="ar"?"fr":"ar";localStorage.setItem("md_lang",currentLang);document.documentElement.lang=currentLang;document.documentElement.dir=currentLang==="ar"?"rtl":"ltr";updateLanguageToggle();applyStaticTexts();renderCategories();renderCategoryIconManager();renderProductsTable();renderOrdersTable();renderShipmentsTable();renderCustomersTable();renderUsersTable();renderAuditTable();renderInventoryReport();stats();if(activeHistoryOrderId)loadOrderHistory(activeHistoryOrderId)}
 function applyStaticTexts(){
   loginTitle.textContent=t("loginTitle");loginUsernameLabel.textContent=t("username");loginPasswordLabel.textContent=t("password");loginBack.textContent=`← ${t("returnToStore")}`;loginPasswordToggle.setAttribute("aria-label",t(document.getElementById("p").type==="password"?"showPassword":"hidePassword"));
+  closeStoreSettingsBtn.setAttribute("aria-label",t("closeStoreSettings"));
+  document.querySelectorAll(".dashboard-section-modal .modal-head button").forEach(button=>button.setAttribute("aria-label",t("closeSection")));
+  renderHeroSettingsStatus();
   campaignImagesLabel.textContent=t("campaignImagesLabel");uploadCampaignImagesBtn.textContent=t("campaignImagesAdd");renderCampaignImageManager();
   document.title=`M&D Store — ${t("dashboardTitle")}`;dashboardTitle.textContent=t("dashboard");updateLanguageToggle();
   document.querySelector(".dashboard-overview").setAttribute("aria-label",t("overviewLabel"));document.querySelector(".dashboard-charts").setAttribute("aria-label",t("chartsLabel"));trendChartTitle.textContent=t("trendChartTitle");trendChartSubtitle.textContent=t("trendChartSubtitle");statusChartTitle.textContent=t("statusChartTitle");statusChartSubtitle.textContent=t("statusChartSubtitle");chartModeSales.textContent=t("chartSales");chartModeOrders.textContent=t("chartOrders");chartMetricControl.setAttribute("aria-label",t("chartMetricLabel"));chartRangeControl.setAttribute("aria-label",t("chartRangeLabel"));
@@ -376,6 +393,7 @@ function applyStaticTexts(){
   excelBtn.textContent=t("excel");
   storeSettingsTitle.textContent=t("storeSettings");storeSettingsHint.textContent=t("storeSettingsHint");settingsWhatsappLabel.textContent=t("whatsappNumber");settingsPhoneLabel.textContent=t("contactPhone");settingsEmailLabel.textContent=t("contactEmail");settingsAddressLabel.textContent=t("contactAddress");settingsHoursLabel.textContent=t("openingHours");settingsFacebookLabel.textContent=t("socialFacebook");settingsInstagramLabel.textContent=t("socialInstagram");settingsTiktokLabel.textContent=t("socialTiktok");settingsProductColumnsLabel.textContent=t("productColumnsLabel");settingsCategoryColumnsLabel.textContent=t("categoryColumnsLabel");saveStoreSettingsBtn.textContent=t("saveStoreSettings");navigationTitle.textContent=t("navigationTitle");navigationHint.textContent=t("navigationHint");navigationArabicLabel.textContent=t("navigationArabicLabel");navigationFrenchLabel.textContent=t("navigationFrenchLabel");navigationHrefLabel.textContent=t("navigationHrefLabel");navigationAddBtn.textContent=t("navigationAdd");renderNavigationLinks();heroSettingsTitle.textContent=t("heroSettingsTitle");heroSettingsHint.textContent=t("heroSettingsHint");heroBackgroundLabel.textContent=t("heroBackgroundLabel");heroBackgroundFileLabel.textContent=t("heroBackgroundFileLabel");heroCardXLabel.textContent=t("heroCardXLabel");heroCardYLabel.textContent=t("heroCardYLabel");heroOverlayLabel.textContent=t("heroOverlayLabel");heroPriceSizeLabel.textContent=t("heroPriceSizeLabel");uploadHeroBackgroundBtn.textContent=t("uploadHeroBackground");resetHeroBackgroundBtn.textContent=t("resetHeroBackground");updateHeroSettingValues();
   heroLogoLabel.textContent=t("heroLogoLabel");heroLogoFileLabel.textContent=t("heroLogoFileLabel");uploadHeroLogoBtn.textContent=t("uploadHeroLogo");resetHeroLogoBtn.textContent=t("resetHeroLogo");
+  mobileLogoLabel.textContent=t("mobileLogoLabel");mobileLogoDraftHint.textContent=t("mobileLogoDraftHint");uploadMobileLogoBtn.textContent=t("uploadMobileLogo");resetMobileLogoBtn.textContent=t("resetMobileLogo");
   if(productModal.classList.contains("open"))formTitle.textContent=pid.value?t("editProduct"):t("createProduct");
   if(document.getElementById("loginTitle")) loginTitle.textContent=t("loginTitle");
   renderDashboardCharts();
@@ -383,6 +401,56 @@ function applyStaticTexts(){
 function toggleLoginPassword(){p.type=p.type==="password"?"text":"password";const label=t(p.type==="password"?"showPassword":"hidePassword");loginPasswordToggle.setAttribute("aria-label",label);loginPasswordToggle.title=label}
 async function doLogin(event){event.preventDefault();const r=await fetch("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u.value,password:p.value})}),x=await r.json();if(!r.ok)return msg.textContent=x.error;localStorage.setItem("md_admin",x.token);location.reload()}
 function logout(){localStorage.removeItem("md_admin");location.reload()}
+const dashboardSectionModalIds={productsDashboard:"productsDashboardModal",ordersDashboard:"ordersDashboardModal",inventoryBox:"inventoryBoxModal",categoriesBox:"categoriesBoxModal",customersDashboard:"customersDashboardModal",shipmentsDashboard:"shipmentsDashboardModal"};
+const dashboardSectionReturnFocus=new Map();
+let dashboardSectionPreviousOverflow="";
+function openDashboardSection(sectionId){
+  if(!me||(sectionId==="categoriesBox"&&me.role!=="admin"))return;
+  const modal=document.getElementById(dashboardSectionModalIds[sectionId]);
+  if(!modal)return;
+  dashboardSectionReturnFocus.set(sectionId,document.activeElement);
+  dashboardSectionPreviousOverflow=document.body.style.overflow;
+  modal.dataset.sectionId=sectionId;
+  modal.classList.add("open");
+  document.body.style.overflow="hidden";
+  modal.querySelector(".modal-head button").focus();
+}
+function closeDashboardSection(sectionId){
+  const modal=document.getElementById(dashboardSectionModalIds[sectionId]);
+  if(!modal?.classList.contains("open"))return;
+  modal.classList.remove("open");
+  document.body.style.overflow=dashboardSectionPreviousOverflow;
+  const returnFocus=dashboardSectionReturnFocus.get(sectionId);
+  dashboardSectionReturnFocus.delete(sectionId);
+  if(returnFocus instanceof HTMLElement&&returnFocus.isConnected)returnFocus.focus();
+}
+function trapModalTab(modal,event){
+  if(event.key!=="Tab")return;
+  const focusable=[...modal.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex="-1"])')].filter(element=>element.offsetParent!==null&&(!element.closest("details:not([open])")||element.matches("summary")));
+  if(!focusable.length){event.preventDefault();return}
+  const first=focusable[0],last=focusable[focusable.length-1];
+  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+  else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+}
+document.querySelectorAll(".dashboard-section-backdrop").forEach(modal=>modal.addEventListener("keydown",event=>trapModalTab(modal,event)));
+let storeSettingsReturnFocus=null,storeSettingsPreviousOverflow="";
+function openStoreSettings(){
+  if(!me||me.role!=="admin")return;
+  storeSettingsReturnFocus=document.activeElement;
+  storeSettingsPreviousOverflow=document.body.style.overflow;
+  storeSettingsModal.classList.add("open");
+  document.body.style.overflow="hidden";
+  closeStoreSettingsBtn.focus();
+}
+function closeStoreSettings(){
+  if(!storeSettingsModal.classList.contains("open"))return;
+  storeSettingsModal.classList.remove("open");
+  document.body.style.overflow=storeSettingsPreviousOverflow;
+  if(storeSettingsReturnFocus instanceof HTMLElement&&storeSettingsReturnFocus.isConnected)storeSettingsReturnFocus.focus();
+}
+storeSettingsModal.addEventListener("keydown",event=>{
+  trapModalTab(storeSettingsModal,event);
+});
 function decode(){try{return JSON.parse(atob(token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")))}catch(e){return null}}
 function showToast(message){const el=document.getElementById("toast");el.textContent=message;el.classList.add("show");clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>el.classList.remove("show"),3000)}
 async function init(){
@@ -426,8 +494,36 @@ async function storeSettingsLoad(){
   settingsWhatsapp.value=settings.whatsapp;settingsPhone.value=settings.contact_phone;settingsEmail.value=settings.contact_email;settingsAddress.value=settings.contact_address;settingsHours.value=settings.opening_hours;settingsFacebook.value=settings.social_facebook;settingsInstagram.value=settings.social_instagram;settingsTiktok.value=settings.social_tiktok;settingsProductColumns.value=settings.product_columns;settingsCategoryColumns.value=settings.category_columns;
   heroBackgroundUrl.value=settings.hero_background_url;heroCardX.value=settings.hero_card_x;heroCardY.value=settings.hero_card_y;heroOverlay.value=settings.hero_overlay;heroPriceSize.value=settings.hero_price_size;updateHeroSettingValues();updateHeroBackgroundPreview();
   heroLogoUrl.value=settings.hero_logo_url;updateHeroLogoPreview();
+  mobileLogoUrl.value=settings.mobile_logo_url;mobileLogoFile.value="";updateMobileLogoPreview();
   campaignImages=Array.isArray(settings.campaign_images)?settings.campaign_images:[];
+  heroSettingsHasDraft=Boolean(settings.hero_settings_has_draft);
+  renderHeroSettingsStatus();
   renderCampaignImageManager();
+}
+let heroSettingsHasDraft=false,heroSettingsActivating=false;
+function renderHeroSettingsStatus(){
+  heroSettingsStatus.textContent=t(heroSettingsHasDraft?"heroSettingsDraft":"heroSettingsActive");
+  activateHeroSettingsBtn.textContent=t("heroSettingsActivate");
+  activateHeroSettingsBtn.hidden=!heroSettingsHasDraft;
+  activateHeroSettingsBtn.disabled=heroSettingsActivating;
+}
+async function activateHeroSettings(){
+  if(!heroSettingsHasDraft||heroSettingsActivating||!confirm(t("heroSettingsActivateConfirm")))return;
+  heroSettingsActivating=true;renderHeroSettingsStatus();
+  try{
+    const response=await api("/api/admin/settings/activate",{method:"POST"}),result=await response.json();
+    if(!response.ok)throw new Error(result.error||t("heroSettingsActivateFailed"));
+    heroSettingsHasDraft=false;renderHeroSettingsStatus();showToast(t("heroSettingsActivated"));
+    await storeSettingsLoad().catch(error=>console.error("Could not reload activated slider settings:",error));
+  }catch(error){
+    console.error("Could not activate draft storefront hero settings:",error);
+    alert(t("heroSettingsActivateFailed"));
+  }finally{
+    heroSettingsActivating=false;renderHeroSettingsStatus();
+  }
+}
+function markHeroSettingsDraft(){
+  heroSettingsHasDraft=true;renderHeroSettingsStatus();
 }
 async function navigationLinksLoad(){
   try{
@@ -544,7 +640,7 @@ async function uploadCampaignImages(){
     const formData=new FormData();files.forEach(file=>formData.append("images",file));
     const response=await api("/api/admin/settings/campaign-images",{method:"POST",body:formData}),result=await response.json();
     if(!response.ok){alert(result.error||t("campaignImagesUploadFailed"));return}
-    campaignImages=result.campaign_images;campaignImagesFile.value="";renderCampaignImageManager();showToast(t("campaignImagesUploaded"));
+    campaignImages=result.campaign_images;campaignImagesFile.value="";markHeroSettingsDraft();renderCampaignImageManager();showToast(t("campaignImagesUploaded"));
   }catch(error){
     console.error("Could not upload campaign slideshow images:",error);alert(t("campaignImagesUploadFailed"));
   }finally{
@@ -556,7 +652,7 @@ async function deleteCampaignImage(id){
   try{
     const response=await api(`/api/admin/settings/campaign-images/${encodeURIComponent(id)}`,{method:"DELETE"}),result=await response.json();
     if(!response.ok){alert(result.error||t("campaignImagesUploadFailed"));return}
-    campaignImages=result.campaign_images;renderCampaignImageManager();
+    campaignImages=result.campaign_images;markHeroSettingsDraft();renderCampaignImageManager();
   }catch(error){
     console.error("Could not delete campaign slideshow image:",error);alert(t("campaignImagesUploadFailed"));
   }
@@ -597,6 +693,35 @@ function updateHeroLogoPreview(){
 function resetHeroLogo(){
   heroLogoUrl.value="";heroLogoFile.value="";updateHeroLogoPreview();
 }
+let mobileLogoPreviewObjectUrl="";
+function updateMobileLogoPreview(){
+  if(mobileLogoPreviewObjectUrl){URL.revokeObjectURL(mobileLogoPreviewObjectUrl);mobileLogoPreviewObjectUrl=""}
+  const file=mobileLogoFile.files[0];
+  const url=file?(mobileLogoPreviewObjectUrl=URL.createObjectURL(file)):mobileLogoUrl.value.trim();
+  if(!url){mobileLogoPreview.removeAttribute("src");mobileLogoPreview.hidden=true;return}
+  mobileLogoPreview.onerror=()=>{console.error("Could not preview the selected mobile menu logo.");mobileLogoPreview.hidden=true};
+  mobileLogoPreview.onload=()=>{mobileLogoPreview.hidden=false};
+  mobileLogoPreview.src=url;
+}
+function previewMobileLogoFile(){updateMobileLogoPreview()}
+function resetMobileLogo(){
+  mobileLogoFile.value="";mobileLogoUrl.value="";updateMobileLogoPreview();saveStoreSettings();
+}
+async function uploadMobileLogo(){
+  const file=mobileLogoFile.files[0];
+  if(!file){alert(t("heroBackgroundInvalid"));return}
+  uploadMobileLogoBtn.disabled=true;
+  try{
+    const formData=new FormData();formData.append("image",file);
+    const response=await api("/api/admin/settings/mobile-logo",{method:"POST",body:formData}),result=await response.json();
+    if(!response.ok){alert(result.error||t("mobileLogoUploadFailed"));return}
+    mobileLogoUrl.value=result.mobile_logo_url;mobileLogoFile.value="";updateMobileLogoPreview();markHeroSettingsDraft();showToast(t("mobileLogoUploaded"));
+  }catch(error){
+    console.error("Could not upload the mobile menu logo:",error);alert(t("mobileLogoUploadFailed"));
+  }finally{
+    uploadMobileLogoBtn.disabled=false;
+  }
+}
 async function uploadHeroBackground(){
   const file=heroBackgroundFile.files[0];
   if(!file)return false;
@@ -605,7 +730,7 @@ async function uploadHeroBackground(){
     const formData=new FormData();formData.append("image",file);
     const response=await api("/api/admin/settings/hero-background",{method:"POST",body:formData}),result=await response.json();
     if(!response.ok){alert(result.error||t("heroBackgroundUploadFailed"));return false}
-    heroBackgroundUrl.value=result.hero_background_url;heroBackgroundFile.value="";updateHeroBackgroundPreview();showToast(t("heroBackgroundUploaded"));return true;
+    heroBackgroundUrl.value=result.hero_background_url;heroBackgroundFile.value="";updateHeroBackgroundPreview();markHeroSettingsDraft();showToast(t("heroBackgroundUploaded"));return true;
   }catch(error){
     console.error("Could not upload the storefront hero background:",error);alert(t("heroBackgroundUploadFailed"));return false;
   }finally{
@@ -627,7 +752,7 @@ async function uploadHeroLogo(){
     const formData=new FormData();formData.append("image",file);
     const response=await api("/api/admin/settings/hero-logo",{method:"POST",body:formData}),result=await response.json();
     if(!response.ok){alert(result.error||t("heroLogoUploadFailed"));return}
-    heroLogoUrl.value=result.hero_logo_url;updateHeroLogoPreview();showToast(t("heroLogoUploaded"));
+    heroLogoUrl.value=result.hero_logo_url;updateHeroLogoPreview();markHeroSettingsDraft();showToast(t("heroLogoUploaded"));
   }catch(error){
     console.error("Could not upload the storefront hero logo:",error);alert(t("heroLogoUploadFailed"));
   }finally{
@@ -638,10 +763,10 @@ async function saveStoreSettings(){
   saveStoreSettingsBtn.disabled=true;
   try{
     if(heroBackgroundFile.files[0]&&!await uploadHeroBackground())return;
-    const response=await api("/api/admin/settings",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({whatsapp:settingsWhatsapp.value,contact_phone:settingsPhone.value,contact_email:settingsEmail.value,contact_address:settingsAddress.value,opening_hours:settingsHours.value,social_facebook:settingsFacebook.value,social_instagram:settingsInstagram.value,social_tiktok:settingsTiktok.value,product_columns:Number(settingsProductColumns.value),category_columns:Number(settingsCategoryColumns.value),hero_background_url:heroBackgroundUrl.value,hero_logo_url:heroLogoUrl.value,hero_card_x:Number(heroCardX.value),hero_card_y:Number(heroCardY.value),hero_overlay:Number(heroOverlay.value),hero_price_size:Number(heroPriceSize.value)})});
+    const response=await api("/api/admin/settings",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({whatsapp:settingsWhatsapp.value,contact_phone:settingsPhone.value,contact_email:settingsEmail.value,contact_address:settingsAddress.value,opening_hours:settingsHours.value,social_facebook:settingsFacebook.value,social_instagram:settingsInstagram.value,social_tiktok:settingsTiktok.value,product_columns:Number(settingsProductColumns.value),category_columns:Number(settingsCategoryColumns.value),hero_background_url:heroBackgroundUrl.value,hero_logo_url:heroLogoUrl.value,mobile_logo_url:mobileLogoUrl.value,hero_card_x:Number(heroCardX.value),hero_card_y:Number(heroCardY.value),hero_overlay:Number(heroOverlay.value),hero_price_size:Number(heroPriceSize.value)})});
     const result=await response.json();
     if(!response.ok){alert(result.error||t("settingsFailed"));return}
-    showToast(t("settingsSaved"));
+    markHeroSettingsDraft();showToast(t("heroSettingsDraftSaved"));
   }catch(error){
     console.error("Could not save store contact settings:",error);
     alert(t("settingsFailed"));
@@ -1109,7 +1234,7 @@ async function removeP(id){if(!confirm(t("deleteProductConfirm")))return;const r
 function previewImage(src,alt=""){previewImageEl.src=src;previewImageEl.alt=alt;previewImageEl.classList.remove("zoomed");imageViewer.classList.add("open")}
 function closeImagePreview(){imageViewer.classList.remove("open");previewImageEl.src=""}
 const previewImageEl=document.getElementById("previewImage");previewImageEl.addEventListener("click",event=>{event.stopPropagation();previewImageEl.classList.toggle("zoomed")});
-document.addEventListener("keydown",event=>{if(event.key==="Escape"){closeImagePreview();closeProductForm();closeOrderHistory()}});
+document.addEventListener("keydown",event=>{if(event.key!=="Escape")return;if(imageViewer.classList.contains("open"))closeImagePreview();else if(productModal.classList.contains("open"))closeProductForm();else if(orderHistoryModal.classList.contains("open"))closeOrderHistory();else{const openSectionModal=[...document.querySelectorAll(".dashboard-section-backdrop.open")].pop();if(openSectionModal)closeDashboardSection(openSectionModal.dataset.sectionId);else closeStoreSettings()}});
 function renderOrdersTable(){
   const status=orderStatusFilterEl?orderStatusFilterEl.value:"all";
   const list=(window.__ordersCache||[]).filter(order=>status==="all"||order.status===status);
