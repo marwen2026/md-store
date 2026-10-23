@@ -217,6 +217,14 @@ body{background:var(--background);color:var(--text)}
   .direct-order .detail-whatsapp:hover:not(:disabled) { transform: translateY(-1px); background: #18b85c; box-shadow: 0 10px 22px rgba(32,201,105,.28); }
   .direct-order .detail-whatsapp:disabled { opacity: .55; cursor: not-allowed; }
   .direct-order .detail-whatsapp svg { width: 21px; height: 21px; flex: 0 0 auto; fill: currentColor; }
+  .detail-order-form { margin-top: 14px; padding: 18px; border: 1px solid #e5e9f0; border-radius: 16px; background: #fff; }
+  .detail-order-form[hidden] { display: none; }
+  .detail-order-form h2 { margin: 0 0 10px; color: #172554; font-size: 18px; }
+  .detail-order-fields { display: grid; gap: 10px; }
+  .detail-order-fields input { box-sizing: border-box; width: 100%; min-height: 48px; padding: 12px 14px; border: 1px solid #dce2ec; border-radius: 10px; background: #fff; color: #172554; }
+  .detail-order-fields input:focus { border-color: #C99A3B; outline: 2px solid #C99A3B30; }
+  .detail-order-confirm { min-height: 48px; border: 0; border-radius: 10px; background: #20c969; color: #fff; font-weight: 800; cursor: pointer; }
+  .detail-order-confirm:disabled { opacity: .6; cursor: wait; }
   @media (max-width: 500px) {
     .direct-order .detail-whatsapp { gap: 5px; padding-inline: 8px; font-size: 12px; }
     .direct-order .detail-whatsapp svg { width: 18px; height: 18px; }
@@ -834,6 +842,8 @@ Object.assign(storeTranslations.fr,{sideNavigation:"Menu latéral",openMenu:"Ouv
 Object.assign(storeTranslations.ar,{sideCategories:"الفئات"});
 Object.assign(storeTranslations.fr,{sideCategories:"Catégories"});
 const storeText=key=>storeTranslations[currentStoreLanguage][key]||storeTranslations.ar[key]||key;
+Object.assign(storeTranslations.ar,{directOrderHeading:"أدخل بياناتك لتأكيد الطلب",confirmDirectOrder:"تأكيد الطلب"});
+Object.assign(storeTranslations.fr,{directOrderHeading:"Vos coordonnées pour confirmer la commande",confirmDirectOrder:"Confirmer la commande"});
 const storeCurrencyLabel=()=>cfg.currency==="TND"&&currentStoreLanguage==="ar"?"د.ت":cfg.currency;
 const formatStoreAmount=value=>{const amount=Number(value);return new Intl.NumberFormat("fr-TN",{minimumFractionDigits:3,maximumFractionDigits:3}).format(Number.isFinite(amount)?amount:0)};
 const formatStoreMoney=value=>`${formatStoreAmount(value)} ${storeCurrencyLabel()}`;
@@ -1231,7 +1241,18 @@ function openProductDetails(id,updateHistory=true){
     <p class="detail-description">${esc(product.description||storeText("discoverProduct"))}</p><div class="detail-delivery">${deliveryLabel(product.delivery_price)}</div>
     <div class="detail-actions"><div class="detail-quantity" aria-label="${storeText("quantity")}"><button type="button" onclick="changeDetailQuantity(-1)" aria-label="${storeText("decreaseQuantity")}">−</button><output id="detailQuantity">1</output><button type="button" onclick="changeDetailQuantity(1)" aria-label="${storeText("increaseQuantity")}">+</button></div>
       <button class="detail-add" type="button" onclick="addDetailToCart()" ${stock<1?"disabled":""}>${storeText("addToCartEmoji")}</button><button class="detail-favorite" type="button" onclick="fav(this)" aria-label="${storeText("addToFavorites")}">♡</button>
-    </div><section class="direct-order"><button class="detail-whatsapp" type="button" onclick="orderDetailViaWhatsApp()" ${stock<1?"disabled":""}><span class="whatsapp-copy"><svg class="whatsapp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.4 11.7a8.4 8.4 0 0 1-12.3 7.4L4 20l1-4.1a8.4 8.4 0 1 1 15.4-4.2ZM8.3 7.6c-.3-.5-.6-.5-.9-.5-.2 0-.5 0-.7.3-.3.3-1 1-1 2.3s1 2.7 1.2 2.9c.1.2 2 3.1 4.9 4.2 2.4 1 2.9.8 3.4.7.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.1-1.4-.1-.2-.3-.3-.7-.5l-2-.9c-.3-.1-.5-.2-.7.2l-.9 1.1c-.2.2-.3.2-.7.1-.4-.2-1.6-.6-2.9-1.8-1-.9-1.7-2-1.9-2.4-.2-.3 0-.5.1-.7l.5-.6c.2-.2.2-.4.3-.6.1-.2 0-.4 0-.6l-.9-2.1Z" fill="currentColor"/></svg><span class="title">Commander via WhatsApp</span><span class="title-ar" lang="ar" dir="rtl">اطلب عبر واتساب</span></span></button></section>
+    </div><section class="direct-order"><button class="detail-whatsapp" type="button" onclick="orderDetailViaWhatsApp()" ${stock<1?"disabled":""}><span class="whatsapp-copy"><svg class="whatsapp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.4 11.7a8.4 8.4 0 0 1-12.3 7.4L4 20l1-4.1a8.4 8.4 0 1 1 15.4-4.2ZM8.3 7.6c-.3-.5-.6-.5-.9-.5-.2 0-.5 0-.7.3-.3.3-1 1-1 2.3s1 2.7 1.2 2.9c.1.2 2 3.1 4.9 4.2 2.4 1 2.9.8 3.4.7.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.1-1.4-.1-.2-.3-.3-.7-.5l-2-.9c-.3-.1-.5-.2-.7.2l-.9 1.1c-.2.2-.3.2-.7.1-.4-.2-1.6-.6-2.9-1.8-1-.9-1.7-2-1.9-2.4-.2-.3 0-.5.1-.7l.5-.6c.2-.2.2-.4.3-.6.1-.2 0-.4 0-.6l-.9-2.1Z" fill="currentColor"/></svg><span class="title">Commander via WhatsApp</span><span class="title-ar" lang="ar" dir="rtl">اطلب عبر واتساب</span></span></button>
+      <form class="detail-order-form" id="detailOrderForm" onsubmit="submitDetailOrder(event)" hidden>
+        <h2>${storeText("directOrderHeading")}</h2>
+        <div class="detail-order-fields">
+          <input id="detailCustomerName" name="name" type="text" autocomplete="name" maxlength="120" placeholder="${storeText("fullName")}" aria-label="${storeText("fullName")}" required>
+          <input id="detailCustomerPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="40" placeholder="${storeText("phoneNumber")}" aria-label="${storeText("phoneNumber")}" required>
+          <input id="detailCustomerCity" name="city" type="text" autocomplete="address-level2" maxlength="120" placeholder="${storeText("city")}" aria-label="${storeText("city")}" required>
+          <input id="detailCustomerAddress" name="address" type="text" autocomplete="street-address" maxlength="500" placeholder="${storeText("address")}" aria-label="${storeText("address")}" required>
+          <button class="detail-order-confirm" type="submit">${storeText("confirmDirectOrder")}</button>
+        </div>
+      </form>
+    </section>
   </div></div>`;
   productDetail.hidden=false;
   heroSection.hidden=true;featuresSection.hidden=true;categoryShowcase.hidden=true;newArrivalsSection.hidden=true;productsSection.hidden=true;
@@ -1261,12 +1282,54 @@ function changeDetailQuantity(delta){
 function addDetailToCart(){if(detailProduct)addProductToCart(detailProduct,detailQuantity)}
 function orderDetailViaWhatsApp(){
 	if(!detailProduct)return;
+	const form=document.getElementById("detailOrderForm");
+	form.hidden=false;
+	form.scrollIntoView({behavior:"smooth",block:"nearest"});
+	document.getElementById("detailCustomerName").focus({preventScroll:true});
+}
+async function submitDetailOrder(event){
+	event.preventDefault();
+	if(!detailProduct)return;
 	if(!cfg.whatsappConfigured||!cfg.whatsapp)return alert(storeText("whatsappUnavailable"));
-	const productName=String(detailProduct.name||"").trim();
-	const message=currentStoreLanguage==="fr"
-		?`Bonjour, je souhaite commander ce produit : ${productName} (réf. #${detailProduct.id}), quantité : ${detailQuantity}.`
-		:`مرحباً، أريد طلب هذا المنتج: ${productName} (رقم ${detailProduct.id})، الكمية: ${detailQuantity}.`;
-	window.location.assign(`https://wa.me/${cfg.whatsapp}?${new URLSearchParams({text:message})}`);
+	const form=event.currentTarget;
+	if(form.dataset.submitting==="true")return;
+	const customer={
+		name:document.getElementById("detailCustomerName").value.trim(),
+		phone:document.getElementById("detailCustomerPhone").value.trim(),
+		city:document.getElementById("detailCustomerCity").value.trim(),
+		address:document.getElementById("detailCustomerAddress").value.trim()
+	};
+	if(Object.values(customer).some(value=>!value))return form.reportValidity();
+	const confirmButton=form.querySelector("button[type=submit]");
+	const whatsappWindow=window.open("about:blank","_blank");
+	if(whatsappWindow)whatsappWindow.opener=null;
+	form.dataset.submitting="true";
+	confirmButton.disabled=true;
+	try{
+		const response=await fetch("/api/orders",{
+			method:"POST",
+			headers:{"Content-Type":"application/json"},
+			body:JSON.stringify({customer,payment_method:"cash_on_delivery",items:[{product_id:detailProduct.id,quantity:detailQuantity}]})
+		});
+		const result=await response.json();
+		if(!response.ok){
+			whatsappWindow?.close();
+			return alert(result.error||storeText("orderFailed"));
+		}
+		const french=currentStoreLanguage==="fr";
+		const orderItems=Array.isArray(result.items)?result.items:[{name:detailProduct.name,quantity:detailQuantity,price:detailProduct.price}];
+		const itemsText=orderItems.map(item=>`- ${item.name} × ${item.quantity} (${formatStoreMoney(Number(item.price)*item.quantity)})`).join("\n");
+		const text=`${french?"Bonjour":"مرحباً"} ${cfg.store}\n${french?"Je souhaite confirmer la commande":"أريد تأكيد الطلب"} #${result.order_id}\n${french?"Produits":"المنتجات"}:\n${itemsText}\n${storeText("invoiceSubtotal")}: ${formatStoreMoney(result.subtotal)}\n${storeText("shippingOrder")}: ${formatStoreMoney(result.delivery_fee)}\n${storeText("total")}: ${formatStoreMoney(result.total)}\n${storeText("paymentMethod")}: ${storeText("cashAtDelivery")}\n${french?"Nom complet":"الاسم الكامل"}: ${customer.name}\n${storeText("phoneNumber")}: ${customer.phone}\n${storeText("city")}: ${customer.city}\n${storeText("address")}: ${customer.address}`;
+		const whatsappUrl=`https://wa.me/${cfg.whatsapp}?${new URLSearchParams({text})}`;
+		if(whatsappWindow)whatsappWindow.location.href=whatsappUrl;
+		else window.location.assign(whatsappUrl);
+	}catch(error){
+		whatsappWindow?.close();
+		alert(storeText("sendOrderFailed"));
+	}finally{
+		form.dataset.submitting="false";
+		confirmButton.disabled=false;
+	}
 }
 window.addEventListener("popstate",event=>{
   if(imagePreviewHistoryEntry){
