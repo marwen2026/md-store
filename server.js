@@ -69,7 +69,7 @@ app.use((req, res, next) => {
   next();
 });
 app.get("/", async (req, res) => {
-  let title = "M&D Store — Marwen & Dorra";
+  let title = "M-D Store";
   let description = "اكتشفوا تشكيلة M&D Store وتسوقوا بسهولة عبر موقعنا الإلكتروني.";
   const fallbackImage = "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&h=630&q=85";
   let image = fallbackImage;
