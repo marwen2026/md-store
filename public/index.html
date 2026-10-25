@@ -824,6 +824,17 @@ body{background:var(--background);color:var(--text)}
   <div class="footer-bottom"><span>© M&amp;D Store — <span data-i18n="allRightsReserved">جميع الحقوق محفوظة</span></span><strong data-i18n="footerTagline">تسوّق بذكاء، اختيارات أجمل</strong></div>
 </footer>
 <script>
+const incomingStoreUrl=new URL(location.href);
+let normalizeIncomingStoreUrl=false;
+if(incomingStoreUrl.searchParams.has("fbclid")){
+	incomingStoreUrl.searchParams.delete("fbclid");
+	normalizeIncomingStoreUrl=true;
+}
+if(incomingStoreUrl.searchParams.has("product")&&incomingStoreUrl.hash==="#products"){
+	incomingStoreUrl.hash="";
+	normalizeIncomingStoreUrl=true;
+}
+if(normalizeIncomingStoreUrl)history.replaceState(history.state,"",incomingStoreUrl);
 let products=[],featuredProducts=[],featuredProduct=null,featuredProductIndex=0,advertisementTimer=null,campaignTimer=null,campaignSlideIndex=0,productSearchTimer=null,productLoadSequence=0,cart=JSON.parse(localStorage.getItem("md_cart")||"[]"),cfg={whatsapp:"",whatsappConfigured:false,store:"M&D Store",currency:"TND"},selectedCategory="",detailProduct=null,detailQuantity=1,detailImageIndex=0,shopMode=location.hash==="#shop",shopCatalog=[],shopCategoryIds=new Set(),shopPage=1;
 const FREE_SHIPPING_THRESHOLD=199;
 let currentCategories=[];
