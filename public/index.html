@@ -1005,7 +1005,7 @@ function renderNewArrivals(){
 		const leftDate=Date.parse(left.created_at)||0,rightDate=Date.parse(right.created_at)||0;
 		return rightDate-leftDate||Number(right.id)-Number(left.id);
 	}).slice(0,12);
-	newArrivalsSection.hidden=products.length===0;
+	newArrivalsSection.hidden=Boolean(detailProduct)||products.length===0;
 	track.innerHTML=products.map(product=>{
 		const images=productImages(product),price=Number(product.price)||0,oldPrice=Number(product.old_price)||0;
 		const hasDiscount=oldPrice>price,discount=hasDiscount?Math.round((oldPrice-price)/oldPrice*100):0;
