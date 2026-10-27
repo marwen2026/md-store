@@ -2218,6 +2218,7 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
 
   const accent = "#464feb";
   const deep = "#172554";
+  const invoiceBrand = "MA-DOR";
   const text = "#1f2937";
   const soft = "#f5f7fb";
   const border = "#e5e7eb";
@@ -2247,8 +2248,8 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
   function drawPageHeader(firstPage) {
     if (firstPage) {
       document.fillColor(deep).rect(0, 0, pageWidth, 116).fill();
-      document.fillColor("#ffffff").font("Helvetica-Bold").fontSize(25)
-        .text(STORE, left, 34, { width: 300, lineBreak: false });
+      document.fillColor("#d1a43b").font("Times-Bold").fontSize(27)
+        .text(invoiceBrand, left, 33, { width: 300, lineBreak: false });
       document.fillColor("#c7d2fe").font("Helvetica-Bold").fontSize(10)
         .text("FACTURE", right - 126, 27, { width: 126, align: "right" });
       document.fillColor("#ffffff").font("Helvetica-Bold").fontSize(19)
@@ -2276,8 +2277,8 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
     }
 
     document.fillColor(deep).rect(0, 0, pageWidth, 64).fill();
-    document.fillColor("#ffffff").font("Helvetica-Bold").fontSize(15)
-      .text(STORE, left, 23, { width: 300, lineBreak: false });
+    document.fillColor("#d1a43b").font("Times-Bold").fontSize(19)
+      .text(invoiceBrand, left, 21, { width: 300, lineBreak: false });
     document.fillColor("#c7d2fe").font("Helvetica-Bold").fontSize(10)
       .text(`FACTURE #${order.id}`, right - 180, 25, { width: 180, align: "right" });
     return drawTableHeader(82);
