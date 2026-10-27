@@ -1837,6 +1837,25 @@ app.patch("/api/orders/:id/return-cost", auth, role("admin", "manager"), async (
   }
   res.json({ ok: true });
 });
+app.patch("/api/orders/:id/archive", auth, role("admin", "manager"), async (req, res) => {
+  const orderId = Number(req.params.id);
+  if (!Number.isInteger(orderId) || orderId < 1 || orderId > 2147483647) {
+    return res.status(400).json({ error: "رقم الطلب غير صالح" });
+  }
+  if (typeof req.body.archived !== "boolean") {
+    return res.status(400).json({ error: "حالة الأرشفة غير صالحة" });
+  }
+  const result = await pool.query(
+    `UPDATE orders
+     SET archived_at = CASE WHEN $1 THEN COALESCE(archived_at, CURRENT_TIMESTAMP) ELSE NULL END,
+         archived_by = CASE WHEN $1 THEN $2 ELSE NULL END
+     WHERE id = $3
+     RETURNING id, archived_at, archived_by`,
+    [req.body.archived, req.admin.username, orderId]
+  );
+  if (!result.rowCount) return res.status(404).json({ error: "الطلب غير موجود" });
+  res.json({ ok: true, ...result.rows[0] });
+});
 app.get("/api/orders/:id/history", auth, async (req, res) => {
   const result = await pool.query(
     `SELECT h.id, h.from_status, h.to_status, h.changed_by, h.created_at
@@ -2550,7 +2569,10 @@ async function initializeDatabase() {
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_cost NUMERIC(12, 2) NOT NULL DEFAULT 0;
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_cost_updated_at TIMESTAMPTZ;
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS inventory_deducted BOOLEAN NOT NULL DEFAULT TRUE;
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS archived_at TIMESTAMPTZ;
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS archived_by TEXT;
     ALTER TABLE orders ALTER COLUMN inventory_deducted SET DEFAULT FALSE;
+    CREATE INDEX IF NOT EXISTS orders_archived_at_idx ON orders(archived_at) WHERE archived_at IS NOT NULL;
     CREATE TABLE IF NOT EXISTS shipments (
       id SERIAL PRIMARY KEY,
       recipient_name TEXT NOT NULL,
