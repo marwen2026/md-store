@@ -27,6 +27,12 @@ const LOW_STOCK_THRESHOLD = 5;
 const DEFAULT_CAMPAIGN_IMAGE_COUNT = 4;
 const MAX_CAMPAIGN_IMAGE_COUNT = 20;
 const MAX_CUSTOM_CAMPAIGN_IMAGE_COUNT = MAX_CAMPAIGN_IMAGE_COUNT - DEFAULT_CAMPAIGN_IMAGE_COUNT;
+const productSlug = name => String(name || "")
+  .normalize("NFKD")
+  .replace(/\p{M}/gu, "")
+  .toLowerCase()
+  .replace(/[^\p{L}\p{N}]+/gu, "-")
+  .replace(/^-+|-+$/g, "") || "product";
 const HERO_DRAFT_SETTINGS = [
   "hero_background_url",
   "hero_logo_url",
@@ -69,14 +75,28 @@ app.use((req, res, next) => {
   if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) req.body = {};
   next();
 });
-app.get("/", async (req, res) => {
+async function serveStorePage(req, res, requestedProductId, requestedSlug = "") {
   let title = "M-D Store";
   let description = "اكتشفوا تشكيلة M&D Store وتسوقوا بسهولة عبر موقعنا الإلكتروني.";
   const fallbackImage = "/social-preview.jpg";
   let image = fallbackImage;
   let productId = null;
-  const requestedProductId = String(req.query.product || "");
-  if (/^[1-9]\d*$/.test(requestedProductId) && Number.isSafeInteger(Number(requestedProductId))) {
+  let requestedProductSlug = "";
+  let requestedId = String(requestedProductId || "");
+  if (requestedSlug && /^[\p{L}\p{N}-]+$/u.test(requestedSlug)) {
+    const products = await pool.query(
+      `SELECT p.id, p.name
+       FROM products p
+       LEFT JOIN categories c ON c.id = p.category_id
+       LEFT JOIN categories parent ON parent.id = c.parent_id
+       WHERE p.active = TRUE
+         AND (p.category_id IS NULL OR (c.active = TRUE AND (c.parent_id IS NULL OR parent.active = TRUE)))
+       ORDER BY p.id`
+    );
+    const product = products.rows.find(row => productSlug(row.name) === requestedSlug);
+    requestedId = product ? String(product.id) : "";
+  }
+  if (/^[1-9]\d*$/.test(requestedId) && Number.isSafeInteger(Number(requestedId))) {
     const result = await pool.query(
       `SELECT p.id, p.name, p.description,
          (SELECT path FROM product_images WHERE product_id = p.id ORDER BY id LIMIT 1) AS image
@@ -85,11 +105,25 @@ app.get("/", async (req, res) => {
        LEFT JOIN categories parent ON parent.id = c.parent_id
        WHERE p.id = $1 AND p.active = TRUE
          AND (p.category_id IS NULL OR (c.active = TRUE AND (c.parent_id IS NULL OR parent.active = TRUE)))`,
-      [Number(requestedProductId)]
+      [Number(requestedId)]
     );
     if (result.rowCount) {
       const product = result.rows[0];
       productId = product.id;
+      requestedProductSlug = productSlug(product.name);
+      const canonicalPath = `/product/${requestedProductSlug}`;
+      if (req.path === "/" && req.query.product) {
+        const redirectUrl = new URL(req.originalUrl, "http://localhost");
+        redirectUrl.searchParams.delete("product");
+        return res.redirect(301, `${canonicalPath}${redirectUrl.search}`);
+      }
+      if (requestedSlug && (
+        requestedSlug !== requestedProductSlug ||
+        req.path !== new URL(canonicalPath, "http://localhost").pathname
+      )) {
+        const query = new URL(req.originalUrl, "http://localhost").search;
+        return res.redirect(301, `${canonicalPath}${query}`);
+      }
       title = `${product.name} — M&D Store`;
       description = product.description || `اكتشفوا ${product.name} وتسوقوه الآن من M&D Store.`;
       if (typeof product.image === "string" && /^\/uploads\/[A-Za-z0-9._-]+$/.test(product.image)) {
@@ -108,7 +142,7 @@ app.get("/", async (req, res) => {
   const protocol = forwardedProtocol === "https" ? "https" : req.protocol;
   const publicUrl = String(process.env.PUBLIC_URL || `${protocol}://${req.get("host")}`).replace(/\/+$/, "");
   const pageUrl = new URL("/", `${publicUrl}/`);
-  if (productId !== null) pageUrl.searchParams.set("product", String(productId));
+  if (productId !== null) pageUrl.pathname = `/product/${requestedProductSlug}`;
   const imageUrl = new URL(image, `${publicUrl}/`).href;
   const escapeAttribute = value => String(value).replace(/[&<>"']/g, character => ({
     "&": "&amp;",
@@ -133,7 +167,9 @@ app.get("/", async (req, res) => {
   ].join("\n");
   const html = await fs.promises.readFile(path.join(__dirname, "public/index.html"), "utf8");
   res.type("html").send(html.replace("<!-- SOCIAL_METADATA -->", metadata));
-});
+}
+app.get("/", async (req, res) => serveStorePage(req, res, req.query.product));
+app.get("/product/:slug", async (req, res) => serveStorePage(req, res, null, req.params.slug));
 app.use("/uploads", express.static(uploadDir));
 app.get("/uploads/:filename", (req, res) => {
   res.status(404).json({ error: "Image not found" });

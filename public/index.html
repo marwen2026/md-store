@@ -903,6 +903,18 @@ if(incomingStoreUrl.searchParams.has("product")&&incomingStoreUrl.hash==="#produ
 }
 if(normalizeIncomingStoreUrl)history.replaceState(history.state,"",incomingStoreUrl);
 let products=[],featuredProducts=[],featuredProduct=null,featuredProductIndex=0,advertisementTimer=null,campaignTimer=null,campaignSlideIndex=0,productSearchTimer=null,productLoadSequence=0,cart=JSON.parse(localStorage.getItem("md_cart")||"[]"),cfg={whatsapp:"",whatsappConfigured:false,store:"M&D Store",currency:"TND"},selectedCategory="",detailProduct=null,detailQuantity=1,detailImageIndex=0,detailColor=null,compareProductIds=[],favoriteProductIds=JSON.parse(localStorage.getItem("md_favorites")||"[]"),shopMode=location.hash==="#shop",shopCatalog=[],shopCategoryIds=new Set(),shopPage=1;
+function storeProductSlug(name){
+	return String(name||"").normalize("NFKD").replace(/\p{M}/gu,"").toLowerCase().replace(/[^\p{L}\p{N}]+/gu,"-").replace(/^-+|-+$/g,"")||"product";
+}
+function productDetailPath(product){return `/product/${storeProductSlug(product.name)}`}
+function productFromCurrentUrl(){
+	const pathMatch=location.pathname.match(/^\/product\/([^/]+)\/?$/);
+	const slug=pathMatch?decodeURIComponent(pathMatch[1]):null;
+	const productId=new URLSearchParams(location.search).get("product");
+	return [...products,...shopCatalog,...featuredProducts].find(product=>
+		slug?storeProductSlug(product.name)===slug:productId&&Number(product.id)===Number(productId)
+	);
+}
 const FREE_SHIPPING_THRESHOLD=199;
 let currentCategories=[];
 let currentStoreLanguage=localStorage.getItem("md_store_lang")==="fr"?"fr":"ar";
@@ -1155,11 +1167,11 @@ async function load(){
     return;
   }
   if(requestId!==productLoadSequence)return;
-  if(shopMode){shopCatalog=data;renderShopCatalog();const productId=new URLSearchParams(location.search).get("product");if(productId)openProductDetails(productId,false);return}
+  if(shopMode){shopCatalog=data;renderShopCatalog();const product=productFromCurrentUrl();if(product)openProductDetails(product.id,false);return}
   products=data;
   renderProductGrid(products);
-  const productId=new URLSearchParams(location.search).get("product");
-  if(productId)openProductDetails(productId,false);
+  const product=productFromCurrentUrl();
+  if(product)openProductDetails(product.id,false);
 }
 function renderProductGrid(list){
   grid.innerHTML=list.length?list.map(p=>{
@@ -1382,7 +1394,9 @@ function openProductDetails(id,updateHistory=true){
   updateFavoriteButton(document.querySelector(".detail-favorite"));
   updateCompareControls();
   heroSection.hidden=true;featuresSection.hidden=true;categoryShowcase.hidden=true;newArrivalsSection.hidden=true;productsSection.hidden=true;
-  if(updateHistory){const url=new URL(location.href);url.searchParams.set("product",String(product.id));history.pushState({productId:product.id},"",url)}
+  const detailPath=new URL(productDetailPath(product),location.origin).pathname;
+  if(updateHistory)history.pushState({productId:product.id},"",detailPath);
+  else if(location.pathname!==detailPath||location.search||location.hash)history.replaceState({...history.state,productId:product.id},"",detailPath);
   window.scrollTo({top:0,behavior:"smooth"});
 }
 function selectProductDetailTab(tabName,focusTab=false){
@@ -1414,7 +1428,7 @@ function handleProductDetailTabKeydown(event){
 }
 function closeProductDetails(updateHistory=true,target="products"){
   detailProduct=null;productDetail.hidden=true;heroSection.hidden=false;featuresSection.hidden=false;categoryShowcase.hidden=false;newArrivalsSection.hidden=featuredProducts.length===0;productsSection.hidden=false;
-  if(updateHistory){const url=new URL(location.href);url.searchParams.delete("product");history.replaceState({},"",url)}
+  if(updateHistory){history.replaceState({},"",location.pathname.startsWith("/product/")?"/":location.href)}
   const destination=target==="home"?0:productsSection.offsetTop;
   window.scrollTo({top:destination,behavior:"smooth"});
 }
@@ -1505,8 +1519,8 @@ window.addEventListener("popstate",event=>{
     showImagePreview(event.state.previewProductId,event.state.previewImageIndex);
     return;
   }
-  const productId=new URLSearchParams(location.search).get("product");
-  if(productId)openProductDetails(productId,false);
+  const product=productFromCurrentUrl();
+  if(product)openProductDetails(product.id,false);
   else if(detailProduct)closeProductDetails(false,"products");
   else if(location.hash==="#shop"){if(!shopMode){shopMode=true;applyShopPageVisibility();load()}}
   else if(shopMode)closeShopPage(false);
