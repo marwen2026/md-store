@@ -2370,14 +2370,16 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
   document.fillColor(accent).fontSize(14).text(formatMoney(order.total),
     totalsX + 105, totalsY + 78, { width: 129, align: "right" });
 
+  const lastPageFooterY = Math.min(footerY, totalsY + 132);
   const pageRange = document.bufferedPageRange();
   for (let page = pageRange.start; page < pageRange.start + pageRange.count; page += 1) {
     document.switchToPage(page);
-    document.strokeColor(border).lineWidth(0.8).moveTo(left, footerY).lineTo(right, footerY).stroke();
+    const pageFooterY = page === pageRange.start + pageRange.count - 1 ? lastPageFooterY : footerY;
+    document.strokeColor(border).lineWidth(0.8).moveTo(left, pageFooterY).lineTo(right, pageFooterY).stroke();
     document.fillColor("#6b7280").font("Helvetica").fontSize(8)
-      .text("Merci pour votre confiance.", left, footerY + 2, { width: contentWidth, align: "center" });
+      .text("Merci pour votre confiance.", left, pageFooterY + 2, { width: contentWidth, align: "center" });
     document.fillColor("#9ca3af").fontSize(8)
-      .text(`${page + 1} / ${pageRange.count}`, left, footerY + 2, { width: contentWidth, align: "right" });
+      .text(`${page + 1} / ${pageRange.count}`, left, pageFooterY + 2, { width: contentWidth, align: "right" });
   }
   document.end();
 });
