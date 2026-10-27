@@ -201,12 +201,17 @@ function parseProductInput(body) {
   const stock = safeNum(body.stock, 0);
   const categoryValue = String(body.category_id || "").trim();
   const categoryId = categoryValue ? Number(categoryValue) : null;
+  const colorInput = String(body.colors || "").trim();
+  const colors = colorInput ? colorInput.split(",").map(color => color.trim().toUpperCase()) : [];
     if (!name || !Number.isFinite(price) || price < 0 || price > MAX_MONEY ||
       (costPrice !== null && (!Number.isFinite(costPrice) || costPrice < 0 || costPrice > MAX_MONEY)) ||
       !Number.isFinite(deliveryPrice) || deliveryPrice < 0 || deliveryPrice > MAX_MONEY ||
       (oldPrice !== null && (!Number.isFinite(oldPrice) || oldPrice < 0 || oldPrice > MAX_MONEY)) ||
       !Number.isInteger(stock) || stock < 0 || stock > 2147483647 ||
-      (categoryId !== null && (!Number.isInteger(categoryId) || categoryId < 1 || categoryId > 2147483647))) {
+      (categoryId !== null && (!Number.isInteger(categoryId) || categoryId < 1 || categoryId > 2147483647)) ||
+      colors.length > 12 ||
+      colors.some(color => !/^#[0-9A-F]{6}$/.test(color)) ||
+      new Set(colors).size !== colors.length) {
     return null;
   }
   return {
@@ -218,6 +223,7 @@ function parseProductInput(body) {
     deliveryPrice,
     oldPrice,
     stock,
+    colors,
     advertised: ["1", "true", "on"].includes(String(body.advertised).toLowerCase()),
     active: body.active === undefined || ["1", "true", "on"].includes(String(body.active).toLowerCase())
   };
@@ -1517,13 +1523,13 @@ app.post("/api/products", auth, role("admin", "manager"), productUpload.array("i
       await client.query("UPDATE products SET advertised = FALSE WHERE advertised = TRUE");
     }
     const result = await client.query(
-      `INSERT INTO products(name, description, category_id, price, cost_price, delivery_price, old_price, stock, advertised, sort_order)
-       VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9,
+      `INSERT INTO products(name, description, category_id, price, cost_price, delivery_price, old_price, stock, colors, advertised, sort_order)
+       VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
          CASE WHEN EXISTS (SELECT 1 FROM products WHERE sort_order IS NOT NULL)
            THEN COALESCE((SELECT MAX(sort_order) + 1 FROM products), 0) ELSE NULL END)
        RETURNING id`,
       [product.name, product.description, product.categoryId, product.price, product.costPrice, product.deliveryPrice,
-        product.oldPrice, product.stock, product.advertised]
+        product.oldPrice, product.stock, product.colors, product.advertised]
     );
     const productId = result.rows[0].id;
     await insertProductImages(client, productId, req.files);
@@ -1567,9 +1573,9 @@ app.put("/api/products/:id", auth, role("admin", "manager"), productUpload.array
     }
     await client.query(
       `UPDATE products SET name=$1, description=$2, category_id=$3, price=$4, cost_price=$5, delivery_price=$6, old_price=$7,
-       stock=$8, active=$9, advertised=$10 WHERE id=$11`,
+       stock=$8, active=$9, advertised=$10, colors=$11 WHERE id=$12`,
       [product.name, product.description, product.categoryId, product.price, product.costPrice, product.deliveryPrice,
-        product.oldPrice, product.stock, product.active, product.advertised, req.params.id]
+        product.oldPrice, product.stock, product.active, product.advertised, product.colors, req.params.id]
     );
     await insertProductImages(client, req.params.id, req.files);
     const previousProduct = existing.rows[0];
@@ -1645,29 +1651,48 @@ app.post("/api/orders", async (req, res) => {
     let deliveryFee = 0;
     const normalizedItems = [];
     const requestedItems = new Map();
+    const requestedStock = new Map();
     for (const item of items) {
-      const productId = Number(item?.product_id);
-      const quantity = Number(item?.quantity);
+        const productId = Number(item?.product_id);
+        const quantity = Number(item?.quantity);
+        const variantColor = item?.variant_color == null || item.variant_color === ""
+          ? null
+          : String(item.variant_color).toUpperCase();
         if (!Number.isInteger(productId) || productId < 1 || productId > 2147483647 ||
-          !Number.isSafeInteger(quantity) || quantity < 1) {
-        throw new OrderValidationError("الكمية غير متوفرة: منتج");
-      }
-      const combinedQuantity = (requestedItems.get(productId) || 0) + quantity;
-      if (!Number.isSafeInteger(combinedQuantity)) throw new OrderValidationError("الكمية غير متوفرة: منتج");
-      requestedItems.set(productId, combinedQuantity);
+            !Number.isSafeInteger(quantity) || quantity < 1 ||
+            (variantColor !== null && !/^#[0-9A-F]{6}$/.test(variantColor))) {
+          throw new OrderValidationError("الكمية غير متوفرة: منتج");
+        }
+        const itemKey = `${productId}:${variantColor || ""}`;
+        const combinedQuantity = (requestedItems.get(itemKey)?.quantity || 0) + quantity;
+        if (!Number.isSafeInteger(combinedQuantity)) throw new OrderValidationError("الكمية غير متوفرة: منتج");
+        requestedItems.set(itemKey, { productId, variantColor, quantity: combinedQuantity });
+        const combinedStock = (requestedStock.get(productId) || 0) + quantity;
+        if (!Number.isSafeInteger(combinedStock)) throw new OrderValidationError("الكمية غير متوفرة: منتج");
+        requestedStock.set(productId, combinedStock);
     }
-    for (const [productId, quantity] of [...requestedItems].sort(([left], [right]) => left - right)) {
-      const result = await client.query("SELECT * FROM products WHERE id = $1 AND active = TRUE FOR UPDATE", [productId]);
-      const product = result.rows[0];
-      if (!product || quantity > product.stock) {
-        throw new OrderValidationError(`الكمية غير متوفرة: ${product?.name || "منتج"}`);
-      }
-      subtotal += Number(product.price) * quantity;
-      deliveryFee = Math.max(deliveryFee, Number(product.delivery_price || 0));
-      if (!Number.isFinite(subtotal) || subtotal > MAX_MONEY) {
-        throw new OrderValidationError("المجموع يتجاوز الحد المسموح");
-      }
-      normalizedItems.push({ product, quantity });
+    const productsById = new Map();
+    for (const [productId, quantity] of [...requestedStock].sort(([left], [right]) => left - right)) {
+        const result = await client.query("SELECT * FROM products WHERE id = $1 AND active = TRUE FOR UPDATE", [productId]);
+        const product = result.rows[0];
+        if (!product || quantity > product.stock) {
+          throw new OrderValidationError(`الكمية غير متوفرة: ${product?.name || "منتج"}`);
+        }
+        productsById.set(productId, product);
+    }
+    for (const item of requestedItems.values()) {
+        const product = productsById.get(item.productId);
+        const colors = Array.isArray(product.colors) ? product.colors : [];
+        if ((colors.length && !colors.includes(item.variantColor)) || (!colors.length && item.variantColor)) {
+          throw new OrderValidationError(`اللون غير متوفر: ${product.name}`);
+        }
+        const { quantity } = item;
+        subtotal += Number(product.price) * quantity;
+        deliveryFee = Math.max(deliveryFee, Number(product.delivery_price || 0));
+        if (!Number.isFinite(subtotal) || subtotal > MAX_MONEY) {
+          throw new OrderValidationError("المجموع يتجاوز الحد المسموح");
+        }
+        normalizedItems.push({ product, quantity, variantColor: item.variantColor });
     }
     if (subtotal >= FREE_SHIPPING_THRESHOLD) deliveryFee = 0;
     if (!Number.isFinite(subtotal + deliveryFee) || subtotal + deliveryFee > MAX_MONEY) {
@@ -1691,10 +1716,10 @@ app.post("/api/orders", async (req, res) => {
     );
     for (const item of normalizedItems) {
       await client.query(
-        `INSERT INTO order_items(order_id, product_id, product_name, price, cost_price, delivery_price, quantity)
-         VALUES($1, $2, $3, $4, $5, $6, $7)`,
+        `INSERT INTO order_items(order_id, product_id, product_name, price, cost_price, delivery_price, quantity, variant_color)
+         VALUES($1, $2, $3, $4, $5, $6, $7, $8)`,
         [orderId, item.product.id, item.product.name, item.product.price, item.product.cost_price,
-          item.product.delivery_price || 0, item.quantity]
+          item.product.delivery_price || 0, item.quantity, item.variantColor]
       );
     }
     await client.query("COMMIT");
@@ -1708,7 +1733,8 @@ app.post("/api/orders", async (req, res) => {
       items: normalizedItems.map(item => ({
         name: item.product.name,
         quantity: item.quantity,
-        price: Number(item.product.price)
+        price: Number(item.product.price),
+        variant_color: item.variantColor
       }))
     });
   } catch (error) {
@@ -2258,7 +2284,7 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
 
   let y = drawPageHeader(true);
   for (const item of items.rows) {
-    const productName = String(item.product_name || "Produit");
+    const productName = `${String(item.product_name || "Produit")}${item.variant_color ? ` - Couleur: ${item.variant_color}` : ""}`;
     const productOptions = { width: columns.product.width, font: "Helvetica", fontSize: 9 };
     const rowHeight = Math.max(34, document.heightOfString(productName, productOptions) + 18);
     if (y + rowHeight + 150 > footerY) {
@@ -2408,6 +2434,7 @@ async function initializeDatabase() {
       delivery_price NUMERIC(12, 2) NOT NULL DEFAULT 0,
       old_price NUMERIC(12, 2),
       stock INTEGER NOT NULL DEFAULT 0,
+      colors TEXT[] NOT NULL DEFAULT '{}',
       active BOOLEAN NOT NULL DEFAULT TRUE,
       advertised BOOLEAN NOT NULL DEFAULT FALSE,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -2416,6 +2443,10 @@ async function initializeDatabase() {
     ALTER TABLE products ADD COLUMN IF NOT EXISTS delivery_price NUMERIC(12, 2) NOT NULL DEFAULT 0;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS cost_price NUMERIC(12, 2);
     ALTER TABLE products ADD COLUMN IF NOT EXISTS sort_order INTEGER;
+    ALTER TABLE products ADD COLUMN IF NOT EXISTS colors TEXT[] NOT NULL DEFAULT '{}';
+    UPDATE products SET colors = '{}' WHERE colors IS NULL;
+    ALTER TABLE products ALTER COLUMN colors SET DEFAULT '{}';
+    ALTER TABLE products ALTER COLUMN colors SET NOT NULL;
     CREATE INDEX IF NOT EXISTS products_sort_order_idx ON products(sort_order, id)
       WHERE sort_order IS NOT NULL;
     CREATE UNIQUE INDEX IF NOT EXISTS products_single_advertised_idx
@@ -2471,10 +2502,12 @@ async function initializeDatabase() {
       price NUMERIC(12, 2) NOT NULL,
       cost_price NUMERIC(12, 2),
       delivery_price NUMERIC(12, 2) NOT NULL DEFAULT 0,
-      quantity INTEGER NOT NULL
+      quantity INTEGER NOT NULL,
+      variant_color TEXT
     );
     ALTER TABLE order_items ADD COLUMN IF NOT EXISTS delivery_price NUMERIC(12, 2) NOT NULL DEFAULT 0;
     ALTER TABLE order_items ADD COLUMN IF NOT EXISTS cost_price NUMERIC(12, 2);
+    ALTER TABLE order_items ADD COLUMN IF NOT EXISTS variant_color TEXT;
     CREATE TABLE IF NOT EXISTS inventory_movements (
       id SERIAL PRIMARY KEY,
       product_id INTEGER REFERENCES products(id) ON DELETE SET NULL,
