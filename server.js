@@ -2377,9 +2377,9 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
     document.switchToPage(page);
     document.strokeColor(border).lineWidth(0.8).moveTo(left, footerY).lineTo(right, footerY).stroke();
     document.fillColor("#6b7280").font("Helvetica").fontSize(8)
-      .text("Merci pour votre confiance.", left, footerY + 12, { width: contentWidth, align: "center" });
+      .text("Merci pour votre confiance.", left, footerY + 2, { width: contentWidth, align: "center" });
     document.fillColor("#9ca3af").fontSize(8)
-      .text(`${page + 1} / ${pageRange.count}`, left, footerY + 12, { width: contentWidth, align: "right" });
+      .text(`${page + 1} / ${pageRange.count}`, left, footerY + 2, { width: contentWidth, align: "right" });
   }
   document.end();
 });
