@@ -2344,6 +2344,23 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
   }
   const totalsY = y + 12;
   const totalsX = right - 250;
+  const stampX = left + 64;
+  const stampY = totalsY + 56;
+  document.circle(stampX, stampY, 49).fillAndStroke("#fffaf0", accent);
+  document.lineWidth(1.2).circle(stampX, stampY, 43).strokeColor(deep).stroke();
+  document.lineWidth(0.7).circle(stampX, stampY, 39).strokeColor(accent).stroke();
+  document.fillColor(accent).font("Helvetica-Bold").fontSize(7.5)
+    .text("MERCI", stampX - 37, stampY - 30, { width: 74, align: "center", lineBreak: false, characterSpacing: 1 });
+  document.fillColor(deep).font("Times-Bold").fontSize(20)
+    .text("M&D", stampX - 38, stampY - 15, { width: 76, align: "center", lineBreak: false });
+  document.strokeColor(accent).lineWidth(0.8).moveTo(stampX - 22, stampY + 9).lineTo(stampX + 22, stampY + 9).stroke();
+  document.fillColor(deep).font("Helvetica-Bold").fontSize(7.5)
+    .text("MA-DOR", stampX - 35, stampY + 13, { width: 70, align: "center", lineBreak: false, characterSpacing: 1 });
+  document.fillColor("#596579").font("Helvetica").fontSize(5.5)
+    .text("BOUTIQUE  -  TUNISIE", stampX - 37, stampY + 25, { width: 74, align: "center", lineBreak: false, characterSpacing: 0.2 });
+  for (const offset of [-31, 31]) {
+    document.fillColor(accent).circle(stampX + offset, stampY + 1, 1.5).fill();
+  }
   document.roundedRect(totalsX, totalsY, 250, 112, 10).fillAndStroke("#ffffff", border);
   document.fillColor("#596579").font("Helvetica").fontSize(9).text("Sous-total", totalsX + 15, totalsY + 15);
   document.fillColor(text).font("Helvetica-Bold").text(formatMoney(subtotal), totalsX + 110, totalsY + 15, { width: 124, align: "right" });
