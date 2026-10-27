@@ -2209,6 +2209,7 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
   const createdAt = new Date(order.created_at).toLocaleDateString("fr-FR", {
     dateStyle: "medium"
   });
+  const invoiceNumber = `${new Date(order.created_at).getFullYear()}-${String(order.id).padStart(3, "0")}`;
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", `inline; filename=invoice-${order.id}.pdf`);
@@ -2260,9 +2261,9 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
       document.text("E-mail : contact@mador.tn", left + 2, 105, { width: 340, lineBreak: false });
       document.text("Site web : https://mador.tn", left + 2, 116, { width: 340, lineBreak: false });
       document.fillColor("#dbe3f4").font("Helvetica-Bold").fontSize(8)
-        .text("FACTURE", right - 132, 27, { width: 132, align: "right", characterSpacing: 1.2 });
+        .text("FACTURE N°", right - 132, 27, { width: 132, align: "right", characterSpacing: 1.2 });
       document.fillColor("#ffffff").font("Helvetica-Bold").fontSize(24)
-        .text(`#${order.id}`, right - 132, 47, { width: 132, align: "right" });
+        .text(invoiceNumber, right - 132, 47, { width: 132, align: "right" });
       document.fillColor("#dbe3f4").font("Helvetica").fontSize(9)
         .text(createdAt, right - 132, 82, { width: 132, align: "right" });
 
@@ -2296,7 +2297,7 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
     document.fillColor("#d1a43b").font("Times-Bold").fontSize(19)
       .text(invoiceBrand, left, 17, { width: 300, lineBreak: false });
     document.fillColor("#dbe3f4").font("Helvetica-Bold").fontSize(9)
-      .text(`FACTURE  #${order.id}`, right - 180, 25, { width: 180, align: "right" });
+      .text(`FACTURE N° ${invoiceNumber}`, right - 180, 25, { width: 180, align: "right" });
     return drawTableHeader(82);
   }
 
