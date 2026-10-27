@@ -2216,7 +2216,7 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
   const document = new PDFDocument({ size: "A4", margin: 44, bufferPages: true });
   document.pipe(res);
 
-  const accent = "#464feb";
+  const accent = "#c99a3b";
   const deep = "#172554";
   const invoiceBrand = "MA-DOR";
   const text = "#1f2937";
@@ -2227,114 +2227,134 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
   const left = 44;
   const right = pageWidth - 44;
   const contentWidth = right - left;
-  const footerY = pageHeight - 66;
+  const footerY = pageHeight - 58;
   const columns = {
-    product: { x: left + 14, width: 238 },
-    quantity: { x: left + 266, width: 42 },
-    unitPrice: { x: left + 320, width: 86 },
-    total: { x: left + 416, width: 82 }
+    product: { x: left + 14, width: 224 },
+    quantity: { x: left + 260, width: 46 },
+    unitPrice: { x: left + 316, width: 92 },
+    total: { x: left + 414, width: 79 }
   };
+  const formatMoney = value => `${Number(value).toFixed(3).replace(".", ",")} ${CURRENCY}`;
 
   function drawTableHeader(y) {
-    document.fillColor(deep).roundedRect(left, y, contentWidth, 30, 7).fill();
-    document.fillColor("#ffffff").font("Helvetica-Bold").fontSize(9)
-      .text("Produit", columns.product.x, y + 10, { width: columns.product.width });
-    document.text("Qté", columns.quantity.x, y + 10, { width: columns.quantity.width, align: "center" });
-    document.text("Prix unitaire", columns.unitPrice.x, y + 10, { width: columns.unitPrice.width, align: "right" });
-    document.text("Total", columns.total.x, y + 10, { width: columns.total.width, align: "right" });
-    return y + 38;
+    document.fillColor(soft).roundedRect(left, y, contentWidth, 34, 8).fill();
+    document.fillColor(deep).font("Helvetica-Bold").fontSize(8)
+      .text("PRODUIT", columns.product.x, y + 12, { width: columns.product.width });
+    document.text("QTÉ", columns.quantity.x, y + 12, { width: columns.quantity.width, align: "center" });
+    document.text("PRIX UNIT.", columns.unitPrice.x, y + 12, { width: columns.unitPrice.width, align: "right" });
+    document.text("TOTAL", columns.total.x, y + 12, { width: columns.total.width, align: "right" });
+    return y + 42;
   }
 
   function drawPageHeader(firstPage) {
     if (firstPage) {
-      document.fillColor(deep).rect(0, 0, pageWidth, 116).fill();
-      document.fillColor("#d1a43b").font("Times-Bold").fontSize(27)
-        .text(invoiceBrand, left, 33, { width: 300, lineBreak: false });
-      document.fillColor("#c7d2fe").font("Helvetica-Bold").fontSize(10)
-        .text("FACTURE", right - 126, 27, { width: 126, align: "right" });
-      document.fillColor("#ffffff").font("Helvetica-Bold").fontSize(19)
-        .text(`#${order.id}`, right - 126, 47, { width: 126, align: "right" });
+      document.fillColor(deep).rect(0, 0, pageWidth, 126).fill();
+      document.fillColor(accent).rect(0, 0, 6, 126).fill();
+      document.fillColor(accent).font("Times-Bold").fontSize(30)
+        .text(invoiceBrand, left, 30, { width: 300, lineBreak: false });
+      document.fillColor("#dbe3f4").font("Helvetica").fontSize(8)
+        .text("VOTRE BOUTIQUE, EN TOUTE CONFIANCE", left + 2, 70, { width: 280, lineBreak: false, characterSpacing: 0.6 });
+      document.fillColor("#dbe3f4").font("Helvetica-Bold").fontSize(8)
+        .text("FACTURE", right - 132, 27, { width: 132, align: "right", characterSpacing: 1.2 });
+      document.fillColor("#ffffff").font("Helvetica-Bold").fontSize(24)
+        .text(`#${order.id}`, right - 132, 47, { width: 132, align: "right" });
+      document.fillColor("#dbe3f4").font("Helvetica").fontSize(9)
+        .text(createdAt, right - 132, 82, { width: 132, align: "right" });
 
-      const infoY = 140;
+      const infoY = 148;
       const cardWidth = (contentWidth - 14) / 2;
-      document.fillColor(soft).roundedRect(left, infoY, cardWidth, 128, 10).fill();
-      document.fillColor(soft).roundedRect(left + cardWidth + 14, infoY, cardWidth, 128, 10).fill();
+      document.roundedRect(left, infoY, cardWidth, 112, 10).fillAndStroke("#ffffff", border);
+      document.roundedRect(left + cardWidth + 14, infoY, cardWidth, 112, 10).fillAndStroke("#ffffff", border);
 
-      document.fillColor(accent).font("Helvetica-Bold").fontSize(9).text("CLIENT", left + 16, infoY + 15);
-      document.fillColor(text).font("Helvetica-Bold").fontSize(13)
-        .text(String(order.customer_name || "-"), left + 16, infoY + 34, { width: cardWidth - 32 });
-      document.fillColor("#4b5563").font("Helvetica").fontSize(9)
-        .text(`Téléphone : ${order.phone || "-"}`, left + 16, infoY + 62, { width: cardWidth - 32 });
+      document.fillColor(accent).font("Helvetica-Bold").fontSize(8)
+        .text("FACTURÉ À", left + 15, infoY + 14, { width: cardWidth - 30, characterSpacing: 0.8 });
+      document.fillColor(text).font("Helvetica-Bold").fontSize(12)
+        .text(String(order.customer_name || "-"), left + 15, infoY + 34, { width: cardWidth - 30, height: 18, ellipsis: true });
+      document.fillColor("#596579").font("Helvetica").fontSize(9)
+        .text(`Téléphone : ${order.phone || "-"}`, left + 15, infoY + 59, { width: cardWidth - 30, height: 14, ellipsis: true });
       document.text(`Adresse : ${[order.address, order.city].filter(Boolean).join(", ") || "-"}`,
-        left + 16, infoY + 82, { width: cardWidth - 32, height: 34, ellipsis: true });
+        left + 15, infoY + 78, { width: cardWidth - 30, height: 24, ellipsis: true });
 
-      const detailX = left + cardWidth + 30;
-      document.fillColor(accent).font("Helvetica-Bold").fontSize(9).text("DÉTAILS DE LA FACTURE", detailX, infoY + 15);
-      document.fillColor("#4b5563").font("Helvetica").fontSize(9)
-        .text(`Date : ${createdAt}`, detailX, infoY + 39, { width: cardWidth - 32 });
-      document.text("Paiement : à la livraison", detailX, infoY + 59, { width: cardWidth - 32 });
-      return drawTableHeader(292);
+      const detailX = left + cardWidth + 29;
+      document.fillColor(accent).font("Helvetica-Bold").fontSize(8)
+        .text("DÉTAILS DE LA FACTURE", detailX, infoY + 14, { width: cardWidth - 30, characterSpacing: 0.5 });
+      document.fillColor("#596579").font("Helvetica").fontSize(9)
+        .text(`Date : ${createdAt}`, detailX, infoY + 39, { width: cardWidth - 30 });
+      document.text("Paiement : à la livraison", detailX, infoY + 61, { width: cardWidth - 30 });
+      document.fillColor("#15805d").font("Helvetica-Bold").fontSize(8)
+        .text("MERCI POUR VOTRE COMMANDE", detailX, infoY + 84, { width: cardWidth - 30 });
+      return drawTableHeader(280);
     }
 
-    document.fillColor(deep).rect(0, 0, pageWidth, 64).fill();
+    document.fillColor(deep).rect(0, 0, pageWidth, 62).fill();
+    document.fillColor(accent).rect(0, 0, 6, 62).fill();
     document.fillColor("#d1a43b").font("Times-Bold").fontSize(19)
-      .text(invoiceBrand, left, 21, { width: 300, lineBreak: false });
-    document.fillColor("#c7d2fe").font("Helvetica-Bold").fontSize(10)
-      .text(`FACTURE #${order.id}`, right - 180, 25, { width: 180, align: "right" });
+      .text(invoiceBrand, left, 17, { width: 300, lineBreak: false });
+    document.fillColor("#dbe3f4").font("Helvetica-Bold").fontSize(9)
+      .text(`FACTURE  #${order.id}`, right - 180, 25, { width: 180, align: "right" });
     return drawTableHeader(82);
   }
 
   let y = drawPageHeader(true);
+  let rowIndex = 0;
   for (const item of items.rows) {
     const productName = String(item.product_name || "Produit");
     const variantColor = normalizeColorHex(item.variant_color);
     const variantLabel = variantColor ? `Couleur : ${colorName(variantColor, "fr")}` : "";
     const productOptions = { width: columns.product.width, font: "Helvetica", fontSize: 9 };
-    const rowHeight = Math.max(variantLabel ? 42 : 34, document.heightOfString(productName, productOptions) + (variantLabel ? 27 : 18));
-    if (y + rowHeight + 150 > footerY) {
+    const productHeight = document.heightOfString(productName, productOptions);
+    const rowHeight = Math.max(variantLabel ? 45 : 40, productHeight + (variantLabel ? 28 : 18));
+    if (y + rowHeight + 132 > footerY) {
       document.addPage();
       y = drawPageHeader(false);
     }
-    document.fillColor(y % 2 ? "#ffffff" : soft).roundedRect(left, y, contentWidth, rowHeight, 5).fill();
-    document.fillColor(text).font("Helvetica").fontSize(9)
-      .text(productName, columns.product.x, variantLabel ? y + 7 : y + 9, { width: columns.product.width, height: rowHeight - 16, ellipsis: true });
-    if (variantLabel) {
-      document.fillColor(variantColor).circle(columns.product.x + 3, y + 29, 3).fill();
-      document.fillColor("#4b5563").font("Helvetica").fontSize(8)
-        .text(variantLabel, columns.product.x + 11, y + 23, { width: columns.product.width - 11, height: 12, ellipsis: true });
+    if (rowIndex % 2 === 0) {
+      document.fillColor("#fafbfd").roundedRect(left, y, contentWidth, rowHeight, 6).fill();
     }
-    const textY = y + Math.max(9, (rowHeight - 12) / 2);
-    document.text(String(item.quantity || 0), columns.quantity.x, textY, { width: columns.quantity.width, align: "center" });
-    document.text(`${Number(item.price).toFixed(3).replace(".", ",")} ${CURRENCY}`, columns.unitPrice.x, textY, { width: columns.unitPrice.width, align: "right" });
-    document.font("Helvetica-Bold").text(
-      `${(Number(item.price) * Number(item.quantity)).toFixed(3).replace(".", ",")} ${CURRENCY}`,
+    document.fillColor(text).font("Helvetica").fontSize(9)
+      .text(productName, columns.product.x, y + (variantLabel ? 7 : 12), { width: columns.product.width, height: rowHeight - 18, ellipsis: true });
+    if (variantLabel) {
+      document.fillColor(variantColor).circle(columns.product.x + 3, y + 31, 3).fill();
+      document.fillColor("#4b5563").font("Helvetica").fontSize(8)
+        .text(variantLabel, columns.product.x + 11, y + 25, { width: columns.product.width - 11, height: 12, ellipsis: true });
+    }
+    const textY = y + Math.max(12, (rowHeight - 10) / 2);
+    document.fillColor(soft).roundedRect(columns.quantity.x + 7, textY - 5, 32, 21, 7).fill();
+    document.fillColor(text).font("Helvetica-Bold").fontSize(9)
+      .text(String(item.quantity || 0), columns.quantity.x + 7, textY, { width: 32, align: "center" });
+    document.fillColor("#596579").font("Helvetica").fontSize(9)
+      .text(formatMoney(item.price), columns.unitPrice.x, textY, { width: columns.unitPrice.width, align: "right" });
+    document.fillColor(text).font("Helvetica-Bold").fontSize(9).text(
+      formatMoney(Number(item.price) * Number(item.quantity)),
       columns.total.x, textY, { width: columns.total.width, align: "right" }
     );
+    document.strokeColor(border).lineWidth(0.45).moveTo(left + 8, y + rowHeight + 2).lineTo(right - 8, y + rowHeight + 2).stroke();
     y += rowHeight + 4;
+    rowIndex += 1;
   }
 
-  if (y + 142 > footerY) {
+  if (y + 132 > footerY) {
     document.addPage();
     y = drawPageHeader(false);
   }
-  const totalsY = y + 14;
-  const totalsX = right - 230;
-  document.fillColor(soft).roundedRect(totalsX, totalsY, 230, 126, 10).fill();
-  document.fillColor(text).font("Helvetica").fontSize(10).text("Sous-total", totalsX + 16, totalsY + 18);
-  document.font("Helvetica-Bold").text(`${subtotal.toFixed(3).replace(".", ",")} ${CURRENCY}`, totalsX + 100, totalsY + 18, { width: 112, align: "right" });
-  document.font("Helvetica").text("Livraison", totalsX + 16, totalsY + 43);
-  document.font("Helvetica-Bold").text(`${deliveryFee.toFixed(3).replace(".", ",")} ${CURRENCY}`, totalsX + 100, totalsY + 43, { width: 112, align: "right" });
-  document.strokeColor(border).lineWidth(1).moveTo(totalsX + 16, totalsY + 70).lineTo(totalsX + 214, totalsY + 70).stroke();
-  document.fillColor(deep).font("Helvetica-Bold").fontSize(11).text("TOTAL", totalsX + 16, totalsY + 91);
-  document.fillColor(accent).fontSize(14).text(`${Number(order.total).toFixed(3).replace(".", ",")} ${CURRENCY}`,
-    totalsX + 90, totalsY + 88, { width: 122, align: "right" });
+  const totalsY = y + 12;
+  const totalsX = right - 250;
+  document.roundedRect(totalsX, totalsY, 250, 112, 10).fillAndStroke("#ffffff", border);
+  document.fillColor("#596579").font("Helvetica").fontSize(9).text("Sous-total", totalsX + 15, totalsY + 15);
+  document.fillColor(text).font("Helvetica-Bold").text(formatMoney(subtotal), totalsX + 110, totalsY + 15, { width: 124, align: "right" });
+  document.fillColor("#596579").font("Helvetica").text("Livraison", totalsX + 15, totalsY + 37);
+  document.fillColor(text).font("Helvetica-Bold").text(formatMoney(deliveryFee), totalsX + 110, totalsY + 37, { width: 124, align: "right" });
+  document.strokeColor(border).lineWidth(0.8).moveTo(totalsX + 15, totalsY + 61).lineTo(totalsX + 235, totalsY + 61).stroke();
+  document.fillColor(deep).font("Helvetica-Bold").fontSize(10).text("TOTAL", totalsX + 15, totalsY + 82);
+  document.fillColor(accent).fontSize(14).text(formatMoney(order.total),
+    totalsX + 105, totalsY + 78, { width: 129, align: "right" });
 
   const pageRange = document.bufferedPageRange();
   for (let page = pageRange.start; page < pageRange.start + pageRange.count; page += 1) {
     document.switchToPage(page);
-    document.strokeColor(border).lineWidth(1).moveTo(left, footerY - 11).lineTo(right, footerY - 11).stroke();
+    document.strokeColor(border).lineWidth(0.8).moveTo(left, footerY).lineTo(right, footerY).stroke();
     document.fillColor("#6b7280").font("Helvetica").fontSize(8)
-      .text("Merci pour votre confiance.", left, footerY, { width: contentWidth, align: "center" });
+      .text("Merci pour votre confiance.", left, footerY + 12, { width: contentWidth, align: "center" });
     document.fillColor("#9ca3af").fontSize(8)
       .text(`${page + 1} / ${pageRange.count}`, left, footerY + 12, { width: contentWidth, align: "right" });
   }
