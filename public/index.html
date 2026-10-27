@@ -641,14 +641,18 @@ body{background:var(--background);color:var(--text)}
 <style>
   .detail-reward { margin: 20px 0 16px; padding: 14px 16px; border-radius: 9px; background: #e4f6f3; color: #172554; font-size: 14px; }
   .cart-item-meta .color-name-swatch { width: 12px; height: 12px; flex-basis: 12px; }
-  .detail-color-picker { margin: 0 0 18px; }
-  .detail-color-heading { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; font-size: 14px; font-weight: 800; }
-  .detail-color-heading strong { display: inline-flex; align-items: center; gap: 6px; color: #657189; font-weight: 600; }
+  .detail-color-picker { display: flex; align-items: center; gap: 13px; flex-wrap: wrap; margin: 0 0 18px; }
+  .detail-color-heading { margin: 0; color: #34415c; font-size: 13px; font-weight: 800; }
   .color-name-swatch { display: inline-block; width: 14px; height: 14px; flex: 0 0 14px; border: 1px solid #0002; border-radius: 50%; box-shadow: inset 0 0 0 2px #fff8; vertical-align: middle; }
-  .detail-color-options { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .detail-color-option { width: 27px; height: 27px; padding: 0; border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 0 1px #d8dce4; cursor: pointer; }
-  .detail-color-option[aria-pressed="true"] { box-shadow: 0 0 0 2px #172554; }
-  .detail-color-option:focus-visible { outline: 2px solid #C99A3B; outline-offset: 3px; }
+  .detail-color-options { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; }
+  .detail-color-option { position: relative; width: 24px; height: 24px; flex: 0 0 24px; padding: 0; border: 0; border-radius: 50%; box-shadow: 0 0 0 1px #17255418; cursor: pointer; transition: transform .18s ease,box-shadow .18s ease; }
+  .detail-color-option:after { position: absolute; right: 3px; bottom: -5px; left: 3px; height: 2px; border-radius: 2px; background: #172554; content: ""; opacity: 0; transform: scaleX(.55); transition: opacity .18s ease,transform .18s ease; }
+  .detail-color-option:hover { transform: translateY(-2px); box-shadow: 0 0 0 2px #fff,0 0 0 3px #c99a3b; }
+  .detail-color-option[aria-pressed="true"] { box-shadow: 0 0 0 2px #fff,0 0 0 3px #172554; }
+  .detail-color-option[aria-pressed="true"]:after { opacity: 1; transform: scaleX(1); }
+  .detail-color-option:focus-visible,.detail-color-clear:focus-visible { outline: 2px solid #C99A3B; outline-offset: 4px; }
+  .detail-color-clear { display: inline-flex; align-items: center; gap: 4px; padding: 4px 0; border: 0; background: transparent; color: #7b8493; font: inherit; font-size: 12px; cursor: pointer; transition: color .18s ease; }
+  .detail-color-clear:hover { color: #172554; }
   .detail-actions .detail-secondary-actions { display: flex; align-items: center; gap: 8px; }
   .detail-compare { min-height: 42px; padding: 0 10px; border: 0; background: transparent; color: #34415c; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; }
   .detail-compare[aria-pressed="true"] { color: #946b1e; }
@@ -1301,7 +1305,7 @@ function openProductDetails(id,updateHistory=true){
     ${hasDiscount?`<div class="detail-saving">${storeText("youSave")} ${esc(formatStoreMoney(oldPrice-price))}</div>`:""}
     <p class="detail-description">${esc(product.description||storeText("discoverProduct"))}</p><div class="detail-delivery">${deliveryLabel(product.delivery_price)}</div>
     <div class="detail-reward">${currentStoreLanguage==="fr"?"Achetez cet article et obtenez 3 points de récompense":"اشترِ هذا المنتج واحصل على 3 نقاط مكافأة"}</div>
-    ${colors.length?`<div class="detail-color-picker"><div class="detail-color-heading">${currentStoreLanguage==="fr"?"Couleur :":"اللون:"} <strong id="detailSelectedColor"><span class="color-name-swatch" style="background-color:${StoreColor.normalizeColorHex(detailColor)}" aria-hidden="true"></span>${esc(StoreColor.colorName(detailColor,currentStoreLanguage))}</strong></div><div class="detail-color-options" role="group" aria-label="${currentStoreLanguage==="fr"?"Couleurs disponibles":"الألوان المتاحة"}">${colors.map(color=>`<button class="detail-color-option" type="button" data-color="${color}" style="background-color:${StoreColor.normalizeColorHex(color)}" aria-label="${currentStoreLanguage==="fr"?"Couleur":"اللون"} ${esc(StoreColor.colorName(color,currentStoreLanguage))}" title="${esc(StoreColor.colorName(color,currentStoreLanguage))}" aria-pressed="${color===detailColor}" onclick="selectDetailColor('${color}')"></button>`).join("")}</div></div>`:""}
+    ${colors.length?`<div class="detail-color-picker"><span class="detail-color-heading">${currentStoreLanguage==="fr"?"Couleur :":"اللون:"}</span><div class="detail-color-options" role="group" aria-label="${currentStoreLanguage==="fr"?"Couleurs disponibles":"الألوان المتاحة"}">${colors.map(color=>`<button class="detail-color-option" type="button" data-color="${color}" style="background-color:${StoreColor.normalizeColorHex(color)}" aria-label="${currentStoreLanguage==="fr"?"Couleur":"اللون"} ${esc(StoreColor.colorName(color,currentStoreLanguage))}" title="${esc(StoreColor.colorName(color,currentStoreLanguage))}" aria-pressed="${color===detailColor}" onclick="selectDetailColor('${color}')"></button>`).join("")}</div><button class="detail-color-clear" type="button" onclick="clearDetailColor()" aria-label="${currentStoreLanguage==="fr"?"Effacer la couleur sélectionnée":"إلغاء اختيار اللون"}"><span aria-hidden="true">×</span>${currentStoreLanguage==="fr"?"Effacer":"مسح"}</button></div>`:""}
     <div class="detail-actions"><div class="detail-quantity" aria-label="${storeText("quantity")}"><button type="button" onclick="changeDetailQuantity(-1)" aria-label="${storeText("decreaseQuantity")}">−</button><output id="detailQuantity">1</output><button type="button" onclick="changeDetailQuantity(1)" aria-label="${storeText("increaseQuantity")}">+</button></div>
       <button class="detail-add" type="button" onclick="addDetailToCart()" ${stock<1?"disabled":""}>${storeText("addToCartEmoji")}</button><div class="detail-secondary-actions"><button class="detail-favorite" type="button" data-product-id="${Number(product.id)}" onclick="fav(this)" aria-label="${storeText("addToFavorites")}">♡</button></div>
     </div><button class="detail-compare" type="button" data-compare-product-id="${Number(product.id)}" aria-pressed="false" onclick="toggleCompareProduct(${Number(product.id)})">⇄ ${currentStoreLanguage==="fr"?"Comparer":"مقارنة"}</button>
@@ -1344,8 +1348,10 @@ function selectDetailColor(color){
   if(!detailProduct||!Array.isArray(detailProduct.colors)||!detailProduct.colors.includes(color))return;
   detailColor=color;
   document.querySelectorAll(".detail-color-option").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.color===color)));
-  const selectedColor=document.getElementById("detailSelectedColor");
-  if(selectedColor)selectedColor.innerHTML=`<span class="color-name-swatch" style="background-color:${StoreColor.normalizeColorHex(color)}" aria-hidden="true"></span>${esc(StoreColor.colorName(color,currentStoreLanguage))}`;
+}
+function clearDetailColor(){
+  detailColor=null;
+  document.querySelectorAll(".detail-color-option").forEach(button=>button.setAttribute("aria-pressed","false"));
 }
 function changeDetailQuantity(delta){
   if(!detailProduct)return;
