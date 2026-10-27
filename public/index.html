@@ -640,9 +640,11 @@ body{background:var(--background);color:var(--text)}
 </style>
 <style>
   .detail-reward { margin: 20px 0 16px; padding: 14px 16px; border-radius: 9px; background: #e4f6f3; color: #172554; font-size: 14px; }
+  .cart-item-meta .color-name-swatch { width: 12px; height: 12px; flex-basis: 12px; }
   .detail-color-picker { margin: 0 0 18px; }
   .detail-color-heading { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; font-size: 14px; font-weight: 800; }
-  .detail-color-heading strong { color: #657189; font-weight: 600; }
+  .detail-color-heading strong { display: inline-flex; align-items: center; gap: 6px; color: #657189; font-weight: 600; }
+  .color-name-swatch { display: inline-block; width: 14px; height: 14px; flex: 0 0 14px; border: 1px solid #0002; border-radius: 50%; box-shadow: inset 0 0 0 2px #fff8; vertical-align: middle; }
   .detail-color-options { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .detail-color-option { width: 27px; height: 27px; padding: 0; border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 0 1px #d8dce4; cursor: pointer; }
   .detail-color-option[aria-pressed="true"] { box-shadow: 0 0 0 2px #172554; }
@@ -860,6 +862,7 @@ body{background:var(--background);color:var(--text)}
   </nav>
   <div class="footer-bottom"><span>© M&amp;D Store — <span data-i18n="allRightsReserved">جميع الحقوق محفوظة</span></span><strong data-i18n="footerTagline">تسوّق بذكاء، اختيارات أجمل</strong></div>
 </footer>
+<script src="/color-names.js"></script>
 <script>
 const incomingStoreUrl=new URL(location.href);
 let normalizeIncomingStoreUrl=false;
@@ -1275,7 +1278,7 @@ function openProductDetails(id,updateHistory=true){
   const product=[...products,...shopCatalog,...featuredProducts].find(item=>Number(item.id)===Number(id));
   if(!product)return;
   detailProduct=product;detailQuantity=1;detailImageIndex=0;
-  const colors=Array.isArray(product.colors)?product.colors:[];
+  const colors=Array.isArray(product.colors)?product.colors.filter(color=>StoreColor.normalizeColorHex(color)):[];
   detailColor=colors[0]||null;
   const images=productImages(product),price=Number(product.price)||0,oldPrice=Number(product.old_price)||0,hasDiscount=oldPrice>price;
   const discount=hasDiscount?Math.round((oldPrice-price)/oldPrice*100):0;
@@ -1298,7 +1301,7 @@ function openProductDetails(id,updateHistory=true){
     ${hasDiscount?`<div class="detail-saving">${storeText("youSave")} ${esc(formatStoreMoney(oldPrice-price))}</div>`:""}
     <p class="detail-description">${esc(product.description||storeText("discoverProduct"))}</p><div class="detail-delivery">${deliveryLabel(product.delivery_price)}</div>
     <div class="detail-reward">${currentStoreLanguage==="fr"?"Achetez cet article et obtenez 3 points de récompense":"اشترِ هذا المنتج واحصل على 3 نقاط مكافأة"}</div>
-    ${colors.length?`<div class="detail-color-picker"><div class="detail-color-heading">${currentStoreLanguage==="fr"?"Couleur :":"اللون:"} <strong id="detailSelectedColor">${esc(detailColor)}</strong></div><div class="detail-color-options" role="group" aria-label="${currentStoreLanguage==="fr"?"Couleurs disponibles":"الألوان المتاحة"}">${colors.map(color=>`<button class="detail-color-option" type="button" style="background-color:${esc(color)}" aria-label="${currentStoreLanguage==="fr"?"Couleur":"اللون"} ${esc(color)}" aria-pressed="${color===detailColor}" onclick="selectDetailColor('${esc(color)}')"></button>`).join("")}</div></div>`:""}
+    ${colors.length?`<div class="detail-color-picker"><div class="detail-color-heading">${currentStoreLanguage==="fr"?"Couleur :":"اللون:"} <strong id="detailSelectedColor"><span class="color-name-swatch" style="background-color:${StoreColor.normalizeColorHex(detailColor)}" aria-hidden="true"></span>${esc(StoreColor.colorName(detailColor,currentStoreLanguage))}</strong></div><div class="detail-color-options" role="group" aria-label="${currentStoreLanguage==="fr"?"Couleurs disponibles":"الألوان المتاحة"}">${colors.map(color=>`<button class="detail-color-option" type="button" data-color="${color}" style="background-color:${StoreColor.normalizeColorHex(color)}" aria-label="${currentStoreLanguage==="fr"?"Couleur":"اللون"} ${esc(StoreColor.colorName(color,currentStoreLanguage))}" title="${esc(StoreColor.colorName(color,currentStoreLanguage))}" aria-pressed="${color===detailColor}" onclick="selectDetailColor('${color}')"></button>`).join("")}</div></div>`:""}
     <div class="detail-actions"><div class="detail-quantity" aria-label="${storeText("quantity")}"><button type="button" onclick="changeDetailQuantity(-1)" aria-label="${storeText("decreaseQuantity")}">−</button><output id="detailQuantity">1</output><button type="button" onclick="changeDetailQuantity(1)" aria-label="${storeText("increaseQuantity")}">+</button></div>
       <button class="detail-add" type="button" onclick="addDetailToCart()" ${stock<1?"disabled":""}>${storeText("addToCartEmoji")}</button><div class="detail-secondary-actions"><button class="detail-favorite" type="button" data-product-id="${Number(product.id)}" onclick="fav(this)" aria-label="${storeText("addToFavorites")}">♡</button></div>
     </div><button class="detail-compare" type="button" data-compare-product-id="${Number(product.id)}" aria-pressed="false" onclick="toggleCompareProduct(${Number(product.id)})">⇄ ${currentStoreLanguage==="fr"?"Comparer":"مقارنة"}</button>
@@ -1340,9 +1343,9 @@ function setDetailImage(index){
 function selectDetailColor(color){
   if(!detailProduct||!Array.isArray(detailProduct.colors)||!detailProduct.colors.includes(color))return;
   detailColor=color;
-  document.querySelectorAll(".detail-color-option").forEach(button=>button.setAttribute("aria-pressed",String(button.getAttribute("aria-label").endsWith(color))));
+  document.querySelectorAll(".detail-color-option").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.color===color)));
   const selectedColor=document.getElementById("detailSelectedColor");
-  if(selectedColor)selectedColor.textContent=color;
+  if(selectedColor)selectedColor.innerHTML=`<span class="color-name-swatch" style="background-color:${StoreColor.normalizeColorHex(color)}" aria-hidden="true"></span>${esc(StoreColor.colorName(color,currentStoreLanguage))}`;
 }
 function changeDetailQuantity(delta){
   if(!detailProduct)return;
@@ -1389,7 +1392,7 @@ async function submitDetailOrder(event){
 		}
 		const french=currentStoreLanguage==="fr";
 		const orderItems=Array.isArray(result.items)?result.items:[{name:detailProduct.name,quantity:detailQuantity,price:detailProduct.price}];
-		const itemsText=orderItems.map(item=>`- ${item.name}${item.variant_color?` (${french?"Couleur":"اللون"}: ${item.variant_color})`:""} × ${item.quantity} (${formatStoreMoney(Number(item.price)*item.quantity)})`).join("\n");
+		const itemsText=orderItems.map(item=>`- ${item.name}${item.variant_color?` (${french?"Couleur":"اللون"}: ${StoreColor.colorName(item.variant_color,currentStoreLanguage)})`:""} × ${item.quantity} (${formatStoreMoney(Number(item.price)*item.quantity)})`).join("\n");
 		const text=`${french?"Bonjour":"مرحباً"} ${cfg.store}\n${french?"Je souhaite confirmer la commande":"أريد تأكيد الطلب"} #${result.order_id}\n${french?"Produits":"المنتجات"}:\n${itemsText}\n${storeText("invoiceSubtotal")}: ${formatStoreMoney(result.subtotal)}\n${storeText("shippingOrder")}: ${formatStoreMoney(result.delivery_fee)}\n${storeText("total")}: ${formatStoreMoney(result.total)}\n${storeText("paymentMethod")}: ${storeText("cashAtDelivery")}\n${french?"Nom complet":"الاسم الكامل"}: ${customer.name}\n${storeText("phoneNumber")}: ${customer.phone}\n${storeText("city")}: ${customer.city}\n${storeText("address")}: ${customer.address}`;
 		const whatsappUrl=`https://wa.me/${cfg.whatsapp}?${new URLSearchParams({text})}`;
 		if(whatsappWindow)whatsappWindow.location.href=whatsappUrl;
@@ -1673,7 +1676,7 @@ function render(){
 		const image=product?.images?.[0]?.path||"/favicon.svg";
 		const imageAlt=currentStoreLanguage==="fr"?"Image de":"صورة";
 		const removeLabel=currentStoreLanguage==="fr"?"Retirer":"حذف";
-		return `<article class="cartitem"><img class="cart-item-image" src="${esc(image)}" alt="${esc(imageAlt)} ${esc(item.name)}"><div class="cart-item-info"><strong class="cart-item-name">${esc(item.name)}</strong><div class="cart-item-meta">${item.variant_color?`${french?"Couleur":"اللون"}: ${esc(item.variant_color)} · `:""}<input class="qty" type="number" min="1" value="${item.quantity}" aria-label="${french?"Quantité":"الكمية"}" onchange="setQty(${index},this.value)"> × ${esc(formatStoreMoney(item.price))}</div><strong class="cart-item-price">${esc(formatStoreMoney(Number(item.price)*item.quantity))}</strong></div><button class="cart-item-remove" type="button" onclick="del(${index})" aria-label="${removeLabel}: ${esc(item.name)}" title="${removeLabel}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16m-10 4v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg></button></article>`;
+		return `<article class="cartitem"><img class="cart-item-image" src="${esc(image)}" alt="${esc(imageAlt)} ${esc(item.name)}"><div class="cart-item-info"><strong class="cart-item-name">${esc(item.name)}</strong><div class="cart-item-meta">${item.variant_color&&StoreColor.normalizeColorHex(item.variant_color)?`<span class="color-name-swatch" style="background-color:${StoreColor.normalizeColorHex(item.variant_color)}" aria-hidden="true"></span>${french?"Couleur":"اللون"}: ${esc(StoreColor.colorName(item.variant_color,currentStoreLanguage))} · `:""}<input class="qty" type="number" min="1" value="${item.quantity}" aria-label="${french?"Quantité":"الكمية"}" onchange="setQty(${index},this.value)"> × ${esc(formatStoreMoney(item.price))}</div><strong class="cart-item-price">${esc(formatStoreMoney(Number(item.price)*item.quantity))}</strong></div><button class="cart-item-remove" type="button" onclick="del(${index})" aria-label="${removeLabel}: ${esc(item.name)}" title="${removeLabel}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16m-10 4v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg></button></article>`;
 	}).join(""):`<div class="cart-empty">${esc(storeText("emptyCart"))}</div>`;
 	document.getElementById("cartTitle").textContent=french?"Mon panier":"سلة المشتريات";
 	document.getElementById("cartSubtotalLabel").textContent=french?"Sous-total":"المجموع الفرعي";
@@ -1718,7 +1721,7 @@ async function checkout(){
 		const greeting=currentStoreLanguage==="fr"?"Bonjour":"مرحباً",orderRequest=currentStoreLanguage==="fr"?"Je souhaite confirmer la commande":"أريد تأكيد الطلب";
 		const productsLabel=currentStoreLanguage==="fr"?"Produits":"المنتجات";
 		const orderItems=Array.isArray(x.items)?x.items:cart.map(item=>({name:item.name,quantity:item.quantity,price:item.price}));
-		const itemsText=orderItems.map(item=>`- ${item.name}${item.variant_color?` (${currentStoreLanguage==="fr"?"Couleur":"اللون"}: ${item.variant_color})`:""} × ${item.quantity} (${formatStoreMoney(Number(item.price)*item.quantity)})`).join("\n");
+		const itemsText=orderItems.map(item=>`- ${item.name}${item.variant_color?` (${currentStoreLanguage==="fr"?"Couleur":"اللون"}: ${StoreColor.colorName(item.variant_color,currentStoreLanguage)})`:""} × ${item.quantity} (${formatStoreMoney(Number(item.price)*item.quantity)})`).join("\n");
 		const text=`${greeting} ${cfg.store}\n${orderRequest} #${x.order_id}\n${productsLabel}:\n${itemsText}\n${storeText("invoiceSubtotal")}: ${formatStoreMoney(x.subtotal)}\n${storeText("shippingOrder")}: ${formatStoreMoney(x.delivery_fee)}\n${storeText("total")}: ${formatStoreMoney(x.total)}\n${storeText("paymentMethod")}: ${storeText("cashAtDelivery")}\n${storeText("customer")}: ${customer.name}\n${storeText("phoneNumber")}: ${customer.phone}\n${storeText("address")}: ${customer.address} ${customer.city}`;
 		const whatsappUrl="https://wa.me/"+cfg.whatsapp+"?"+new URLSearchParams({text});
 		cart=[];save();render();closeCart();load();

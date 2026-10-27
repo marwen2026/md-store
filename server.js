@@ -8,6 +8,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const PDFDocument = require("pdfkit");
+const { colorName, normalizeColorHex } = require("./public/color-names");
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -2284,17 +2285,24 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
 
   let y = drawPageHeader(true);
   for (const item of items.rows) {
-    const productName = `${String(item.product_name || "Produit")}${item.variant_color ? ` - Couleur: ${item.variant_color}` : ""}`;
+    const productName = String(item.product_name || "Produit");
+    const variantColor = normalizeColorHex(item.variant_color);
+    const variantLabel = variantColor ? `Couleur : ${colorName(variantColor, "fr")}` : "";
     const productOptions = { width: columns.product.width, font: "Helvetica", fontSize: 9 };
-    const rowHeight = Math.max(34, document.heightOfString(productName, productOptions) + 18);
+    const rowHeight = Math.max(variantLabel ? 42 : 34, document.heightOfString(productName, productOptions) + (variantLabel ? 27 : 18));
     if (y + rowHeight + 150 > footerY) {
       document.addPage();
       y = drawPageHeader(false);
     }
     document.fillColor(y % 2 ? "#ffffff" : soft).roundedRect(left, y, contentWidth, rowHeight, 5).fill();
-    const textY = y + Math.max(9, (rowHeight - 12) / 2);
     document.fillColor(text).font("Helvetica").fontSize(9)
-      .text(productName, columns.product.x, y + 9, { width: columns.product.width, height: rowHeight - 16, ellipsis: true });
+      .text(productName, columns.product.x, variantLabel ? y + 7 : y + 9, { width: columns.product.width, height: rowHeight - 16, ellipsis: true });
+    if (variantLabel) {
+      document.fillColor(variantColor).circle(columns.product.x + 3, y + 29, 3).fill();
+      document.fillColor("#4b5563").font("Helvetica").fontSize(8)
+        .text(variantLabel, columns.product.x + 11, y + 23, { width: columns.product.width - 11, height: 12, ellipsis: true });
+    }
+    const textY = y + Math.max(9, (rowHeight - 12) / 2);
     document.text(String(item.quantity || 0), columns.quantity.x, textY, { width: columns.quantity.width, align: "center" });
     document.text(`${Number(item.price).toFixed(3).replace(".", ",")} ${CURRENCY}`, columns.unitPrice.x, textY, { width: columns.unitPrice.width, align: "right" });
     document.font("Helvetica-Bold").text(
