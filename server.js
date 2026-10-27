@@ -2287,8 +2287,6 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
       document.fillColor("#596579").font("Helvetica").fontSize(9)
         .text(`Date : ${createdAt}`, detailX, infoY + 39, { width: cardWidth - 30 });
       document.text("Paiement : à la livraison", detailX, infoY + 61, { width: cardWidth - 30 });
-      document.fillColor("#15805d").font("Helvetica-Bold").fontSize(8)
-        .text("MERCI POUR VOTRE COMMANDE", detailX, infoY + 84, { width: cardWidth - 30 });
       return drawTableHeader(282);
     }
 
