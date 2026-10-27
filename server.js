@@ -2301,14 +2301,15 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
 
   let y = drawPageHeader(true);
   let rowIndex = 0;
-  for (const item of items.rows) {
+  for (const [itemIndex, item] of items.rows.entries()) {
     const productName = String(item.product_name || "Produit");
     const variantColor = normalizeColorHex(item.variant_color);
     const variantLabel = variantColor ? `Couleur : ${colorName(variantColor, "fr")}` : "";
     const productOptions = { width: columns.product.width, font: "Helvetica", fontSize: 9 };
     const productHeight = document.heightOfString(productName, productOptions);
     const rowHeight = Math.max(variantLabel ? 45 : 40, productHeight + (variantLabel ? 28 : 18));
-    if (y + rowHeight + 132 > footerY) {
+    const reservedSpace = itemIndex === items.rows.length - 1 ? 270 : 132;
+    if (y + rowHeight + reservedSpace > footerY) {
       document.addPage();
       y = drawPageHeader(false);
     }
@@ -2337,14 +2338,15 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
     rowIndex += 1;
   }
 
-  if (y + 132 > footerY) {
+  if (y + 270 > footerY) {
     document.addPage();
     y = drawPageHeader(false);
   }
   const totalsY = y + 12;
   const totalsX = right - 250;
-  const stampX = left + 64;
-  const stampY = totalsY + 56;
+  const signatureY = totalsY + 132;
+  const stampX = left + 68;
+  const stampY = signatureY + 52;
   document.circle(stampX, stampY, 49).fillAndStroke("#fffaf0", accent);
   document.lineWidth(1.2).circle(stampX, stampY, 43).strokeColor(deep).stroke();
   document.lineWidth(0.7).circle(stampX, stampY, 39).strokeColor(accent).stroke();
@@ -2370,17 +2372,10 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
   document.fillColor(accent).fontSize(14).text(formatMoney(order.total),
     totalsX + 105, totalsY + 78, { width: 129, align: "right" });
 
-  const lastPageFooterY = Math.min(footerY, totalsY + 132);
-  const pageRange = document.bufferedPageRange();
-  for (let page = pageRange.start; page < pageRange.start + pageRange.count; page += 1) {
-    document.switchToPage(page);
-    const pageFooterY = page === pageRange.start + pageRange.count - 1 ? lastPageFooterY : footerY;
-    document.strokeColor(border).lineWidth(0.8).moveTo(left, pageFooterY).lineTo(right, pageFooterY).stroke();
-    document.fillColor("#6b7280").font("Helvetica").fontSize(8)
-      .text("Merci pour votre confiance.", left, pageFooterY + 2, { width: contentWidth, align: "center" });
-    document.fillColor("#9ca3af").fontSize(8)
-      .text(`${page + 1} / ${pageRange.count}`, left, pageFooterY + 2, { width: contentWidth, align: "right" });
-  }
+  document.fillColor(deep).font("Helvetica-Bold").fontSize(8)
+    .text("SIGNATURE ET CACHET", left + 145, signatureY + 18, { width: contentWidth - 160, characterSpacing: 0.6 });
+  document.strokeColor(border).lineWidth(0.8)
+    .moveTo(left + 145, signatureY + 78).lineTo(right - 12, signatureY + 78).stroke();
   document.end();
 });
 
