@@ -2308,7 +2308,7 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
     const productOptions = { width: columns.product.width, font: "Helvetica", fontSize: 9 };
     const productHeight = document.heightOfString(productName, productOptions);
     const rowHeight = Math.max(variantLabel ? 45 : 40, productHeight + (variantLabel ? 28 : 18));
-    const reservedSpace = itemIndex === items.rows.length - 1 ? 290 : 132;
+    const reservedSpace = itemIndex === items.rows.length - 1 ? 230 : 132;
     if (y + rowHeight + reservedSpace > footerY) {
       document.addPage();
       y = drawPageHeader(false);
@@ -2338,7 +2338,7 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
     rowIndex += 1;
   }
 
-  if (y + 290 > footerY) {
+  if (y + 230 > footerY) {
     document.addPage();
     y = drawPageHeader(false);
   }
@@ -2355,12 +2355,10 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
   document.fillColor(accent).fontSize(14).text(formatMoney(order.total),
     totalsX + 105, totalsY + 78, { width: 129, align: "right" });
 
-  document.image(path.join(__dirname, "public", "ma-dor-signature.png"),
-    left, signatureY, { width: 230, height: 140 });
   document.fillColor(deep).font("Helvetica-Bold").fontSize(8)
-    .text("SIGNATURE ET CACHET", left + 260, signatureY + 18, { width: contentWidth - 275, characterSpacing: 0.6 });
+    .text("SIGNATURE", left + 145, signatureY + 18, { width: contentWidth - 160, characterSpacing: 0.6 });
   document.strokeColor(border).lineWidth(0.8)
-    .moveTo(left + 260, signatureY + 78).lineTo(right - 12, signatureY + 78).stroke();
+    .moveTo(left + 145, signatureY + 78).lineTo(right - 12, signatureY + 78).stroke();
   document.end();
 });
 
