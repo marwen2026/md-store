@@ -2305,9 +2305,9 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
     const productName = String(item.product_name || "Produit");
     const variantColor = normalizeColorHex(item.variant_color);
     const variantLabel = variantColor ? `Couleur : ${colorName(variantColor, "fr")}` : "";
-    const productOptions = { width: columns.product.width, font: "Helvetica", fontSize: 9 };
+    const productOptions = { width: columns.product.width, font: "Helvetica-Bold", fontSize: 9 };
     const productHeight = document.heightOfString(productName, productOptions);
-    const rowHeight = Math.max(variantLabel ? 45 : 40, productHeight + (variantLabel ? 28 : 18));
+    const rowHeight = Math.max(40, productHeight + (variantLabel ? 20 : 18));
     const reservedSpace = itemIndex === items.rows.length - 1 ? 230 : 132;
     if (y + rowHeight + reservedSpace > footerY) {
       document.addPage();
@@ -2316,12 +2316,14 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
     if (rowIndex % 2 === 0) {
       document.fillColor("#fafbfd").roundedRect(left, y, contentWidth, rowHeight, 6).fill();
     }
-    document.fillColor(text).font("Helvetica").fontSize(9)
-      .text(productName, columns.product.x, y + (variantLabel ? 7 : 12), { width: columns.product.width, height: rowHeight - 18, ellipsis: true });
+    const productNameY = y + (variantLabel ? 6 : Math.max(12, (rowHeight - productHeight) / 2));
+    document.fillColor(text).font("Helvetica-Bold").fontSize(9)
+      .text(productName, columns.product.x, productNameY, { ...productOptions, height: productHeight, ellipsis: true });
     if (variantLabel) {
-      document.fillColor(variantColor).circle(columns.product.x + 3, y + 31, 3).fill();
-      document.fillColor("#4b5563").font("Helvetica").fontSize(8)
-        .text(variantLabel, columns.product.x + 11, y + 25, { width: columns.product.width - 11, height: 12, ellipsis: true });
+      const variantY = productNameY + productHeight + 1;
+      document.fillColor(variantColor).circle(columns.product.x + 3, variantY + 4, 2.5).fill();
+      document.fillColor("#4b5563").font("Helvetica").fontSize(7.5)
+        .text(variantLabel, columns.product.x + 11, variantY, { width: columns.product.width - 11, height: 10, ellipsis: true });
     }
     const textY = y + Math.max(12, (rowHeight - 10) / 2);
     document.fillColor(soft).roundedRect(columns.quantity.x + 7, textY - 5, 32, 21, 7).fill();
