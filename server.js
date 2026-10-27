@@ -2248,12 +2248,17 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
 
   function drawPageHeader(firstPage) {
     if (firstPage) {
-      document.fillColor(deep).rect(0, 0, pageWidth, 126).fill();
-      document.fillColor(accent).rect(0, 0, 6, 126).fill();
+      document.fillColor(deep).rect(0, 0, pageWidth, 138).fill();
+      document.fillColor(accent).rect(0, 0, 6, 138).fill();
       document.fillColor(accent).font("Times-Bold").fontSize(30)
         .text(invoiceBrand, left, 30, { width: 300, lineBreak: false });
       document.fillColor("#dbe3f4").font("Helvetica").fontSize(8)
         .text("VOTRE BOUTIQUE, EN TOUTE CONFIANCE", left + 2, 70, { width: 280, lineBreak: false, characterSpacing: 0.6 });
+      document.fillColor("#dbe3f4").font("Helvetica").fontSize(7.5)
+        .text("Adresse : Avenue des Martyrs, Manouba", left + 2, 83, { width: 340, lineBreak: false });
+      document.text("Téléphone : 27326608", left + 2, 94, { width: 340, lineBreak: false });
+      document.text("E-mail : contact@mador.tn", left + 2, 105, { width: 340, lineBreak: false });
+      document.text("Site web : https://mador.tn", left + 2, 116, { width: 340, lineBreak: false });
       document.fillColor("#dbe3f4").font("Helvetica-Bold").fontSize(8)
         .text("FACTURE", right - 132, 27, { width: 132, align: "right", characterSpacing: 1.2 });
       document.fillColor("#ffffff").font("Helvetica-Bold").fontSize(24)
@@ -2261,7 +2266,7 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
       document.fillColor("#dbe3f4").font("Helvetica").fontSize(9)
         .text(createdAt, right - 132, 82, { width: 132, align: "right" });
 
-      const infoY = 148;
+      const infoY = 150;
       const cardWidth = (contentWidth - 14) / 2;
       document.roundedRect(left, infoY, cardWidth, 112, 10).fillAndStroke("#ffffff", border);
       document.roundedRect(left + cardWidth + 14, infoY, cardWidth, 112, 10).fillAndStroke("#ffffff", border);
@@ -2283,7 +2288,7 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
       document.text("Paiement : à la livraison", detailX, infoY + 61, { width: cardWidth - 30 });
       document.fillColor("#15805d").font("Helvetica-Bold").fontSize(8)
         .text("MERCI POUR VOTRE COMMANDE", detailX, infoY + 84, { width: cardWidth - 30 });
-      return drawTableHeader(280);
+      return drawTableHeader(282);
     }
 
     document.fillColor(deep).rect(0, 0, pageWidth, 62).fill();
