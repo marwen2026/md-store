@@ -659,7 +659,8 @@ body{background:var(--background);color:var(--text)}
   .detail-tab-list::-webkit-scrollbar { display: none; }
   .detail-tab { position: relative; flex: 0 0 auto; min-height: 62px; padding: 0 3px; border: 0; background: transparent; color: #727272; font: inherit; font-size: 13px; font-weight: 750; text-transform: uppercase; cursor: pointer; transition: color .18s ease; }
   .detail-tab:after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: #c99a3b; content: ""; transform: scaleX(.35); opacity: 0; transition: opacity .18s ease,transform .18s ease; }
-  .detail-tab:hover,.detail-tab[aria-selected="true"] { color: #252525; }
+  .detail-tab:hover { color: #252525; }
+  .detail-tab[aria-selected="true"] { color: #000000; font-weight: 850; }
   .detail-tab[aria-selected="true"]:after { opacity: 1; transform: scaleX(1); }
   .detail-tab:focus-visible { outline: 2px solid #c99a3b; outline-offset: -4px; }
   .detail-tab-panel { min-height: 150px; padding: 28px clamp(20px, 4vw, 36px); background: #fff; color: #445066; }
