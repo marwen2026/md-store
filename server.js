@@ -2308,7 +2308,7 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
     const productOptions = { width: columns.product.width, font: "Helvetica", fontSize: 9 };
     const productHeight = document.heightOfString(productName, productOptions);
     const rowHeight = Math.max(variantLabel ? 45 : 40, productHeight + (variantLabel ? 28 : 18));
-    const reservedSpace = itemIndex === items.rows.length - 1 ? 270 : 132;
+    const reservedSpace = itemIndex === items.rows.length - 1 ? 290 : 132;
     if (y + rowHeight + reservedSpace > footerY) {
       document.addPage();
       y = drawPageHeader(false);
@@ -2338,30 +2338,13 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
     rowIndex += 1;
   }
 
-  if (y + 270 > footerY) {
+  if (y + 290 > footerY) {
     document.addPage();
     y = drawPageHeader(false);
   }
   const totalsY = y + 12;
   const totalsX = right - 250;
   const signatureY = totalsY + 132;
-  const stampX = left + 68;
-  const stampY = signatureY + 52;
-  document.circle(stampX, stampY, 49).fillAndStroke("#fffaf0", accent);
-  document.lineWidth(1.2).circle(stampX, stampY, 43).strokeColor(deep).stroke();
-  document.lineWidth(0.7).circle(stampX, stampY, 39).strokeColor(accent).stroke();
-  document.fillColor(accent).font("Helvetica-Bold").fontSize(7.5)
-    .text("MERCI", stampX - 37, stampY - 30, { width: 74, align: "center", lineBreak: false, characterSpacing: 1 });
-  document.fillColor(deep).font("Times-Bold").fontSize(20)
-    .text("M&D", stampX - 38, stampY - 15, { width: 76, align: "center", lineBreak: false });
-  document.strokeColor(accent).lineWidth(0.8).moveTo(stampX - 22, stampY + 9).lineTo(stampX + 22, stampY + 9).stroke();
-  document.fillColor(deep).font("Helvetica-Bold").fontSize(7.5)
-    .text("MA-DOR", stampX - 35, stampY + 13, { width: 70, align: "center", lineBreak: false, characterSpacing: 1 });
-  document.fillColor("#596579").font("Helvetica").fontSize(5.5)
-    .text("BOUTIQUE  -  TUNISIE", stampX - 37, stampY + 25, { width: 74, align: "center", lineBreak: false, characterSpacing: 0.2 });
-  for (const offset of [-31, 31]) {
-    document.fillColor(accent).circle(stampX + offset, stampY + 1, 1.5).fill();
-  }
   document.roundedRect(totalsX, totalsY, 250, 112, 10).fillAndStroke("#ffffff", border);
   document.fillColor("#596579").font("Helvetica").fontSize(9).text("Sous-total", totalsX + 15, totalsY + 15);
   document.fillColor(text).font("Helvetica-Bold").text(formatMoney(subtotal), totalsX + 110, totalsY + 15, { width: 124, align: "right" });
@@ -2372,10 +2355,12 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
   document.fillColor(accent).fontSize(14).text(formatMoney(order.total),
     totalsX + 105, totalsY + 78, { width: 129, align: "right" });
 
+  document.image(path.join(__dirname, "public", "ma-dor-signature.png"),
+    left, signatureY, { width: 230, height: 140 });
   document.fillColor(deep).font("Helvetica-Bold").fontSize(8)
-    .text("SIGNATURE ET CACHET", left + 145, signatureY + 18, { width: contentWidth - 160, characterSpacing: 0.6 });
+    .text("SIGNATURE ET CACHET", left + 260, signatureY + 18, { width: contentWidth - 275, characterSpacing: 0.6 });
   document.strokeColor(border).lineWidth(0.8)
-    .moveTo(left + 145, signatureY + 78).lineTo(right - 12, signatureY + 78).stroke();
+    .moveTo(left + 260, signatureY + 78).lineTo(right - 12, signatureY + 78).stroke();
   document.end();
 });
 
