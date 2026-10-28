@@ -2494,6 +2494,23 @@ app.post("/api/admins", auth, role("admin"), async (req, res) => {
     throw error;
   }
 });
+app.put("/api/admins/:id/password", auth, role("admin"), async (req, res) => {
+  const userId = Number(req.params.id);
+  const password = String(req.body.password || "");
+  if (!Number.isInteger(userId) || userId < 1 || userId > 2147483647) {
+    return res.status(400).json({ error: "معرّف المستخدم غير صالح" });
+  }
+  if (password.length < 6) {
+    return res.status(400).json({ error: "كلمة المرور يجب أن تتكون من 6 أحرف على الأقل" });
+  }
+  const passwordHash = bcrypt.hashSync(password, 12);
+  const result = await pool.query(
+    "UPDATE admins SET password_hash = $1 WHERE id = $2 RETURNING id",
+    [passwordHash, userId]
+  );
+  if (!result.rowCount) return res.status(404).json({ error: "المستخدم غير موجود" });
+  res.json({ ok: true });
+});
 app.delete("/api/admins/:id", auth, role("admin"), async (req, res) => {
   if (Number(req.params.id) === Number(req.admin.id)) return res.status(400).json({ error: "لا يمكن حذف المستخدم الحالي" });
   await pool.query("DELETE FROM admins WHERE id = $1", [req.params.id]);
