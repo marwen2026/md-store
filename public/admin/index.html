@@ -668,10 +668,16 @@ async function uploadCampaignImages(){
   if(files.some(file=>!supportedTypes.has(file.type)||file.size>5*1024*1024)){alert(t("heroBackgroundInvalid"));return}
   campaignImagesUploading=true;renderCampaignImageManager();
   try{
-    const formData=new FormData();files.forEach(file=>formData.append("images",file));
-    const response=await api("/api/admin/settings/campaign-images",{method:"POST",body:formData}),result=await response.json();
-    if(!response.ok){alert(result.error||t("campaignImagesUploadFailed"));return}
-    campaignImages=result.campaign_images;campaignImagesFile.value="";markHeroSettingsDraft();renderCampaignImageManager();showToast(t("campaignImagesUploaded"));
+    let result={campaign_images:campaignImages};
+    for(let offset=0;offset<files.length;offset+=4){
+      const formData=new FormData();files.slice(offset,offset+4).forEach(file=>formData.append("images",file));
+      const response=await api("/api/admin/settings/campaign-images",{method:"POST",body:formData}),batch=await response.json();
+      if(!response.ok)throw new Error(batch.error||t("campaignImagesUploadFailed"));
+      result=batch;
+      campaignImages=result.campaign_images;
+      renderCampaignImageManager();
+    }
+    campaignImagesFile.value="";markHeroSettingsDraft();renderCampaignImageManager();showToast(t("campaignImagesUploaded"));
   }catch(error){
     console.error("Could not upload campaign slideshow images:",error);alert(t("campaignImagesUploadFailed"));
   }finally{
