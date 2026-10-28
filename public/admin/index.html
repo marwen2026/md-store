@@ -430,7 +430,7 @@ function applyStaticTexts(){
 }
 function toggleLoginPassword(){p.type=p.type==="password"?"text":"password";const label=t(p.type==="password"?"showPassword":"hidePassword");loginPasswordToggle.setAttribute("aria-label",label);loginPasswordToggle.title=label}
 async function doLogin(event){event.preventDefault();const r=await fetch("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u.value,password:p.value})}),x=await r.json();if(!r.ok)return msg.textContent=x.error;localStorage.setItem("md_admin",x.token);location.reload()}
-function logout(){localStorage.removeItem("md_admin");location.reload()}
+async function logout(){try{const response=await api("/api/logout",{method:"POST"});if(!response.ok)console.error("Could not record admin logout:",await response.text())}catch(error){console.error("Could not record admin logout:",error)}finally{localStorage.removeItem("md_admin");location.reload()}}
 const dashboardSectionModalIds={productsDashboard:"productsDashboardModal",ordersDashboard:"ordersDashboardModal",inventoryBox:"inventoryBoxModal",categoriesBox:"categoriesBoxModal",customersDashboard:"customersDashboardModal",shipmentsDashboard:"shipmentsDashboardModal"};
 const dashboardSectionReturnFocus=new Map();
 let dashboardSectionPreviousOverflow="";

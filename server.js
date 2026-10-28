@@ -495,11 +495,19 @@ app.post("/api/login", async (req, res) => {
   if (!admin || !bcrypt.compareSync(String(req.body.password || ""), admin.password_hash)) {
     return res.status(401).json({ error: "بيانات الدخول غير صحيحة" });
   }
+  pool.query(
+    `INSERT INTO admin_audit_logs(admin_id, admin_username, method, endpoint)
+     VALUES($1, $2, 'POST', '/api/login')`,
+    [admin.id, admin.username]
+  ).catch(error => console.error("Could not record admin login:", error));
   res.json({
     token: jwt.sign({ id: admin.id, username: admin.username, role: admin.role }, JWT_SECRET, { expiresIn: "8h" }),
     username: admin.username,
     role: admin.role
   });
+});
+app.post("/api/logout", auth, role("admin", "manager"), (req, res) => {
+  res.json({ ok: true });
 });
 
 async function readStoreSettings() {
