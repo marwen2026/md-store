@@ -1181,8 +1181,8 @@ async function load(){
   const product=productFromCurrentUrl();
   if(product)openProductDetails(product.id,false);
 }
-function renderProductGrid(list){
-  grid.innerHTML=list.length?list.map(p=>{
+function renderProductGrid(list,container=grid){
+  container.innerHTML=list.length?list.map(p=>{
     const images=Array.isArray(p.images)&&p.images.length?p.images:[{path:"https://via.placeholder.com/600x500?text=M%26D"}];
     const price=Number(p.price)||0,oldPrice=Number(p.old_price)||0,hasDiscount=oldPrice>price;
     const discount=hasDiscount?Math.round((oldPrice-price)/oldPrice*100):0;
@@ -1336,6 +1336,12 @@ function openProductDetails(id,updateHistory=true){
   const images=productImages(product),price=Number(product.price)||0,oldPrice=Number(product.old_price)||0,hasDiscount=oldPrice>price;
   const discount=hasDiscount?Math.round((oldPrice-price)/oldPrice*100):0;
   const stock=Number(product.stock)||0;
+  const relatedProducts=product.category_id==null?[]:[...new Map(
+    [...featuredProducts,...shopCatalog,...products].map(candidate=>[Number(candidate.id),candidate])
+  ).values()]
+    .filter(candidate=>Number(candidate.category_id)===Number(product.category_id)&&Number(candidate.id)!==Number(product.id))
+    .sort((a,b)=>(Number(b.units_sold??b.sales)||0)-(Number(a.units_sold??a.sales)||0))
+    .slice(0,6);
   const detailTabText=currentStoreLanguage==="fr"?{
     label:"Informations sur le produit",description:"Description",information:"Informations complémentaires",shipping:"Expédition & livraison",reviews:"Avis",
     details:"Détails du produit",reference:"Référence",category:"Catégorie",availability:"Disponibilité",colors:"Couleurs disponibles",
@@ -1403,7 +1409,12 @@ function openProductDetails(id,updateHistory=true){
     <section class="detail-tab-panel" id="detail-panel-shipping" role="tabpanel" aria-labelledby="detail-tab-shipping" tabindex="0" hidden>
       <div class="detail-shipping-card"><span class="detail-tab-icon" aria-hidden="true">↗</span><div><h3>${detailTabText.shippingTitle}</h3><p>${esc(deliveryLabel(product.delivery_price))} · ${detailTabText.shippingRegions}</p><p><strong>${detailTabText.payment} :</strong> ${detailTabText.paymentValue}</p></div></div>
     </section>
-  </section>`;
+  </section>
+  ${relatedProducts.length?`<section class="section related-products" aria-labelledby="relatedProductsTitle">
+    <h2 class="section-title" id="relatedProductsTitle">${currentStoreLanguage==="fr"?"Produits similaires":"منتجات ذات صلة"}</h2>
+    <div class="products related-products-grid"></div>
+  </section>`:""}`;
+  if(relatedProducts.length)renderProductGrid(relatedProducts,productDetail.querySelector(".related-products-grid"));
   productDetail.hidden=false;
   updateFavoriteButton(document.querySelector(".detail-favorite"));
   updateCompareControls();
