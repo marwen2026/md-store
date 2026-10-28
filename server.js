@@ -2183,6 +2183,23 @@ app.get("/api/customers", auth, async (req, res) => {
   );
   res.json(result.rows);
 });
+app.delete("/api/customers/:id", auth, role("admin", "manager"), async (req, res) => {
+  const customerId = Number(req.params.id);
+  if (!Number.isInteger(customerId) || customerId < 1 || customerId > 2147483647) {
+    return res.status(400).json({ error: "معرّف العميل غير صالح" });
+  }
+  const result = await pool.query(
+    `DELETE FROM customers c
+     WHERE c.id = $1
+       AND NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id)
+     RETURNING c.id`,
+    [customerId]
+  );
+  if (result.rowCount) return res.json({ ok: true });
+  const customer = await pool.query("SELECT id FROM customers WHERE id = $1", [customerId]);
+  if (!customer.rowCount) return res.status(404).json({ error: "العميل غير موجود" });
+  return res.status(409).json({ error: "لا يمكن حذف عميل لديه طلبات مرتبطة" });
+});
 app.get("/api/stats", auth, async (req, res) => {
   const [products, customers, orders, revenue, returnedQuantity, monthlyProfit, lowStock, ordersToday, ordersInDelivery, stock] = await Promise.all([
     pool.query("SELECT COUNT(*)::int AS n FROM products WHERE active = TRUE"),
