@@ -2020,18 +2020,22 @@ app.patch("/api/orders/:id/status", auth, role("admin", "manager"), async (req, 
   try {
     await client.query("BEGIN");
     const current = await client.query(
-      "SELECT status, inventory_deducted FROM orders WHERE id = $1 FOR UPDATE",
+      "SELECT status, inventory_deducted, archived_at FROM orders WHERE id = $1 FOR UPDATE",
       [req.params.id]
     );
     if (!current.rowCount) {
       await client.query("ROLLBACK");
       return res.status(404).json({ error: "الطلب غير موجود" });
     }
-    const { status: previousStatus, inventory_deducted: inventoryDeducted } = current.rows[0];
+    const { status: previousStatus, inventory_deducted: inventoryDeducted, archived_at: archivedAt } = current.rows[0];
     if (previousStatus !== req.body.status) {
-      if (previousStatus === "returned") {
+      if (archivedAt) {
         await client.query("ROLLBACK");
-        return res.status(409).json({ error: "لا يمكن تغيير حالة الطلب بعد تسجيله كمرتجع" });
+        return res.status(409).json({ error: "أزل الطلب من الأرشيف أولاً لتغيير حالته" });
+      }
+      if (previousStatus === "returned" && !["new", "confirmed", "cancelled"].includes(req.body.status)) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({ error: "أعد الطلب إلى حالة جديد أو مؤكد أو ملغى قبل تغيير مسار الشحن" });
       }
       if (req.body.status === "returned" && !["shipped", "delivered"].includes(previousStatus)) {
         await client.query("ROLLBACK");
