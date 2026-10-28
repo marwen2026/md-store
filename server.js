@@ -1456,6 +1456,19 @@ app.get("/api/admin/inventory", auth, role("admin", "manager"), async (req, res)
   res.json(await loadInventoryReport());
 });
 
+app.delete("/api/admin/inventory/movements/:id", auth, role("admin"), async (req, res) => {
+  const movementId = Number(req.params.id);
+  if (!Number.isInteger(movementId) || movementId < 1) {
+    return res.status(400).json({ error: "معرّف حركة المخزون غير صالح" });
+  }
+  const result = await pool.query(
+    "DELETE FROM inventory_movements WHERE id = $1 RETURNING id",
+    [movementId]
+  );
+  if (!result.rowCount) return res.status(404).json({ error: "حركة المخزون غير موجودة" });
+  res.json({ ok: true });
+});
+
 app.get("/api/admin/inventory/export.csv", auth, role("admin", "manager"), async (req, res) => {
   const report = await loadInventoryReport();
   const rows = [
