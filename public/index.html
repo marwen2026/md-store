@@ -726,7 +726,7 @@ body{background:var(--background);color:var(--text)}
     <input id="search" type="search" autocomplete="off" placeholder="Recherche" aria-label="Rechercher un produit ou une marque">
     <button class="search-clear" id="searchClear" type="button" aria-label="Effacer la recherche" hidden>×</button>
   </div>
-  <a class="modern-brand" href="/" aria-label="MA-DOR Store — Accueil" onclick="goToHome(event)">
+  <a class="modern-brand" href="/#shop" aria-label="MA-DOR Store — Retour aux produits" title="Retour aux produits" onclick="goToProducts(event)">
     <span class="modern-brand-text">MA<span class="gold">-</span>DOR</span>
     <small class="modern-brand-tagline" id="storeBrandTagline">Achetez malin</small>
   </a>
@@ -1303,6 +1303,11 @@ function closeShopPage(pushHistory=true){
 	applyShopPageVisibility();
 	if(pushHistory){const url=new URL(location.href);url.searchParams.delete("product");url.hash="";history.replaceState({},"",url)}
 	load();window.scrollTo({top:0,behavior:"smooth"});
+}
+function goToProducts(event){
+	event?.preventDefault();
+	closeCart();closeSideMenu();
+	openShopPage(null,true);
 }
 function goToHome(event){
 	event?.preventDefault();
