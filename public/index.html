@@ -4,6 +4,14 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>M-D Store</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=10">
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','1646222136892588');
+fbq('track','PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1646222136892588&ev=PageView&noscript=1" alt=""></noscript>
+<!-- End Meta Pixel Code -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -1316,6 +1324,7 @@ function productImages(product){return Array.isArray(product.images)&&product.im
 function openProductDetails(id,updateHistory=true){
   const product=[...products,...shopCatalog,...featuredProducts].find(item=>Number(item.id)===Number(id));
   if(!product)return;
+  if(typeof window.fbq==="function")window.fbq('track','ViewContent',{content_ids:[String(product.id)],content_name:product.name,content_type:'product',content_category:product.category_name||undefined,value:Number(product.price)||0,currency:'TND'});
   detailProduct=product;detailQuantity=1;detailImageIndex=0;
   const colors=Array.isArray(product.colors)?product.colors.filter(color=>StoreColor.normalizeColorHex(color)):[];
   detailColor=colors[0]||null;
@@ -1570,7 +1579,7 @@ function showCompareModal(){
 document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!document.getElementById("compareModal").hidden)closeCompareModal()});
 function deliveryLabel(value){const fee=Number(value)||0;return fee>0?`${storeText("deliveryFee")} ${esc(formatStoreMoney(fee))}`:storeText("freeDelivery")}
 function add(id){const product=findStoreProduct(id);if(Array.isArray(product?.colors)&&product.colors.length)return openProductDetails(id);addProductToCart(product)}
-function addProductToCart(product,quantity=1,variantColor=null){if(!product||product.stock<1)return;const addedQuantity=Math.max(1,Math.min(Number(quantity)||1,Number(product.stock))),item=cart.find(x=>x.product_id==product.id&&x.variant_color===variantColor),deliveryPrice=Number(product.delivery_price)||0;if(item){item.quantity=Math.min(item.quantity+addedQuantity,product.stock);item.delivery_price=deliveryPrice}else cart.push({product_id:product.id,name:product.name,price:Number(product.price),delivery_price:deliveryPrice,quantity:addedQuantity,variant_color:variantColor});save();render();openCart()}
+function addProductToCart(product,quantity=1,variantColor=null){if(!product||product.stock<1)return;const addedQuantity=Math.max(1,Math.min(Number(quantity)||1,Number(product.stock))),item=cart.find(x=>x.product_id==product.id&&x.variant_color===variantColor),deliveryPrice=Number(product.delivery_price)||0;if(item){item.quantity=Math.min(item.quantity+addedQuantity,product.stock);item.delivery_price=deliveryPrice}else cart.push({product_id:product.id,name:product.name,price:Number(product.price),delivery_price:deliveryPrice,quantity:addedQuantity,variant_color:variantColor});if(typeof window.fbq==="function")window.fbq('track','AddToCart',{content_ids:[String(product.id)],content_name:product.name,content_type:'product',contents:[{id:String(product.id),quantity:addedQuantity,item_price:Number(product.price)||0}],value:(Number(product.price)||0)*addedQuantity,currency:'TND'});save();render();openCart()}
 function renderHeroDots(){
 	renderCampaignDots();
 }
@@ -1817,10 +1826,12 @@ async function checkout(){
 		address:document.getElementById("address").value.trim()
 	};
 	if(!customer.name||!customer.phone)return alert(storeText("namePhoneRequired"));
+	if(typeof window.fbq==="function")window.fbq('track','InitiateCheckout',{content_ids:cart.map(item=>String(item.product_id)),contents:cart.map(item=>({id:String(item.product_id),quantity:item.quantity,item_price:Number(item.price)||0})),num_items:cart.reduce((sum,item)=>sum+item.quantity,0),value:cart.reduce((sum,item)=>sum+(Number(item.price)||0)*item.quantity,0),currency:'TND'});
 	try{
 		const r=await fetch("/api/orders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({customer,payment_method:"cash_on_delivery",items:cart.map(x=>({product_id:x.product_id,quantity:x.quantity,variant_color:x.variant_color||null}))})});
 		const x=await r.json();
 		if(!r.ok)return alert(x.error||storeText("orderFailed"));
+		if(typeof window.fbq==="function")window.fbq('track','Purchase',{content_ids:cart.map(item=>String(item.product_id)),contents:cart.map(item=>({id:String(item.product_id),quantity:item.quantity,item_price:Number(item.price)||0})),num_items:cart.reduce((sum,item)=>sum+item.quantity,0),value:Number(x.total)||0,currency:'TND'},{eventID:String(x.order_id)});
 		const greeting=currentStoreLanguage==="fr"?"Bonjour":"مرحباً",orderRequest=currentStoreLanguage==="fr"?"Je souhaite confirmer la commande":"أريد تأكيد الطلب";
 		const productsLabel=currentStoreLanguage==="fr"?"Produits":"المنتجات";
 		const orderItems=Array.isArray(x.items)?x.items:cart.map(item=>({name:item.name,quantity:item.quantity,price:item.price}));
