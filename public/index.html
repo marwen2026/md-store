@@ -24,9 +24,17 @@ fbq('track','PageView');
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 <style>
 body.shop-page #offers,body.shop-page #features,body.shop-page #categoryShowcase,body.shop-page #newArrivals{display:none!important}
+body.shop-page #manualHomepageSections{display:none!important}
 #categoryShowcase[hidden]{display:none!important}
 body.shop-page .nav-shop-item .mega-menu{display:none}
 .home-product-sections{display:flex;flex-direction:column}
+.manual-home-sections{display:flex;flex-direction:column;gap:26px;max-width:1440px;margin:0 auto;padding:0 clamp(16px,4vw,56px) 36px}
+.manual-home-section{padding:24px;border:1px solid #e8eaf0;border-radius:20px;background:#fff;box-shadow:0 10px 32px #1e293b0a}
+.manual-home-sections[hidden],.manual-home-section[hidden]{display:none!important}
+.manual-home-section-heading{margin-bottom:18px;text-align:center}.manual-home-section-heading h2{margin:0;color:#14243c;font-size:clamp(22px,3vw,32px);font-weight:900}.manual-home-section-heading p{margin:6px 0 0;color:#6b7280}
+.manual-home-banner{position:relative;display:grid;min-height:260px;overflow:hidden;align-items:end;border-radius:16px;background:#14243c;color:#fff}.manual-home-banner>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.manual-home-banner:after{position:absolute;inset:0;background:linear-gradient(0deg,#0b1425e8,transparent 85%);content:""}.manual-home-banner-content{position:relative;z-index:1;padding:clamp(22px,5vw,48px)}.manual-home-banner h2{margin:0;font-size:clamp(24px,4vw,40px);font-weight:900}.manual-home-banner p{max-width:680px;margin:7px 0 16px;color:#f1f5f9}.manual-home-banner a{display:inline-flex;padding:10px 17px;border-radius:999px;background:#d4af37;color:#111827;font-weight:800}
+.manual-home-section .products{grid-template-columns:repeat(var(--product-columns,4),minmax(0,1fr))}
+@media(max-width:700px){.manual-home-section{padding:16px}.manual-home-section .products{grid-template-columns:repeat(2,minmax(0,1fr))}}
 body.shop-page #products{max-width:1440px;min-height:calc(100vh - var(--store-header-height,136px));margin:0 auto;padding:28px clamp(16px,4vw,56px) 60px}
 .shop-banner{margin-bottom:26px;padding:28px 34px;border-radius:18px;background:linear-gradient(115deg,#101f38,#193d63);color:#fff}
 .shop-banner[hidden],.shop-filters[hidden],.shop-toolbar[hidden]{display:none!important}
@@ -833,6 +841,7 @@ body{background:var(--background);color:var(--text)}
 </div>
 </section>
 </div>
+<div id="manualHomepageSections"></div>
 
 <a class="wa" id="wa" target="_blank" title="WhatsApp" aria-label="تواصل معنا عبر WhatsApp" data-i18n-title="contactWhatsApp" data-i18n-aria="contactWhatsApp"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.4 11.7a8.4 8.4 0 0 1-12.3 7.4L4 20l1-4.1a8.4 8.4 0 1 1 15.4-4.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.3 7.6c-.3-.5-.6-.5-.9-.5-.2 0-.5 0-.7.3-.3.3-1 1-1 2.3s1 2.7 1.2 2.9c.1.2 2 3.1 4.9 4.2 2.4 1 2.9.8 3.4.7.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.1-1.4-.1-.2-.3-.3-.7-.5l-2-.9c-.3-.1-.5-.2-.7.2l-.9 1.1c-.2.2-.3.3-.7.1-.4-.2-1.6-.6-2.9-1.8-1-.9-1.7-2-1.9-2.4-.2-.3 0-.5.1-.7l.5-.6c.2-.2.2-.4.3-.6.1-.2 0-.4 0-.6l-.9-2.1Z" fill="currentColor"/></svg></a>
 <aside class="side-menu" id="sideMenu" aria-label="القائمة الجانبية" data-i18n-aria="sideNavigation">
@@ -914,7 +923,7 @@ if(incomingStoreUrl.searchParams.has("product")&&incomingStoreUrl.hash==="#produ
 	normalizeIncomingStoreUrl=true;
 }
 if(normalizeIncomingStoreUrl)history.replaceState(history.state,"",incomingStoreUrl);
-let products=[],featuredProducts=[],featuredProduct=null,featuredProductIndex=0,advertisementTimer=null,campaignTimer=null,campaignSlideIndex=0,productSearchTimer=null,productLoadSequence=0,cart=JSON.parse(localStorage.getItem("md_cart")||"[]"),cfg={whatsapp:"",whatsappConfigured:false,store:"M&D Store",currency:"TND",homepageSections:[{id:"category_showcase",title:"Explorez nos univers",subtitle:"Une sélection pour chaque envie",enabled:true,order:1},{id:"new_products",title:"Nouveautés",subtitle:"Fraîchement arrivés",enabled:true,order:2,productCount:12},{id:"best_sellers",title:"Meilleures ventes",subtitle:"Sélection M&D",enabled:true,order:3,productCount:12}]},selectedCategory="",detailProduct=null,detailQuantity=1,detailImageIndex=0,detailColor=null,compareProductIds=[],favoriteProductIds=JSON.parse(localStorage.getItem("md_favorites")||"[]"),shopMode=location.hash==="#shop",shopCatalog=[],shopCategoryIds=new Set(),shopPage=1;
+let products=[],featuredProducts=[],featuredProduct=null,featuredProductIndex=0,advertisementTimer=null,campaignTimer=null,campaignSlideIndex=0,productSearchTimer=null,productLoadSequence=0,cart=JSON.parse(localStorage.getItem("md_cart")||"[]"),cfg={whatsapp:"",whatsappConfigured:false,store:"M&D Store",currency:"TND",homepageSections:[{id:"category_showcase",title:"Explorez nos univers",subtitle:"Une sélection pour chaque envie",enabled:true,order:1},{id:"new_products",title:"Nouveautés",subtitle:"Fraîchement arrivés",enabled:true,order:2,productCount:12},{id:"best_sellers",title:"Meilleures ventes",subtitle:"Sélection M&D",enabled:true,order:3,productCount:12}],manualHomepageSections:[]},selectedCategory="",detailProduct=null,detailQuantity=1,detailImageIndex=0,detailColor=null,compareProductIds=[],favoriteProductIds=JSON.parse(localStorage.getItem("md_favorites")||"[]"),shopMode=location.hash==="#shop",shopCatalog=[],shopCategoryIds=new Set(),shopPage=1;
 function storeProductSlug(name){
 	return String(name||"").normalize("NFKD").replace(/\p{M}/gu,"").toLowerCase().replace(/[^\p{L}\p{N}]+/gu,"-").replace(/^-+|-+$/g,"")||"product";
 }
@@ -1005,10 +1014,10 @@ function updateDirectionalControls(){
 function updateHeroCopy(){const arabic=currentStoreLanguage==="ar";document.getElementById("heroEyebrow").textContent=arabic?"تسوّقوا عبر الإنترنت في تونس":"Shopping en ligne en Tunisie";document.getElementById("heroHeadline").innerHTML=arabic?'تسوّقوا بسهولة <span class="accent">بأفضل الأسعار.</span>':'Vos achats en ligne <span class="accent">au meilleur prix.</span>';document.getElementById("heroDescription").textContent=arabic?"اكتشفوا تشكيلة متنوعة من المنتجات مع أسعار تنافسية وتوصيل سريع إلى جميع أنحاء تونس.":"Mode, high-tech, maison et bien plus : découvrez notre sélection, profitez de prix compétitifs et d’une livraison rapide partout en Tunisie.";document.getElementById("heroBuyButton").textContent=arabic?"اكتشفوا المتجر":"Découvrir la boutique";document.getElementById("heroBestSellers").textContent=arabic?"الأكثر مبيعاً":"Meilleures ventes";document.getElementById("storeBrandTagline").textContent=arabic?"تسوّق بذكاء":"Achetez malin";document.getElementById("mobilePaymentLabel").textContent=arabic?"الدفع عند الاستلام متاح":"Paiement à la livraison disponible";document.getElementById("mobileHomeLabel").textContent=arabic?"الرئيسية":"Accueil";document.getElementById("mobileShopLabel").textContent=arabic?"المتجر":"Boutique";document.getElementById("mobileFavoritesLabel").textContent=arabic?"المفضلة":"Favoris";document.getElementById("mobileCartLabel").textContent=arabic?"السلة":"Panier";document.getElementById("mobileAccountLabel").textContent=arabic?"حسابي":"Compte"}
 function goToBestSellers(event){event.preventDefault();document.getElementById("products").scrollIntoView({behavior:"smooth",block:"start"})}
 function applyStoreLanguage(){document.documentElement.lang=currentStoreLanguage;document.documentElement.dir=currentStoreLanguage==="ar"?"rtl":"ltr";document.querySelectorAll("[data-i18n]").forEach(element=>{element.textContent=storeText(element.dataset.i18n)});document.querySelectorAll("[data-i18n-placeholder]").forEach(element=>{element.placeholder=storeText(element.dataset.i18nPlaceholder)});document.querySelectorAll("[data-i18n-aria]").forEach(element=>{element.setAttribute("aria-label",storeText(element.dataset.i18nAria))});document.querySelectorAll("[data-i18n-title]").forEach(element=>{element.title=storeText(element.dataset.i18nTitle)});updateHeroCopy();if(cur)cur.textContent=storeCurrencyLabel();if(storeLanguageTarget && storeLanguageToggle){const nextLanguage=currentStoreLanguage==="ar"?"fr":"ar",toggleLabel=nextLanguage==="fr"?"Passer au français":"التبديل إلى العربية";storeLanguageTarget.textContent=nextLanguage.toUpperCase();storeLanguageToggle.setAttribute("aria-label",toggleLabel);storeLanguageToggle.title=toggleLabel;}
-updateDirectionalControls();updateStoreWhatsAppLinks();renderCategoryShowcase();renderNewArrivals();renderCampaignDots();updateShopCopy()}
+updateDirectionalControls();updateStoreWhatsAppLinks();renderCategoryShowcase();renderNewArrivals();renderManualHomepageSections();renderCampaignDots();updateShopCopy()}
 function toggleStoreLanguage(){const quantity=detailQuantity,imageIndex=detailImageIndex,color=detailColor,productId=detailProduct?.id;currentStoreLanguage=currentStoreLanguage==="ar"?"fr":"ar";localStorage.setItem("md_store_lang",currentStoreLanguage);applyStoreLanguage();renderStoreNavigation();loadCats().catch(error=>console.error("Could not translate storefront categories:",error));if(search)load();render();if(detailProduct){openProductDetails(productId,false);detailQuantity=Math.min(quantity,Number(detailProduct.stock)||1);document.getElementById("detailQuantity").textContent=String(detailQuantity);setDetailImage(imageIndex);if(color&&detailProduct.colors?.includes(color))selectDetailColor(color)}if(featuredProduct)showAdvertisement(featuredProductIndex);updateCompareControls();syncFavoriteUI()}
 document.documentElement.lang=currentStoreLanguage;document.documentElement.dir=currentStoreLanguage==="ar"?"rtl":"ltr";
-const productDetail=document.getElementById("productDetail"),productsSection=document.getElementById("products"),homeProductSections=document.getElementById("homeProductSections"),heroSection=document.getElementById("offers"),categoryShowcase=document.getElementById("categoryShowcase"),newArrivalsSection=document.getElementById("newArrivals"),featuresSection=document.getElementById("features");
+const productDetail=document.getElementById("productDetail"),productsSection=document.getElementById("products"),homeProductSections=document.getElementById("homeProductSections"),manualHomepageSections=document.getElementById("manualHomepageSections"),heroSection=document.getElementById("offers"),categoryShowcase=document.getElementById("categoryShowcase"),newArrivalsSection=document.getElementById("newArrivals"),featuresSection=document.getElementById("features");
 const save=()=>localStorage.setItem("md_cart",JSON.stringify(cart));
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 function categoryIcon(kind){const paths={all:'<rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/>',tag:'<path d="M20 13 13 20a2 2 0 0 1-3 0l-6-6V4h10l6 6a2 2 0 0 1 0 3Z"/><circle cx="8" cy="8" r="1"/>',clothing:'<path d="m8 4 4 2 4-2 5 3-2 5-3-1v9H8v-9l-3 1-2-5 5-3Z"/><path d="M9 5.5a3 3 0 0 0 6 0"/>',bag:'<path d="M5 8h14l1 12H4L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/><path d="M9 12v1m6-1v1"/>',watch:'<rect x="7" y="7" width="10" height="10" rx="3"/><path d="m9 7 1-4h4l1 4m-6 10 1 4h4l1-4"/><path d="M12 10v2l2 1"/>',accessory:'<path d="M12 3 14.8 8.7 21 9.6l-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z"/>'};return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[kind]||paths.tag}</svg>`}
@@ -1107,6 +1116,52 @@ function renderNewArrivals(){
 	}).join("");
 	updateNewArrivalArrows();
 }
+function renderManualHomepageSections(){
+	const container=document.getElementById("manualHomepageSections");
+	if(!container)return;
+	const sections=Array.isArray(cfg.manualHomepageSections)?cfg.manualHomepageSections:[];
+	container.className="manual-home-sections";
+	container.hidden=Boolean(detailProduct)||shopMode||!sections.some(section=>section.enabled);
+	container.innerHTML=sections.filter(section=>section.enabled).sort((left,right)=>left.order-right.order).map(section=>{
+		const id=esc(section.id),title=esc(section.title),subtitle=esc(section.subtitle||"");
+		if(section.type==="manual"||section.type==="hero_banner"){
+			const image=esc(section.image),buttonText=esc(section.buttonText),buttonLink=esc(section.buttonLink);
+			return `<section class="manual-home-banner" id="manual-home-${id}"><img src="${image}" alt="${title}" loading="lazy"><div class="manual-home-banner-content"><h2>${title}</h2>${subtitle?`<p>${subtitle}</p>`:""}<a href="${buttonLink}">${buttonText}</a></div></section>`;
+		}
+		const heading=`<header class="manual-home-section-heading"><h2>${title}</h2>${subtitle?`<p>${subtitle}</p>`:""}</header>`;
+		if(section.type==="category_showcase"){
+			const categories=currentCategories.filter(category=>category.parent_id==null&&category.show_in_showcase!==false);
+			const cards=categories.map((category,index)=>{
+				const image=categoryShowcaseImage(category,index),categoryIds=categoryDescendantIds(category.id);
+				const count=featuredProducts.filter(product=>categoryIds.has(String(product.category_id))).length;
+				const countLabel=currentStoreLanguage==="fr"?`${count} produit${count===1?"":"s"}`:`${count} منتج`;
+				return `<button class="category-showcase-card" type="button" data-category-id="${esc(category.id)}" aria-label="${esc(category.displayName||category.name)} — ${esc(countLabel)}" onclick="selectCategoryFromShowcase(this.dataset.categoryId)"><img class="category-showcase-image" src="${esc(image)}" alt="" loading="lazy"><span class="category-showcase-corner" aria-hidden="true"></span><strong>${esc(category.displayName||category.name)}</strong><small>${esc(countLabel)}</small><span class="category-showcase-cta">${currentStoreLanguage==="fr"?"Découvrir la catégorie":"اكتشفوا القسم"} <span aria-hidden="true">${currentStoreLanguage==="fr"?"→":"←"}</span></span></button>`;
+			}).join("");
+			return `<section class="manual-home-section" id="manual-home-${id}">${heading}<div class="category-showcase-grid">${cards}</div></section>`;
+		}
+		const productFilters={
+			new_products:product=>product.show_new_products,
+			best_sellers:product=>product.show_best_sellers,
+			featured_products:product=>product.advertised,
+			promotions:product=>Number(product.old_price)>Number(product.price)
+		};
+		const filter=productFilters[section.type];
+		if(!filter)return "";
+		const sectionProducts=featuredProducts.filter(filter).sort(compareProductOrder).slice(0,section.productCount);
+		if(!sectionProducts.length)return "";
+		return `<section class="manual-home-section" id="manual-home-${id}">${heading}<div class="products" data-manual-products="${id}"></div></section>`;
+	}).join("");
+	container.querySelectorAll("[data-manual-products]").forEach(grid=>{
+		const section=sections.find(item=>item.id===grid.dataset.manualProducts);
+		const productFilters={
+			new_products:product=>product.show_new_products,
+			best_sellers:product=>product.show_best_sellers,
+			featured_products:product=>product.advertised,
+			promotions:product=>Number(product.old_price)>Number(product.price)
+		};
+		renderProductGrid(featuredProducts.filter(productFilters[section.type]).sort(compareProductOrder).slice(0,section.productCount),grid);
+	});
+}
 function openNewArrival(id){
 	const product=featuredProducts.find(item=>Number(item.id)===Number(id));
 	if(!product)return;
@@ -1144,7 +1199,7 @@ function mobileNavigate(tab){
 }
 document.getElementById("newArrivalsTrack").addEventListener("scroll",updateNewArrivalArrows,{passive:true});
 window.addEventListener("resize",updateNewArrivalArrows);
-async function loadCats(){const response=await fetch("/api/categories",{cache:"no-store"});if(!response.ok)throw new Error("Could not load storefront categories");const list=await response.json();currentCategories=list.map((category,index)=>({...category,displayName:translateCategoryName(category.name),icon:category.icon||categoryIconType(category.name,index)}));renderSideMenuCategories();categoriesSyncedAt=Date.now();renderStoreNavigation();renderCategoryShowcase()}
+async function loadCats(){const response=await fetch("/api/categories",{cache:"no-store"});if(!response.ok)throw new Error("Could not load storefront categories");const list=await response.json();currentCategories=list.map((category,index)=>({...category,displayName:translateCategoryName(category.name),icon:category.icon||categoryIconType(category.name,index)}));renderSideMenuCategories();categoriesSyncedAt=Date.now();renderStoreNavigation();renderCategoryShowcase();renderManualHomepageSections()}
 function renderSideMenuCategories(){const container=document.getElementById("sideMenuCategories");container.innerHTML=[{id:"",displayName:storeText("allProducts"),icon:"all"},...currentCategories].map(category=>`<button class="side-menu-category ${category.parent_id==null?"":"is-subcategory"}" type="button" data-category-id="${esc(category.id)}" aria-pressed="${selectedCategory===String(category.id)}" onclick="selectCategoryFromMenu(this.dataset.categoryId)">${esc(category.displayName||category.name)}</button>`).join("")}
 function selectCategoryFromMenu(id){closeSideMenu();selectCategory(id)}
 function refreshCategoriesOnReturn(){if(document.visibilityState==="visible"&&Date.now()-categoriesSyncedAt>1000)loadCats().catch(error=>console.error("Could not refresh storefront categories:",error))}
@@ -1184,6 +1239,7 @@ async function load(){
   if(shopMode){shopCatalog=data;renderShopCatalog();const product=productFromCurrentUrl();if(product)openProductDetails(product.id,false);return}
   products=data;
   renderProductGrid(products);
+  renderManualHomepageSections();
   const product=productFromCurrentUrl();
   if(product)openProductDetails(product.id,false);
 }
@@ -1291,6 +1347,7 @@ function resetShopFilters(){
 }
 function applyShopPageVisibility(){
 	document.body.classList.toggle("shop-page",shopMode);
+	manualHomepageSections.hidden=shopMode||Boolean(detailProduct);
 	document.getElementById("shopBanner").hidden=!shopMode;
 	document.getElementById("shopFilters").hidden=!shopMode;
 	document.getElementById("shopToolbar").hidden=!shopMode;
@@ -1335,9 +1392,11 @@ function goToHome(event){
 	detailProduct=null;productDetail.hidden=true;
 	heroSection.hidden=false;featuresSection.hidden=false;categoryShowcase.hidden=!homepageSection("category_showcase").enabled;
 	newArrivalsSection.hidden=featuredProducts.length===0||!homepageSection("new_products").enabled;productsSection.hidden=!homepageSection("best_sellers").enabled;
+	manualHomepageSections.hidden=false;
 	shopMode=false;selectedCategory="";shopCategoryIds.clear();
 	document.querySelectorAll("#sideMenuCategories [data-category-id]").forEach(button=>button.setAttribute("aria-pressed","false"));
 	applyShopPageVisibility();
+	renderManualHomepageSections();
 	if(wasNotHome)load();
 	window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -1435,6 +1494,7 @@ function openProductDetails(id,updateHistory=true){
   updateFavoriteButton(document.querySelector(".detail-favorite"));
   updateCompareControls();
   heroSection.hidden=true;featuresSection.hidden=true;categoryShowcase.hidden=true;newArrivalsSection.hidden=true;productsSection.hidden=true;
+  manualHomepageSections.hidden=true;
   const detailPath=new URL(productDetailPath(product),location.origin).pathname;
   if(updateHistory)history.pushState({productId:product.id},"",detailPath);
   else if(location.pathname!==detailPath||location.search||location.hash)history.replaceState({...history.state,productId:product.id},"",detailPath);
@@ -1468,7 +1528,7 @@ function handleProductDetailTabKeydown(event){
   selectProductDetailTab(tabs[nextIndex].dataset.detailTab,true);
 }
 function closeProductDetails(updateHistory=true,target="products"){
-  detailProduct=null;productDetail.hidden=true;heroSection.hidden=false;featuresSection.hidden=false;categoryShowcase.hidden=!homepageSection("category_showcase").enabled;newArrivalsSection.hidden=featuredProducts.length===0||!homepageSection("new_products").enabled;productsSection.hidden=!shopMode&&!homepageSection("best_sellers").enabled;
+  detailProduct=null;productDetail.hidden=true;heroSection.hidden=false;featuresSection.hidden=false;categoryShowcase.hidden=!homepageSection("category_showcase").enabled;newArrivalsSection.hidden=featuredProducts.length===0||!homepageSection("new_products").enabled;productsSection.hidden=!shopMode&&!homepageSection("best_sellers").enabled;manualHomepageSections.hidden=shopMode;renderManualHomepageSections();
   if(updateHistory){history.replaceState({},"",location.pathname.startsWith("/product/")?"/":location.href)}
   const destination=target==="home"?0:productsSection.offsetTop;
   window.scrollTo({top:destination,behavior:"smooth"});
@@ -1766,6 +1826,7 @@ function applyHomepageSectionSettings(){
 		.map(section=>sectionElements[section.id]));
 	if(!detailProduct)productsSection.hidden=!shopMode&&!bestSellers.enabled;
 	renderNewArrivals();
+	renderManualHomepageSections();
 	if(products.length&&!shopMode)renderProductGrid(products);
 }
 function applyCategoryGridSettings(){
@@ -1818,6 +1879,7 @@ async function loadAdvertisement(){
 		showAdvertisement(0);
 		renderCategoryShowcase();
 		renderNewArrivals();
+		renderManualHomepageSections();
 		if(advertisementTimer)clearInterval(advertisementTimer);
 		if(featuredProducts.length>1&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches)advertisementTimer=setInterval(()=>changeFeaturedSlide(1),7000);
 	}catch(error){
@@ -1825,6 +1887,7 @@ async function loadAdvertisement(){
 		showAdvertisement(0);
 		renderCategoryShowcase();
 		renderNewArrivals();
+		renderManualHomepageSections();
 	}
 }
 function render(){
@@ -2027,6 +2090,6 @@ renderCampaignDots();
 initHeroParallax();
 if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches)campaignTimer=setInterval(()=>changeCampaignSlide(1),8000);
 loadStoreNavigation();
-Promise.all([fetch("/api/config").then(r=>r.json()).then(x=>{cfg={...cfg,...x,homepageSections:Array.isArray(x.homepageSections)?x.homepageSections:cfg.homepageSections};if(cur)cur.textContent=storeCurrencyLabel();updateStoreWhatsAppLinks();applyMobileMenuLogo(x.mobileLogoUrl||"");renderCampaignSlides(x.campaignImages||[]);applyHeroDisplaySettings();applyProductGridSettings();applyCategoryGridSettings();applyHomepageSectionSettings()}),loadCats()]).then(()=>Promise.all([load(),loadAdvertisement()]));
+Promise.all([fetch("/api/config").then(r=>r.json()).then(x=>{cfg={...cfg,...x,homepageSections:Array.isArray(x.homepageSections)?x.homepageSections:cfg.homepageSections,manualHomepageSections:Array.isArray(x.manualHomepageSections)?x.manualHomepageSections:[]};if(cur)cur.textContent=storeCurrencyLabel();updateStoreWhatsAppLinks();applyMobileMenuLogo(x.mobileLogoUrl||"");renderCampaignSlides(x.campaignImages||[]);applyHeroDisplaySettings();applyProductGridSettings();applyCategoryGridSettings();applyHomepageSectionSettings()}),loadCats()]).then(()=>Promise.all([load(),loadAdvertisement()]));
 render();syncFavoriteUI();updateCompareControls();
 </script></body></html>h

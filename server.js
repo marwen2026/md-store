@@ -521,6 +521,74 @@ const DEFAULT_HOMEPAGE_SECTIONS = [
   { id: "new_products", title: "Nouveautés", subtitle: "Fraîchement arrivés", enabled: true, order: 2, productCount: 12 },
   { id: "best_sellers", title: "Meilleures ventes", subtitle: "Sélection M&D", enabled: true, order: 3, productCount: 12 }
 ];
+const MANUAL_HOMEPAGE_SECTION_TYPES = new Set([
+  "hero_banner",
+  "new_products",
+  "best_sellers",
+  "category_showcase",
+  "featured_products",
+  "promotions",
+  "manual"
+]);
+
+function isValidHomepageUrl(value, image = false) {
+  if (typeof value !== "string" || value.length > 1000 || /[\u0000-\u001f\\]/.test(value)) return false;
+  if (!value) return true;
+  if (image && value.startsWith("/") && !value.startsWith("//")) return true;
+  if (!image && (value.startsWith("/") && !value.startsWith("//") || /^#[\w-]*$/.test(value))) return true;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+function parseManualHomepageSections(value) {
+  if (value === undefined) return [];
+  const sections = JSON.parse(value);
+  if (!Array.isArray(sections) || sections.length > 30) {
+    throw new Error("Saved manual homepage sections are invalid");
+  }
+  const ids = new Set();
+  const orders = new Set();
+  return sections.map(section => {
+    if (!section || typeof section.id !== "string" || !/^[a-zA-Z0-9_-]{1,60}$/.test(section.id) ||
+      ids.has(section.id) || !MANUAL_HOMEPAGE_SECTION_TYPES.has(section.type) ||
+      typeof section.title !== "string" || !section.title.trim() || section.title.length > 80 ||
+      typeof section.subtitle !== "string" || section.subtitle.length > 160 ||
+      typeof section.image !== "string" || !isValidHomepageUrl(section.image, true) ||
+      typeof section.buttonText !== "string" || section.buttonText.length > 60 ||
+      typeof section.buttonLink !== "string" || !isValidHomepageUrl(section.buttonLink) ||
+      typeof section.enabled !== "boolean" ||
+      !Number.isInteger(section.order) || section.order < 1 || section.order > sections.length ||
+      orders.has(section.order)) {
+      throw new Error("Saved manual homepage sections are invalid");
+    }
+    if ((section.type === "manual" || section.type === "hero_banner") &&
+      (!section.image || !section.buttonText.trim() || !section.buttonLink)) {
+      throw new Error("Manual homepage banners require an image and a valid button");
+    }
+    if (section.type !== "manual" && section.type !== "hero_banner" &&
+      (!Number.isInteger(section.productCount) || section.productCount < 1 || section.productCount > 48)) {
+      throw new Error("Saved manual homepage section product count is invalid");
+    }
+    ids.add(section.id);
+    orders.add(section.order);
+    return {
+      id: section.id,
+      type: section.type,
+      title: section.title.trim(),
+      subtitle: section.subtitle.trim(),
+      image: section.image,
+      buttonText: section.buttonText.trim(),
+      buttonLink: section.buttonLink,
+      enabled: section.enabled,
+      order: section.order,
+      ...(section.type !== "manual" && section.type !== "hero_banner" ? { productCount: section.productCount } : {})
+    };
+  });
+}
 
 function parseHomepageSections(value) {
   if (value === undefined) return DEFAULT_HOMEPAGE_SECTIONS.map(section => ({ ...section }));
@@ -618,6 +686,7 @@ app.get("/api/config", async (req, res) => {
       productColumns: Number.isInteger(productColumns) && productColumns >= 2 && productColumns <= 6 ? productColumns : 4,
       categoryColumns: Number.isInteger(categoryColumns) && categoryColumns >= 2 && categoryColumns <= 6 ? categoryColumns : 4,
       homepageSections: parseHomepageSections(settings.homepage_sections),
+      manualHomepageSections: parseManualHomepageSections(settings.manual_homepage_sections),
       store: STORE,
       currency: CURRENCY
     });
@@ -862,6 +931,7 @@ app.get("/api/admin/settings", auth, role("admin"), async (req, res) => {
       product_columns: settings.draft_product_columns ?? settings.product_columns ?? "4",
       category_columns: settings.draft_category_columns ?? settings.category_columns ?? "4",
       homepage_sections: parseHomepageSections(settings.homepage_sections),
+      manual_homepage_sections: parseManualHomepageSections(settings.manual_homepage_sections),
       hero_settings_has_draft: HERO_DRAFT_SETTINGS.some(key => settings[`draft_${key}`] !== undefined) ||
         settings.draft_campaign_images !== undefined
     });
@@ -924,6 +994,33 @@ app.put("/api/admin/homepage-sections", auth, role("admin"), async (req, res) =>
   } catch (error) {
     console.error("Could not save homepage section settings:", error);
     res.status(500).json({ error: "Could not save homepage section settings" });
+  }
+});
+
+app.put("/api/admin/manual-homepage-sections", auth, role("admin"), async (req, res) => {
+  const sections = req.body?.sections;
+  if (!Array.isArray(sections) || sections.length > 30) {
+    return res.status(400).json({ error: "Manual homepage sections must be an array of at most 30 items" });
+  }
+  try {
+    const validatedSections = parseManualHomepageSections(JSON.stringify(sections));
+    await pool.query(
+      `INSERT INTO store_settings(key, value) VALUES('manual_homepage_sections', $1)
+       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+      [JSON.stringify(validatedSections)]
+    );
+    res.json({ ok: true, sections: validatedSections });
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      return res.status(400).json({ error: "Invalid manual homepage section settings" });
+    }
+    if (error.message === "Saved manual homepage sections are invalid" ||
+      error.message === "Manual homepage banners require an image and a valid button" ||
+      error.message === "Saved manual homepage section product count is invalid") {
+      return res.status(400).json({ error: "Invalid manual homepage section fields or ordering" });
+    }
+    console.error("Could not save manual homepage sections:", error);
+    res.status(500).json({ error: "Could not save manual homepage sections" });
   }
 });
 
