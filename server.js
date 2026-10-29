@@ -170,6 +170,7 @@ async function serveStorePage(req, res, requestedProductId, requestedSlug = "") 
 }
 app.get("/", async (req, res) => serveStorePage(req, res, req.query.product));
 app.get("/product/:slug", async (req, res) => serveStorePage(req, res, null, req.params.slug));
+app.get("/category/:slug", async (req, res) => serveStorePage(req, res));
 app.use("/uploads", express.static(uploadDir));
 app.get("/uploads/:filename", (req, res) => {
   res.status(404).json({ error: "Image not found" });
