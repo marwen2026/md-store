@@ -25,6 +25,7 @@ fbq('track','PageView');
 <style>
 body.shop-page #offers,body.shop-page #features,body.shop-page #categoryShowcase,body.shop-page #newArrivals{display:none!important}
 body.shop-page .nav-shop-item .mega-menu{display:none}
+.home-product-sections{display:flex;flex-direction:column}
 body.shop-page #products{max-width:1440px;min-height:calc(100vh - var(--store-header-height,136px));margin:0 auto;padding:28px clamp(16px,4vw,56px) 60px}
 .shop-banner{margin-bottom:26px;padding:28px 34px;border-radius:18px;background:linear-gradient(115deg,#101f38,#193d63);color:#fff}
 .shop-banner[hidden],.shop-filters[hidden],.shop-toolbar[hidden]{display:none!important}
@@ -786,6 +787,10 @@ body{background:var(--background);color:var(--text)}
   </header>
   <div class="category-showcase-grid" id="categoryShowcaseGrid"></div>
 </section>
+<section class="product-detail" id="productDetail" hidden aria-live="polite"></section>
+<aside class="compare-dock" id="compareDock" hidden aria-live="polite"></aside>
+<div class="compare-modal" id="compareModal" hidden onclick="if(event.target===this)closeCompareModal()"><section class="compare-modal-card" role="dialog" aria-modal="true" aria-labelledby="compareModalTitle"><div class="compare-modal-head"><h2 id="compareModalTitle"></h2><button type="button" onclick="closeCompareModal()" aria-label="Fermer">×</button></div><div class="compare-table-wrap" id="compareTableWrap"></div></section></div>
+<div class="home-product-sections" id="homeProductSections">
 <section class="new-arrivals" id="newArrivals" aria-labelledby="newArrivalsTitle">
   <div class="new-arrivals-inner">
     <header class="new-arrivals-heading">
@@ -799,17 +804,14 @@ body{background:var(--background);color:var(--text)}
     </div>
   </div>
 </section>
-<section class="product-detail" id="productDetail" hidden aria-live="polite"></section>
-<aside class="compare-dock" id="compareDock" hidden aria-live="polite"></aside>
-<div class="compare-modal" id="compareModal" hidden onclick="if(event.target===this)closeCompareModal()"><section class="compare-modal-card" role="dialog" aria-modal="true" aria-labelledby="compareModalTitle"><div class="compare-modal-head"><h2 id="compareModalTitle"></h2><button type="button" onclick="closeCompareModal()" aria-label="Fermer">×</button></div><div class="compare-table-wrap" id="compareTableWrap"></div></section></div>
 <section class="section" id="products" aria-labelledby="bestSellersTitle" aria-describedby="bestSellersDescription">
 <header class="shop-banner" id="shopBanner" hidden>
   <div class="shop-breadcrumb"><button type="button" onclick="closeShopPage()" id="shopHomeBreadcrumb">Accueil</button><span aria-hidden="true"> / </span><span id="shopBreadcrumb">Boutique</span></div>
   <h1 id="shopTitle">La boutique</h1><p id="shopDescription">Découvrez notre sélection et trouvez vos essentiels.</p>
 </header>
-<div class="best-sellers-heading">
-<span class="best-sellers-kicker" data-i18n="bestSellersEyebrow">M&amp;D SELECT</span>
-<h2 class="section-title" id="bestSellersTitle" data-i18n="bestSellers">المنتجات الأكثر مبيعاً</h2>
+<div class="best-sellers-heading" id="bestSellersHeading">
+<span class="best-sellers-kicker" id="bestSellersKicker">M&amp;D SELECT</span>
+<h2 class="section-title" id="bestSellersTitle">المنتجات الأكثر مبيعاً</h2>
 <p class="best-sellers-description" id="bestSellersDescription" data-i18n="bestSellersDescription">اكتشف المنتجات التي اختارها واشترها عملاؤنا أكثر من غيرها</p>
 </div>
 <div class="shop-layout">
@@ -829,6 +831,7 @@ body{background:var(--background);color:var(--text)}
   </div>
 </div>
 </section>
+</div>
 
 <a class="wa" id="wa" target="_blank" title="WhatsApp" aria-label="تواصل معنا عبر WhatsApp" data-i18n-title="contactWhatsApp" data-i18n-aria="contactWhatsApp"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.4 11.7a8.4 8.4 0 0 1-12.3 7.4L4 20l1-4.1a8.4 8.4 0 1 1 15.4-4.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.3 7.6c-.3-.5-.6-.5-.9-.5-.2 0-.5 0-.7.3-.3.3-1 1-1 2.3s1 2.7 1.2 2.9c.1.2 2 3.1 4.9 4.2 2.4 1 2.9.8 3.4.7.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.1-1.4-.1-.2-.3-.3-.7-.5l-2-.9c-.3-.1-.5-.2-.7.2l-.9 1.1c-.2.2-.3.3-.7.1-.4-.2-1.6-.6-2.9-1.8-1-.9-1.7-2-1.9-2.4-.2-.3 0-.5.1-.7l.5-.6c.2-.2.2-.4.3-.6.1-.2 0-.4 0-.6l-.9-2.1Z" fill="currentColor"/></svg></a>
 <aside class="side-menu" id="sideMenu" aria-label="القائمة الجانبية" data-i18n-aria="sideNavigation">
@@ -910,7 +913,7 @@ if(incomingStoreUrl.searchParams.has("product")&&incomingStoreUrl.hash==="#produ
 	normalizeIncomingStoreUrl=true;
 }
 if(normalizeIncomingStoreUrl)history.replaceState(history.state,"",incomingStoreUrl);
-let products=[],featuredProducts=[],featuredProduct=null,featuredProductIndex=0,advertisementTimer=null,campaignTimer=null,campaignSlideIndex=0,productSearchTimer=null,productLoadSequence=0,cart=JSON.parse(localStorage.getItem("md_cart")||"[]"),cfg={whatsapp:"",whatsappConfigured:false,store:"M&D Store",currency:"TND"},selectedCategory="",detailProduct=null,detailQuantity=1,detailImageIndex=0,detailColor=null,compareProductIds=[],favoriteProductIds=JSON.parse(localStorage.getItem("md_favorites")||"[]"),shopMode=location.hash==="#shop",shopCatalog=[],shopCategoryIds=new Set(),shopPage=1;
+let products=[],featuredProducts=[],featuredProduct=null,featuredProductIndex=0,advertisementTimer=null,campaignTimer=null,campaignSlideIndex=0,productSearchTimer=null,productLoadSequence=0,cart=JSON.parse(localStorage.getItem("md_cart")||"[]"),cfg={whatsapp:"",whatsappConfigured:false,store:"M&D Store",currency:"TND",homepageSections:[{id:"new_products",title:"Nouveautés",subtitle:"Fraîchement arrivés",enabled:true,order:1,productCount:12},{id:"best_sellers",title:"Meilleures ventes",subtitle:"Sélection M&D",enabled:true,order:2,productCount:12}]},selectedCategory="",detailProduct=null,detailQuantity=1,detailImageIndex=0,detailColor=null,compareProductIds=[],favoriteProductIds=JSON.parse(localStorage.getItem("md_favorites")||"[]"),shopMode=location.hash==="#shop",shopCatalog=[],shopCategoryIds=new Set(),shopPage=1;
 function storeProductSlug(name){
 	return String(name||"").normalize("NFKD").replace(/\p{M}/gu,"").toLowerCase().replace(/[^\p{L}\p{N}]+/gu,"-").replace(/^-+|-+$/g,"")||"product";
 }
@@ -1004,7 +1007,7 @@ function applyStoreLanguage(){document.documentElement.lang=currentStoreLanguage
 updateDirectionalControls();updateStoreWhatsAppLinks();renderCategoryShowcase();renderNewArrivals();renderCampaignDots();updateShopCopy()}
 function toggleStoreLanguage(){const quantity=detailQuantity,imageIndex=detailImageIndex,color=detailColor,productId=detailProduct?.id;currentStoreLanguage=currentStoreLanguage==="ar"?"fr":"ar";localStorage.setItem("md_store_lang",currentStoreLanguage);applyStoreLanguage();renderStoreNavigation();loadCats().catch(error=>console.error("Could not translate storefront categories:",error));if(search)load();render();if(detailProduct){openProductDetails(productId,false);detailQuantity=Math.min(quantity,Number(detailProduct.stock)||1);document.getElementById("detailQuantity").textContent=String(detailQuantity);setDetailImage(imageIndex);if(color&&detailProduct.colors?.includes(color))selectDetailColor(color)}if(featuredProduct)showAdvertisement(featuredProductIndex);updateCompareControls();syncFavoriteUI()}
 document.documentElement.lang=currentStoreLanguage;document.documentElement.dir=currentStoreLanguage==="ar"?"rtl":"ltr";
-const productDetail=document.getElementById("productDetail"),productsSection=document.getElementById("products"),heroSection=document.getElementById("offers"),categoryShowcase=document.getElementById("categoryShowcase"),newArrivalsSection=document.getElementById("newArrivals"),featuresSection=document.getElementById("features");
+const productDetail=document.getElementById("productDetail"),productsSection=document.getElementById("products"),homeProductSections=document.getElementById("homeProductSections"),heroSection=document.getElementById("offers"),categoryShowcase=document.getElementById("categoryShowcase"),newArrivalsSection=document.getElementById("newArrivals"),featuresSection=document.getElementById("features");
 const save=()=>localStorage.setItem("md_cart",JSON.stringify(cart));
 const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 function categoryIcon(kind){const paths={all:'<rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/>',tag:'<path d="M20 13 13 20a2 2 0 0 1-3 0l-6-6V4h10l6 6a2 2 0 0 1 0 3Z"/><circle cx="8" cy="8" r="1"/>',clothing:'<path d="m8 4 4 2 4-2 5 3-2 5-3-1v9H8v-9l-3 1-2-5 5-3Z"/><path d="M9 5.5a3 3 0 0 0 6 0"/>',bag:'<path d="M5 8h14l1 12H4L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/><path d="M9 12v1m6-1v1"/>',watch:'<rect x="7" y="7" width="10" height="10" rx="3"/><path d="m9 7 1-4h4l1 4m-6 10 1 4h4l1-4"/><path d="M12 10v2l2 1"/>',accessory:'<path d="M12 3 14.8 8.7 21 9.6l-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z"/>'};return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[kind]||paths.tag}</svg>`}
@@ -1083,16 +1086,17 @@ function renderNewArrivals(){
 	const track=document.getElementById("newArrivalsTrack");
 	if(!track)return;
 	const isFrench=currentStoreLanguage==="fr";
-	document.getElementById("newArrivalsKicker").textContent=isFrench?"FRAÎCHEMENT ARRIVÉS":"وصلت حديثاً";
-	document.getElementById("newArrivalsTitle").textContent=isFrench?"Nouveautés":"وصل حديثاً";
+	const section=homepageSection("new_products");
+	document.getElementById("newArrivalsKicker").textContent=section.subtitle;
+	document.getElementById("newArrivalsTitle").textContent=section.title;
 	document.getElementById("newArrivalsViewAll").textContent=isFrench?"Voir tout":"عرض الكل";
 	document.getElementById("newArrivalsPrev").setAttribute("aria-label",isFrench?"Produits précédents":"المنتجات السابقة");
 	document.getElementById("newArrivalsNext").setAttribute("aria-label",isFrench?"Produits suivants":"المنتجات التالية");
 	const products=[...featuredProducts].sort((left,right)=>{
 		const leftDate=Date.parse(left.created_at)||0,rightDate=Date.parse(right.created_at)||0;
 		return rightDate-leftDate||Number(right.id)-Number(left.id);
-	}).slice(0,12);
-	newArrivalsSection.hidden=Boolean(detailProduct)||products.length===0;
+	}).slice(0,section.productCount);
+	newArrivalsSection.hidden=Boolean(detailProduct)||!section.enabled||products.length===0;
 	track.innerHTML=products.map(product=>{
 		const images=productImages(product),price=Number(product.price)||0,oldPrice=Number(product.old_price)||0;
 		const hasDiscount=oldPrice>price,discount=hasDiscount?Math.round((oldPrice-price)/oldPrice*100):0;
@@ -1182,7 +1186,8 @@ async function load(){
   if(product)openProductDetails(product.id,false);
 }
 function renderProductGrid(list,container=grid){
-  container.innerHTML=list.length?list.map(p=>{
+  const visibleProducts=container===grid&&!shopMode?list.slice(0,homepageSection("best_sellers").productCount):list;
+  container.innerHTML=visibleProducts.length?visibleProducts.map(p=>{
     const images=Array.isArray(p.images)&&p.images.length?p.images:[{path:"https://via.placeholder.com/600x500?text=M%26D"}];
     const price=Number(p.price)||0,oldPrice=Number(p.old_price)||0,hasDiscount=oldPrice>price;
     const discount=hasDiscount?Math.round((oldPrice-price)/oldPrice*100):0;
@@ -1279,7 +1284,8 @@ function applyShopPageVisibility(){
 	document.getElementById("shopBanner").hidden=!shopMode;
 	document.getElementById("shopFilters").hidden=!shopMode;
 	document.getElementById("shopToolbar").hidden=!shopMode;
-	document.querySelector(".best-sellers-heading").hidden=shopMode;
+	document.getElementById("bestSellersHeading").hidden=shopMode||!homepageSection("best_sellers").enabled;
+	if(!detailProduct)productsSection.hidden=!shopMode&&!homepageSection("best_sellers").enabled;
 	productsSection.setAttribute("aria-labelledby",shopMode?"shopTitle":"bestSellersTitle");
 	productsSection.setAttribute("aria-describedby",shopMode?"shopDescription":"bestSellersDescription");
 	if(!shopMode)document.getElementById("shopPagination").hidden=true;
@@ -1318,7 +1324,7 @@ function goToHome(event){
 	if(wasNotHome)history.pushState({},"",url.pathname+url.search);
 	detailProduct=null;productDetail.hidden=true;
 	heroSection.hidden=false;featuresSection.hidden=false;categoryShowcase.hidden=false;
-	newArrivalsSection.hidden=featuredProducts.length===0;productsSection.hidden=false;
+	newArrivalsSection.hidden=featuredProducts.length===0||!homepageSection("new_products").enabled;productsSection.hidden=!homepageSection("best_sellers").enabled;
 	shopMode=false;selectedCategory="";shopCategoryIds.clear();
 	document.querySelectorAll("#sideMenuCategories [data-category-id]").forEach(button=>button.setAttribute("aria-pressed","false"));
 	applyShopPageVisibility();
@@ -1452,7 +1458,7 @@ function handleProductDetailTabKeydown(event){
   selectProductDetailTab(tabs[nextIndex].dataset.detailTab,true);
 }
 function closeProductDetails(updateHistory=true,target="products"){
-  detailProduct=null;productDetail.hidden=true;heroSection.hidden=false;featuresSection.hidden=false;categoryShowcase.hidden=false;newArrivalsSection.hidden=featuredProducts.length===0;productsSection.hidden=false;
+  detailProduct=null;productDetail.hidden=true;heroSection.hidden=false;featuresSection.hidden=false;categoryShowcase.hidden=false;newArrivalsSection.hidden=featuredProducts.length===0||!homepageSection("new_products").enabled;productsSection.hidden=!shopMode&&!homepageSection("best_sellers").enabled;
   if(updateHistory){history.replaceState({},"",location.pathname.startsWith("/product/")?"/":location.href)}
   const destination=target==="home"?0:productsSection.offsetTop;
   window.scrollTo({top:destination,behavior:"smooth"});
@@ -1721,6 +1727,21 @@ function applyProductGridSettings(){
 	const columns=Number(cfg.productColumns);
 	document.documentElement.style.setProperty("--product-columns",String(Number.isInteger(columns)&&columns>=2&&columns<=6?columns:4));
 }
+function homepageSection(id){
+	return cfg.homepageSections.find(section=>section.id===id)||{id,title:id==="new_products"?"Nouveautés":"Meilleures ventes",subtitle:id==="new_products"?"Fraîchement arrivés":"Sélection M&D",enabled:true,order:id==="new_products"?1:2,productCount:12};
+}
+function applyHomepageSectionSettings(){
+	const newProducts=homepageSection("new_products"),bestSellers=homepageSection("best_sellers");
+	document.getElementById("bestSellersKicker").textContent=bestSellers.subtitle;
+	document.getElementById("bestSellersTitle").textContent=bestSellers.title;
+	document.getElementById("bestSellersHeading").hidden=shopMode||!bestSellers.enabled;
+	homeProductSections.append(...[newProducts,bestSellers].sort((a,b)=>a.order-b.order).map(section=>
+		section.id==="new_products"?newArrivalsSection:productsSection
+	));
+	if(!detailProduct)productsSection.hidden=!shopMode&&!bestSellers.enabled;
+	renderNewArrivals();
+	if(products.length&&!shopMode)renderProductGrid(products);
+}
 function applyCategoryGridSettings(){
 	const columns=Number(cfg.categoryColumns);
 	document.documentElement.style.setProperty("--category-columns",String(Number.isInteger(columns)&&columns>=2&&columns<=6?columns:4));
@@ -1980,6 +2001,6 @@ renderCampaignDots();
 initHeroParallax();
 if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches)campaignTimer=setInterval(()=>changeCampaignSlide(1),8000);
 loadStoreNavigation();
-Promise.all([fetch("/api/config").then(r=>r.json()).then(x=>{cfg=x;if(cur)cur.textContent=storeCurrencyLabel();updateStoreWhatsAppLinks();applyMobileMenuLogo(x.mobileLogoUrl||"");renderCampaignSlides(x.campaignImages||[]);applyHeroDisplaySettings();applyProductGridSettings();applyCategoryGridSettings()}),loadCats()]).then(()=>Promise.all([load(),loadAdvertisement()]));
+Promise.all([fetch("/api/config").then(r=>r.json()).then(x=>{cfg={...cfg,...x,homepageSections:Array.isArray(x.homepageSections)?x.homepageSections:cfg.homepageSections};if(cur)cur.textContent=storeCurrencyLabel();updateStoreWhatsAppLinks();applyMobileMenuLogo(x.mobileLogoUrl||"");renderCampaignSlides(x.campaignImages||[]);applyHeroDisplaySettings();applyProductGridSettings();applyCategoryGridSettings();applyHomepageSectionSettings()}),loadCats()]).then(()=>Promise.all([load(),loadAdvertisement()]));
 render();syncFavoriteUI();updateCompareControls();
 </script></body></html>h

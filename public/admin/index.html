@@ -28,6 +28,7 @@ tr th{background-color:#f5f5f5}
 .inventory-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}.inventory-metric{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel-alt)}.inventory-metric span{display:block;color:var(--muted);font-size:13px}.inventory-metric strong{display:block;margin-top:5px;font-size:24px;color:var(--accent)}.inventory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.inventory-subsection{min-width:0}.inventory-subsection h3{margin:8px 0}.inventory-table{min-width:520px}.inventory-table tr th,.inventory-table tr td{border:1px solid var(--table-line,#e6e6e6);padding:9px}.inventory-table tr th{background-color:var(--table-head,#f5f5f5)}.inventory-stock-zero{color:#dc2626;font-weight:800}.inventory-stock-ok{color:#15803d;font-weight:700}body.dark .inventory-stock-zero{color:#f87171}body.dark .inventory-stock-ok{color:#4ade80}.inventory-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 @media(max-width:700px){.inventory-summary{grid-template-columns:1fr}.inventory-grid{grid-template-columns:1fr}}
 .store-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}.store-settings-grid label{display:block;font-size:13px;font-weight:700;color:var(--text)}.store-settings-grid textarea{min-height:90px;resize:vertical}.settings-hint{margin:0 0 12px;color:var(--muted);font-size:13px}.hero-slider-settings{margin:20px 0;padding-top:12px;border-top:1px solid var(--line)}.hero-slider-settings h3{margin:0 0 4px}.hero-slider-settings .hero-slider-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}.hero-slider-settings label{display:block;font-size:13px;font-weight:700}.hero-slider-settings input[type=range]{padding:0;accent-color:var(--accent)}.hero-slider-settings input[type=file]{padding:8px}.hero-slider-settings output{color:var(--accent);font-weight:800}.hero-background-preview{display:block;max-width:100%;width:min(460px,100%);max-height:180px;margin:8px 0;object-fit:cover;border:1px solid var(--line);border-radius:10px}.hero-background-actions{display:flex;gap:8px;flex-wrap:wrap}.hero-settings-actions{margin-top:16px}@media(max-width:600px){.store-settings-grid,.hero-slider-settings .hero-slider-fields{grid-template-columns:1fr}}
+.homepage-sections-manager{margin:20px 0;padding-top:16px;border-top:1px solid var(--line)}.homepage-sections-manager h3{margin:0 0 4px}.homepage-sections-list{display:grid;gap:10px;margin:12px 0}.homepage-section-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;align-items:end;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.homepage-section-row h4{grid-column:1/-1;margin:0}.homepage-section-row label{display:block;font-size:12px;font-weight:700}.homepage-section-row input{margin:4px 0 0}.homepage-section-enabled{display:flex;align-items:center;gap:8px;min-height:44px}.homepage-section-enabled input{width:auto;margin:0;accent-color:var(--accent)}@media(max-width:700px){.homepage-section-row{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:420px){.homepage-section-row{grid-template-columns:1fr}}
 .navigation-manager{margin:20px 0;padding-top:16px;border-top:1px solid var(--line)}.navigation-manager h3{margin:0 0 4px}.navigation-link-add,.navigation-link-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:8px;align-items:end}.navigation-link-add{margin:12px 0 16px}.navigation-link-add label,.navigation-link-row label{display:block;font-size:12px;font-weight:700}.navigation-link-add input,.navigation-link-row input{margin:4px 0 0}.navigation-link-list{display:grid;gap:10px}.navigation-link-row{padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.navigation-link-actions{display:flex;gap:5px;align-items:center}.navigation-link-actions button{padding:7px 10px}.navigation-link-empty{color:var(--muted)}@media(max-width:900px){.navigation-link-row{grid-template-columns:repeat(2,minmax(0,1fr))}.navigation-link-actions{grid-column:1/-1}}@media(max-width:600px){.navigation-link-add,.navigation-link-row{grid-template-columns:1fr}.navigation-link-actions{grid-column:auto}}
 @media(max-width:600px){.modal-backdrop{padding:8px}.modal-card{padding:14px}}
 :root{--table-head:#f5f5f5;--table-line:#e6e6e6}body.dark{--table-head:#1e293b;--table-line:#334155}a{text-decoration:none;color:#464feb}th,td{text-align:start;border:1px solid var(--table-line)}th{background-color:var(--table-head)}body.dark .order-table tbody tr{background:var(--panel)}body.dark .order-table tbody tr:hover{background:var(--panel-alt)}.toast{left:auto;inset-inline-start:20px}.invoice-select{background-position:right 10px center;padding-left:10px;padding-right:28px}html[dir="rtl"] .invoice-select{background-position:left 10px center;padding-left:28px;padding-right:10px}.store-settings-grid input[type="url"],.store-settings-grid input[type="email"],.store-settings-grid input[type="tel"]{direction:ltr;text-align:left}.login>.language-toggle{float:inline-end}
@@ -264,6 +265,29 @@ body.dark .chart-controls button[aria-pressed="true"]{box-shadow:0 2px 7px #0004
 <label><span id="settingsProductColumnsLabel">عدد أعمدة المنتجات على الشاشات الكبيرة</span><select id="settingsProductColumns"><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option></select></label>
 <label><span id="settingsCategoryColumnsLabel">عدد أعمدة الأقسام على الشاشات الكبيرة</span><select id="settingsCategoryColumns"><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option></select></label>
 </div>
+<section class="homepage-sections-manager" aria-labelledby="homepageSectionsTitle">
+<h3 id="homepageSectionsTitle">إدارة أقسام الصفحة الرئيسية</h3>
+<p class="settings-hint" id="homepageSectionsHint">تحكم في ظهور الأقسام وعناوينها وترتيبها وعدد المنتجات المعروضة.</p>
+<div class="homepage-sections-list">
+<div class="homepage-section-row" data-homepage-section="new_products">
+<h4 id="newProductsSectionLabel">Nouveautés</h4>
+<label><span id="sectionTitleLabel">العنوان</span><input data-field="title" maxlength="80" required value="Nouveautés"></label>
+<label><span id="sectionSubtitleLabel">العنوان الفرعي</span><input data-field="subtitle" maxlength="120" required value="Fraîchement arrivés"></label>
+<label><span id="sectionOrderLabel">الترتيب</span><input data-field="order" type="number" min="1" max="2" step="1" value="1" required></label>
+<label><span id="sectionProductCountLabel">عدد المنتجات المعروضة</span><input data-field="productCount" type="number" min="1" max="48" step="1" value="12" required></label>
+<label class="homepage-section-enabled"><input data-field="enabled" type="checkbox" checked><span id="sectionEnabledLabel">إظهار القسم</span></label>
+</div>
+<div class="homepage-section-row" data-homepage-section="best_sellers">
+<h4 id="bestSellersSectionLabel">Meilleures ventes</h4>
+<label><span id="sectionTitleLabel2">العنوان</span><input data-field="title" maxlength="80" required value="Meilleures ventes"></label>
+<label><span id="sectionSubtitleLabel2">العنوان الفرعي</span><input data-field="subtitle" maxlength="120" required value="Sélection M&amp;D"></label>
+<label><span id="sectionOrderLabel2">الترتيب</span><input data-field="order" type="number" min="1" max="2" step="1" value="2" required></label>
+<label><span id="sectionProductCountLabel2">عدد المنتجات المعروضة</span><input data-field="productCount" type="number" min="1" max="48" step="1" value="12" required></label>
+<label class="homepage-section-enabled"><input data-field="enabled" type="checkbox" checked><span id="sectionEnabledLabel2">إظهار القسم</span></label>
+</div>
+</div>
+<div class="hero-background-actions"><button class="gold" id="saveHomepageSectionsBtn" type="button" onclick="saveHomepageSections()">حفظ أقسام الصفحة الرئيسية</button></div>
+</section>
 <section class="navigation-manager" aria-labelledby="navigationTitle">
 <h3 id="navigationTitle">إدارة روابط شريط التنقل</h3>
 <p class="settings-hint" id="navigationHint">أضف الروابط أو عدّلها أو احذفها، وحدّد اسمًا بالعربية والفرنسية.</p>
@@ -348,6 +372,8 @@ Object.assign(translations.ar,{productColumnsLabel:"عدد أعمدة المنت
 Object.assign(translations.fr,{productColumnsLabel:"Nombre de colonnes de produits sur grand écran"});
 Object.assign(translations.ar,{categoryColumnsLabel:"عدد أعمدة الأقسام على الشاشات الكبيرة"});
 Object.assign(translations.fr,{categoryColumnsLabel:"Nombre de colonnes de catégories sur grand écran"});
+Object.assign(translations.ar,{homepageSectionsTitle:"إدارة أقسام الصفحة الرئيسية",homepageSectionsHint:"تحكم في ظهور الأقسام وعناوينها وترتيبها وعدد المنتجات المعروضة.",newProductsSection:"المنتجات الجديدة",bestSellersSection:"الأكثر مبيعاً",sectionTitle:"العنوان",sectionSubtitle:"العنوان الفرعي",sectionOrder:"الترتيب",sectionProductCount:"عدد المنتجات المعروضة",sectionEnabled:"إظهار القسم",saveHomepageSections:"حفظ أقسام الصفحة الرئيسية",homepageSectionsSaved:"تم حفظ إعدادات أقسام الصفحة الرئيسية",homepageSectionsFailed:"تعذر حفظ إعدادات أقسام الصفحة الرئيسية",homepageSectionsOrderInvalid:"يجب أن يكون ترتيب القسمين مختلفاً من 1 إلى 2"});
+Object.assign(translations.fr,{homepageSectionsTitle:"Gérer les sections de la page d’accueil",homepageSectionsHint:"Choisissez les sections visibles, leurs titres, leur ordre et le nombre de produits affichés.",newProductsSection:"Nouveautés",bestSellersSection:"Meilleures ventes",sectionTitle:"Titre",sectionSubtitle:"Sous-titre",sectionOrder:"Ordre",sectionProductCount:"Nombre de produits affichés",sectionEnabled:"Afficher la section",saveHomepageSections:"Enregistrer les sections",homepageSectionsSaved:"Paramètres des sections enregistrés",homepageSectionsFailed:"Impossible d’enregistrer les paramètres des sections",homepageSectionsOrderInvalid:"Les deux sections doivent avoir un ordre distinct entre 1 et 2"});
 Object.assign(translations.ar,{navigationTitle:"إدارة روابط شريط التنقل",navigationHint:"أضف الروابط أو عدّلها أو احذفها، وحدّد اسمًا بالعربية والفرنسية. يقبل الرابط #products أو /page أو https://...",navigationArabicLabel:"الاسم بالعربية",navigationFrenchLabel:"الاسم بالفرنسية",navigationHrefLabel:"الرابط",navigationAdd:"إضافة رابط",navigationSave:"حفظ",navigationDelete:"حذف",navigationMoveUp:"تحريك لأعلى",navigationMoveDown:"تحريك لأسفل",navigationSaved:"تم حفظ روابط التنقل",navigationSaveFailed:"تعذر حفظ روابط التنقل",navigationDeleteConfirm:"هل تريد حذف هذا الرابط من شريط التنقل؟",navigationEmpty:"لا توجد روابط في شريط التنقل",navigationMaxLinks:"يمكن إضافة 12 رابطاً كحد أقصى"});
 Object.assign(translations.fr,{navigationTitle:"Gérer les liens du menu",navigationHint:"Ajoutez, modifiez ou supprimez les liens avec un libellé arabe et français. Lien accepté : #products, /page ou https://...",navigationArabicLabel:"Libellé en arabe",navigationFrenchLabel:"Libellé en français",navigationHrefLabel:"Lien",navigationAdd:"Ajouter un lien",navigationSave:"Enregistrer",navigationDelete:"Supprimer",navigationMoveUp:"Monter",navigationMoveDown:"Descendre",navigationSaved:"Liens du menu enregistrés",navigationSaveFailed:"Impossible d’enregistrer les liens du menu",navigationDeleteConfirm:"Supprimer ce lien du menu ?",navigationEmpty:"Aucun lien dans le menu",navigationMaxLinks:"Vous pouvez ajouter jusqu’à 12 liens"});
 Object.assign(translations.ar,{navigationLoadFailed:"تعذر تحميل روابط شريط التنقل",navigationLabelsRequired:"أدخل الاسم بالعربية والفرنسية والرابط"});
@@ -422,7 +448,7 @@ function applyStaticTexts(){
   const statuses=[{value:"new",key:"statusNew"},{value:"confirmed",key:"statusConfirmed"},{value:"shipped",key:"statusShipped"},{value:"delivered",key:"statusDelivered"},{value:"cancelled",key:"statusCancelled"},{value:"returned",key:"statusReturned"}];
   statuses.forEach(({value,key})=>{const opt=orderStatusFilterEl&&orderStatusFilterEl.querySelector('option[value="'+value+'"]');if(opt) opt.textContent=t(key);});
   excelBtn.textContent=t("excel");
-  storeSettingsTitle.textContent=t("storeSettings");storeSettingsHint.textContent=t("storeSettingsHint");settingsWhatsappLabel.textContent=t("whatsappNumber");settingsPhoneLabel.textContent=t("contactPhone");settingsEmailLabel.textContent=t("contactEmail");settingsAddressLabel.textContent=t("contactAddress");settingsHoursLabel.textContent=t("openingHours");settingsFacebookLabel.textContent=t("socialFacebook");settingsInstagramLabel.textContent=t("socialInstagram");settingsTiktokLabel.textContent=t("socialTiktok");settingsProductColumnsLabel.textContent=t("productColumnsLabel");settingsCategoryColumnsLabel.textContent=t("categoryColumnsLabel");saveStoreSettingsBtn.textContent=t("saveStoreSettings");navigationTitle.textContent=t("navigationTitle");navigationHint.textContent=t("navigationHint");navigationArabicLabel.textContent=t("navigationArabicLabel");navigationFrenchLabel.textContent=t("navigationFrenchLabel");navigationHrefLabel.textContent=t("navigationHrefLabel");navigationAddBtn.textContent=t("navigationAdd");renderNavigationLinks();heroSettingsTitle.textContent=t("heroSettingsTitle");heroSettingsHint.textContent=t("heroSettingsHint");heroBackgroundLabel.textContent=t("heroBackgroundLabel");heroBackgroundFileLabel.textContent=t("heroBackgroundFileLabel");heroCardXLabel.textContent=t("heroCardXLabel");heroCardYLabel.textContent=t("heroCardYLabel");heroOverlayLabel.textContent=t("heroOverlayLabel");heroPriceSizeLabel.textContent=t("heroPriceSizeLabel");uploadHeroBackgroundBtn.textContent=t("uploadHeroBackground");resetHeroBackgroundBtn.textContent=t("resetHeroBackground");updateHeroSettingValues();
+  storeSettingsTitle.textContent=t("storeSettings");storeSettingsHint.textContent=t("storeSettingsHint");settingsWhatsappLabel.textContent=t("whatsappNumber");settingsPhoneLabel.textContent=t("contactPhone");settingsEmailLabel.textContent=t("contactEmail");settingsAddressLabel.textContent=t("contactAddress");settingsHoursLabel.textContent=t("openingHours");settingsFacebookLabel.textContent=t("socialFacebook");settingsInstagramLabel.textContent=t("socialInstagram");settingsTiktokLabel.textContent=t("socialTiktok");settingsProductColumnsLabel.textContent=t("productColumnsLabel");settingsCategoryColumnsLabel.textContent=t("categoryColumnsLabel");saveStoreSettingsBtn.textContent=t("saveStoreSettings");document.getElementById("homepageSectionsTitle").textContent=t("homepageSectionsTitle");document.getElementById("homepageSectionsHint").textContent=t("homepageSectionsHint");document.getElementById("newProductsSectionLabel").textContent=t("newProductsSection");document.getElementById("bestSellersSectionLabel").textContent=t("bestSellersSection");document.getElementById("sectionTitleLabel").textContent=t("sectionTitle");document.getElementById("sectionTitleLabel2").textContent=t("sectionTitle");document.getElementById("sectionSubtitleLabel").textContent=t("sectionSubtitle");document.getElementById("sectionSubtitleLabel2").textContent=t("sectionSubtitle");document.getElementById("sectionOrderLabel").textContent=t("sectionOrder");document.getElementById("sectionOrderLabel2").textContent=t("sectionOrder");document.getElementById("sectionProductCountLabel").textContent=t("sectionProductCount");document.getElementById("sectionProductCountLabel2").textContent=t("sectionProductCount");document.getElementById("sectionEnabledLabel").textContent=t("sectionEnabled");document.getElementById("sectionEnabledLabel2").textContent=t("sectionEnabled");document.getElementById("saveHomepageSectionsBtn").textContent=t("saveHomepageSections");navigationTitle.textContent=t("navigationTitle");navigationHint.textContent=t("navigationHint");navigationArabicLabel.textContent=t("navigationArabicLabel");navigationFrenchLabel.textContent=t("navigationFrenchLabel");navigationHrefLabel.textContent=t("navigationHrefLabel");navigationAddBtn.textContent=t("navigationAdd");renderNavigationLinks();heroSettingsTitle.textContent=t("heroSettingsTitle");heroSettingsHint.textContent=t("heroSettingsHint");heroBackgroundLabel.textContent=t("heroBackgroundLabel");heroBackgroundFileLabel.textContent=t("heroBackgroundFileLabel");heroCardXLabel.textContent=t("heroCardXLabel");heroCardYLabel.textContent=t("heroCardYLabel");heroOverlayLabel.textContent=t("heroOverlayLabel");heroPriceSizeLabel.textContent=t("heroPriceSizeLabel");uploadHeroBackgroundBtn.textContent=t("uploadHeroBackground");resetHeroBackgroundBtn.textContent=t("resetHeroBackground");updateHeroSettingValues();
   heroLogoLabel.textContent=t("heroLogoLabel");heroLogoFileLabel.textContent=t("heroLogoFileLabel");uploadHeroLogoBtn.textContent=t("uploadHeroLogo");resetHeroLogoBtn.textContent=t("resetHeroLogo");
   mobileLogoLabel.textContent=t("mobileLogoLabel");mobileLogoDraftHint.textContent=t("mobileLogoDraftHint");uploadMobileLogoBtn.textContent=t("uploadMobileLogo");resetMobileLogoBtn.textContent=t("resetMobileLogo");
   if(productModal.classList.contains("open"))formTitle.textContent=pid.value?t("editProduct"):t("createProduct");
@@ -523,6 +549,7 @@ async function storeSettingsLoad(){
   const response=await api("/api/admin/settings"),settings=await response.json();
   if(!response.ok)throw new Error(settings.error||t("settingsFailed"));
   settingsWhatsapp.value=settings.whatsapp;settingsPhone.value=settings.contact_phone;settingsEmail.value=settings.contact_email;settingsAddress.value=settings.contact_address;settingsHours.value=settings.opening_hours;settingsFacebook.value=settings.social_facebook;settingsInstagram.value=settings.social_instagram;settingsTiktok.value=settings.social_tiktok;settingsProductColumns.value=settings.product_columns;settingsCategoryColumns.value=settings.category_columns;
+  renderHomepageSectionSettings(settings.homepage_sections);
   heroBackgroundUrl.value=settings.hero_background_url;heroCardX.value=settings.hero_card_x;heroCardY.value=settings.hero_card_y;heroOverlay.value=settings.hero_overlay;heroPriceSize.value=settings.hero_price_size;updateHeroSettingValues();updateHeroBackgroundPreview();
   heroLogoUrl.value=settings.hero_logo_url;updateHeroLogoPreview();
   mobileLogoUrl.value=settings.mobile_logo_url;mobileLogoFile.value="";updateMobileLogoPreview();
@@ -530,6 +557,49 @@ async function storeSettingsLoad(){
   heroSettingsHasDraft=Boolean(settings.hero_settings_has_draft);
   renderHeroSettingsStatus();
   renderCampaignImageManager();
+}
+function renderHomepageSectionSettings(sections){
+  if(!Array.isArray(sections))throw new Error("Invalid homepage section settings response");
+  for(const section of sections){
+    const row=document.querySelector(`[data-homepage-section="${section.id}"]`);
+    if(!row)continue;
+    row.querySelector('[data-field="title"]').value=section.title;
+    row.querySelector('[data-field="subtitle"]').value=section.subtitle;
+    row.querySelector('[data-field="order"]').value=String(section.order);
+    row.querySelector('[data-field="productCount"]').value=String(section.productCount);
+    row.querySelector('[data-field="enabled"]').checked=section.enabled;
+  }
+}
+async function saveHomepageSections(){
+  const rows=[...document.querySelectorAll("[data-homepage-section]")];
+  const sections=rows.map(row=>({
+    id:row.dataset.homepageSection,
+    title:row.querySelector('[data-field="title"]').value,
+    subtitle:row.querySelector('[data-field="subtitle"]').value,
+    order:Number(row.querySelector('[data-field="order"]').value),
+    productCount:Number(row.querySelector('[data-field="productCount"]').value),
+    enabled:row.querySelector('[data-field="enabled"]').checked
+  }));
+  const orders=sections.map(section=>section.order);
+  if(rows.some(row=>![...row.querySelectorAll("input[required]")].every(input=>input.reportValidity()))||
+    new Set(orders).size!==2||orders.some(order=>!Number.isInteger(order)||order<1||order>2)){
+    if(new Set(orders).size!==2)alert(t("homepageSectionsOrderInvalid"));
+    return;
+  }
+  const button=document.getElementById("saveHomepageSectionsBtn");
+  button.disabled=true;
+  try{
+    const response=await api("/api/admin/homepage-sections",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({sections})});
+    const result=await response.json();
+    if(!response.ok)throw new Error(result.error||t("homepageSectionsFailed"));
+    renderHomepageSectionSettings(result.sections);
+    showToast(t("homepageSectionsSaved"));
+  }catch(error){
+    console.error("Could not save homepage section settings:",error);
+    alert(error.message||t("homepageSectionsFailed"));
+  }finally{
+    button.disabled=false;
+  }
 }
 let heroSettingsHasDraft=false,heroSettingsActivating=false;
 function renderHeroSettingsStatus(){
