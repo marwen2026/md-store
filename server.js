@@ -571,6 +571,7 @@ function parseManualHomepageSections(value) {
       typeof section.image !== "string" || (section.image && !isValidHomepageUrl(section.image, true)) ||
       typeof section.buttonText !== "string" || section.buttonText.length > 60 ||
       typeof section.buttonLink !== "string" || (section.buttonLink && !isValidHomepageUrl(section.buttonLink)) ||
+      (section.imagePosition !== undefined && !["center", "left", "right"].includes(section.imagePosition)) ||
       typeof section.enabled !== "boolean" ||
       !Number.isInteger(section.order) || section.order < 1 || section.order > sections.length ||
       orders.has(section.order)) {
@@ -596,6 +597,7 @@ function parseManualHomepageSections(value) {
       title: section.title.trim(),
       subtitle: section.subtitle,
       image: section.image,
+      imagePosition: section.imagePosition || "center",
       buttonText: section.buttonText.trim(),
       buttonLink: section.buttonLink,
       enabled: section.enabled,

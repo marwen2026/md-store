@@ -1102,8 +1102,8 @@ function renderManualHomepageSections(){
 	container.innerHTML=sections.filter(section=>section.enabled).sort((left,right)=>left.order-right.order).map(section=>{
 		const id=esc(section.id),title=esc(section.title),subtitle=esc(section.subtitle||"");
 		if(section.type==="manual"||section.type==="hero_banner"){
-			const image=esc(section.image),buttonText=esc(section.buttonText),buttonLink=esc(section.buttonLink);
-			return `<section class="manual-home-banner" id="manual-home-${id}"><img src="${image}" alt="${title}" loading="lazy"><div class="manual-home-banner-content"><h2>${title}</h2>${subtitle?`<p>${subtitle}</p>`:""}<a href="${buttonLink}">${buttonText}</a></div></section>`;
+			const image=esc(section.image),imagePosition=["left","right"].includes(section.imagePosition)?section.imagePosition:"center",buttonText=esc(section.buttonText),buttonLink=esc(section.buttonLink);
+			return `<section class="manual-home-banner" id="manual-home-${id}"><img src="${image}" alt="${title}" style="object-position:${imagePosition} center" loading="lazy"><div class="manual-home-banner-content"><h2>${title}</h2>${subtitle?`<p>${subtitle}</p>`:""}<a href="${buttonLink}">${buttonText}</a></div></section>`;
 		}
 		const heading=`<header class="manual-home-section-heading"><h2>${title}</h2>${subtitle?`<p>${subtitle}</p>`:""}</header>`;
 		if(section.type==="category_showcase"){
