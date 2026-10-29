@@ -489,6 +489,18 @@ const productUpload = multer({
     callback(null, true);
   }
 });
+const manualSectionImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024, files: 30 },
+  fileFilter: (req, file, callback) => {
+    if (!/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) {
+      const error = new Error("Seuls les fichiers JPEG, PNG, WebP et GIF sont acceptés");
+      error.status = 400;
+      return callback(error);
+    }
+    callback(null, true);
+  }
+});
 
 app.post("/api/login", async (req, res) => {
   const result = await pool.query("SELECT * FROM admins WHERE username = $1", [String(req.body.username || "")]);
@@ -533,7 +545,6 @@ const MANUAL_HOMEPAGE_SECTION_TYPES = new Set([
 
 function isValidHomepageUrl(value, image = false) {
   if (typeof value !== "string" || value.length > 1000 || /[\u0000-\u001f\\]/.test(value)) return false;
-  if (!value) return true;
   if (image && value.startsWith("/") && !value.startsWith("//")) return true;
   if (!image && (value.startsWith("/") && !value.startsWith("//") || /^#[\w-]*$/.test(value))) return true;
   try {
@@ -557,9 +568,9 @@ function parseManualHomepageSections(value) {
       ids.has(section.id) || !MANUAL_HOMEPAGE_SECTION_TYPES.has(section.type) ||
       typeof section.title !== "string" || !section.title.trim() || section.title.length > 80 ||
       typeof section.subtitle !== "string" || section.subtitle.length > 160 ||
-      typeof section.image !== "string" || !isValidHomepageUrl(section.image, true) ||
+      typeof section.image !== "string" || (section.image && !isValidHomepageUrl(section.image, true)) ||
       typeof section.buttonText !== "string" || section.buttonText.length > 60 ||
-      typeof section.buttonLink !== "string" || !isValidHomepageUrl(section.buttonLink) ||
+      typeof section.buttonLink !== "string" || (section.buttonLink && !isValidHomepageUrl(section.buttonLink)) ||
       typeof section.enabled !== "boolean" ||
       !Number.isInteger(section.order) || section.order < 1 || section.order > sections.length ||
       orders.has(section.order)) {
@@ -569,7 +580,11 @@ function parseManualHomepageSections(value) {
       (!section.image || !section.buttonText.trim() || !section.buttonLink)) {
       throw new Error("Manual homepage banners require an image and a valid button");
     }
-    if (section.type !== "manual" && section.type !== "hero_banner" &&
+    if (section.image.startsWith("/api/store-assets/manual-section/") &&
+      section.image !== `/api/store-assets/manual-section/${section.id}`) {
+      throw new Error("Saved manual homepage sections are invalid");
+    }
+    if (section.type !== "manual" && section.type !== "hero_banner" && section.type !== "category_showcase" &&
       (!Number.isInteger(section.productCount) || section.productCount < 1 || section.productCount > 48)) {
       throw new Error("Saved manual homepage section product count is invalid");
     }
@@ -579,7 +594,7 @@ function parseManualHomepageSections(value) {
       id: section.id,
       type: section.type,
       title: section.title.trim(),
-      subtitle: section.subtitle.trim(),
+      subtitle: section.subtitle,
       image: section.image,
       buttonText: section.buttonText.trim(),
       buttonLink: section.buttonLink,
@@ -756,6 +771,28 @@ app.get("/api/store-assets/campaign/:id", async (req, res) => {
   } catch (error) {
     console.error("Could not load campaign slide image:", error);
     res.status(500).json({ error: "Could not load campaign image" });
+  }
+});
+
+app.get("/api/store-assets/manual-section/:id", async (req, res) => {
+  const { id } = req.params;
+  if (!/^[a-zA-Z0-9_-]{1,60}$/.test(id)) return res.status(404).json({ error: "Section image not found" });
+  try {
+    const { rows } = await pool.query(
+      "SELECT image_data, content_type FROM store_assets WHERE asset_key = $1",
+      [`manual_section_${id}`]
+    );
+    const asset = rows[0];
+    if (!asset?.image_data || !asset.content_type) {
+      return res.status(404).json({ error: "Section image not found" });
+    }
+    res.set({
+      "Cache-Control": "public, max-age=3600",
+      "X-Content-Type-Options": "nosniff"
+    }).type(asset.content_type).send(asset.image_data);
+  } catch (error) {
+    console.error("Could not load manual homepage section image:", error);
+    res.status(500).json({ error: "Could not load section image" });
   }
 });
 
@@ -997,30 +1034,77 @@ app.put("/api/admin/homepage-sections", auth, role("admin"), async (req, res) =>
   }
 });
 
-app.put("/api/admin/manual-homepage-sections", auth, role("admin"), async (req, res) => {
-  const sections = req.body?.sections;
-  if (!Array.isArray(sections) || sections.length > 30) {
-    return res.status(400).json({ error: "Manual homepage sections must be an array of at most 30 items" });
-  }
+app.put("/api/admin/manual-homepage-sections", auth, role("admin"), manualSectionImageUpload.any(), async (req, res) => {
+  let sections;
   try {
-    const validatedSections = parseManualHomepageSections(JSON.stringify(sections));
-    await pool.query(
-      `INSERT INTO store_settings(key, value) VALUES('manual_homepage_sections', $1)
-       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
-      [JSON.stringify(validatedSections)]
-    );
-    res.json({ ok: true, sections: validatedSections });
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      return res.status(400).json({ error: "Invalid manual homepage section settings" });
+    const rawSections = JSON.parse(req.body.sections);
+    if (!Array.isArray(rawSections) || rawSections.length > 30) {
+      return res.status(400).json({ error: "Manual homepage sections must be an array of at most 30 items" });
     }
-    if (error.message === "Saved manual homepage sections are invalid" ||
+    const uploadedImages = new Map();
+    for (const file of req.files || []) {
+      const match = /^image_([a-zA-Z0-9_-]{1,60})$/.exec(file.fieldname);
+      if (!match || uploadedImages.has(match[1])) {
+        return res.status(400).json({ error: "Invalid manual section image upload" });
+      }
+      uploadedImages.set(match[1], file);
+    }
+    const sectionIds = new Set(rawSections.map(section => section?.id));
+    if ([...uploadedImages.keys()].some(id => !sectionIds.has(id))) {
+      return res.status(400).json({ error: "Uploaded image does not match a manual section" });
+    }
+    const sectionsWithImages = rawSections.map(section => ({
+      ...section,
+      image: uploadedImages.has(section?.id)
+        ? `/api/store-assets/manual-section/${section.id}`
+        : section?.image
+    }));
+    sections = parseManualHomepageSections(JSON.stringify(sectionsWithImages));
+  } catch (error) {
+    if (error instanceof SyntaxError || error.message === "Saved manual homepage sections are invalid" ||
       error.message === "Manual homepage banners require an image and a valid button" ||
       error.message === "Saved manual homepage section product count is invalid") {
-      return res.status(400).json({ error: "Invalid manual homepage section fields or ordering" });
+      return res.status(400).json({ error: "Invalid manual homepage section fields, images, or ordering" });
+    }
+    throw error;
+  }
+  const assetKeys = sections
+    .filter(section => section.image === `/api/store-assets/manual-section/${section.id}`)
+    .map(section => `manual_section_${section.id}`);
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    for (const file of req.files || []) {
+      const id = file.fieldname.slice("image_".length);
+      await client.query(
+        `INSERT INTO store_assets(asset_key, image_data, content_type)
+         VALUES($1, $2, $3)
+         ON CONFLICT (asset_key) DO UPDATE
+           SET image_data = EXCLUDED.image_data, content_type = EXCLUDED.content_type, updated_at = NOW()`,
+        [`manual_section_${id}`, file.buffer, file.mimetype]
+      );
+    }
+    await client.query(
+      `INSERT INTO store_settings(key, value) VALUES('manual_homepage_sections', $1)
+       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+      [JSON.stringify(sections)]
+    );
+    await client.query(
+      "DELETE FROM store_assets WHERE left(asset_key, 15) = 'manual_section_' AND NOT (asset_key = ANY($1::text[]))",
+      [assetKeys]
+    );
+    await client.query("COMMIT");
+    res.json({ ok: true, sections });
+  } catch (error) {
+    try {
+      await client.query("ROLLBACK");
+    } catch (rollbackError) {
+      console.error("Could not roll back manual homepage section changes:", rollbackError);
     }
     console.error("Could not save manual homepage sections:", error);
     res.status(500).json({ error: "Could not save manual homepage sections" });
+  } finally {
+    client.release();
   }
 });
 
