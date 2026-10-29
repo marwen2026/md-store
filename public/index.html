@@ -276,11 +276,9 @@ body{background:var(--background);color:var(--text)}
   .modern-header-row { position: relative; }
   .modern-header { border-bottom-color: #e9edf1; box-shadow: 0 5px 18px rgba(16,36,59,.055); }
   .nav-shop-item { height: 100%; display: flex; align-items: center; }
-  .nav-shop-trigger { height: 42px !important; display: inline-flex !important; align-items: center; gap: 9px; padding: 0 15px !important; border: 1px solid #d99b26; border-radius: 10px; background: linear-gradient(180deg,#fff,#fffaf0); color: #bd7417 !important; white-space: nowrap; box-shadow: 0 3px 10px rgba(151,99,15,.08); transition: background .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .18s ease; }
-  .nav-shop-trigger::after, .modern-menu .nav-shop-trigger.active::after { display: none; }
-  .nav-shop-trigger:hover, .nav-shop-trigger[aria-expanded="true"] { transform: translateY(-1px); border-color: #c97716; background: linear-gradient(180deg,#fff8eb,#ffefd1); color: #a9570c !important; box-shadow: 0 6px 15px rgba(151,99,15,.14); }
-  .nav-shop-trigger:focus-visible { outline: 3px solid rgba(217,155,38,.35); outline-offset: 3px; }
-  .nav-shop-icon { width: 17px; height: 17px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+  .nav-shop-trigger { height: 40px !important; display: inline-flex !important; align-items: center; gap: 8px; padding: 0 5px !important; border-radius: 0; background: transparent; color: #10243b !important; white-space: nowrap; }
+  .nav-shop-trigger::after { display: none; }
+  .nav-shop-trigger:hover, .nav-shop-trigger[aria-expanded="true"] { background: transparent; color: #bd8a2a !important; }
   .nav-shop-chevron { width: 8px; height: 8px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform .18s ease; }
   .nav-shop-trigger[aria-expanded="true"] .nav-shop-chevron { transform: rotate(225deg) translate(-1px,-1px); }
   .mega-menu { position: absolute; z-index: 30; top: calc(100% - 2px); left: 50%; width: min(1080px, calc(100vw - 40px)); padding: 22px; border: 1px solid #e9e7e2; border-radius: 22px; background: #fff; box-shadow: 0 24px 60px rgba(12,28,46,.18); opacity: 0; visibility: hidden; pointer-events: none; transform: translate(-50%, 10px); transition: opacity .18s ease, transform .18s ease, visibility .18s ease; }
@@ -1918,7 +1916,7 @@ function renderStoreNavigation(){
 		const trigger=hasMegaMenu?' data-shop-trigger="true" aria-haspopup="true" aria-expanded="false"':"";
 		const isPromotionsLink=/(promotion|promo|offre|sale|deal|عروض|تخفيض)/i.test(`${link.label_ar} ${link.label_fr}`);
 		const label=isPromotionsLink?`${esc(getLabel(link))}<span class="modern-promo-badge" aria-label="Hot">HOT</span>`:esc(getLabel(link));
-		return `<a class="${isActive?"active":""}${hasMegaMenu?" nav-shop-trigger":""}" href="${esc(href)}"${isActive?' aria-current="page"':""}${isExternal?' target="_blank" rel="noopener noreferrer"':""}${trigger}>${hasMegaMenu?'<svg class="nav-shop-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>':""}<span>${label}</span>${hasMegaMenu?'<span class="nav-shop-chevron" aria-hidden="true"></span>':""}</a>`;
+		return `<a class="${isActive?"active":""}${hasMegaMenu?" nav-shop-trigger":""}" href="${esc(href)}"${isActive?' aria-current="page"':""}${isExternal?' target="_blank" rel="noopener noreferrer"':""}${trigger}><span>${label}</span>${hasMegaMenu?'<span class="nav-shop-chevron" aria-hidden="true"></span>':""}</a>`;
 	};
 	const visibleNavigationLinks=storeNavigationLinks.filter(link=>!/(vêtement|vetement|sac|ملابس|حقائب|شنط)/i.test(`${link.label_ar} ${link.label_fr}`));
 	const homeLinkIndex=visibleNavigationLinks.findIndex(link=>/(accueil|home|الرئيسية)/i.test(`${link.label_ar} ${link.label_fr}`));
