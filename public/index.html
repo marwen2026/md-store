@@ -1075,7 +1075,7 @@ function renderCategoryShowcase(){
 	document.getElementById("categoryShowcaseKicker").textContent=isFrench?"NOS UNIVERS":"اكتشفوا عوالمنا";
 	document.getElementById("categoryShowcaseTitle").textContent=section.title;
 	document.getElementById("categoryShowcaseDescription").textContent=section.subtitle;
-	grid.innerHTML=currentCategories.filter(category=>category.parent_id==null).map((category,index)=>{
+	grid.innerHTML=currentCategories.filter(category=>category.parent_id==null&&category.show_in_showcase!==false).map((category,index)=>{
 		const image=categoryShowcaseImage(category,index);
 		const categoryIds=categoryDescendantIds(category.id);
 		const productCount=featuredProducts.filter(product=>categoryIds.has(String(product.category_id))).length;

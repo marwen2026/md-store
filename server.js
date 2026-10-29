@@ -1332,7 +1332,7 @@ app.get("/api/admin/events", auth, (req, res) => {
 });
 app.get("/api/categories", async (req, res) => {
   const result = await pool.query(
-    `SELECT c.id, c.name, c.parent_id, COALESCE(icon.icon_type, 'tag') AS icon
+    `SELECT c.id, c.name, c.parent_id, c.show_in_showcase, COALESCE(icon.icon_type, 'tag') AS icon
      FROM categories c
      LEFT JOIN categories parent ON parent.id = c.parent_id
      LEFT JOIN category_icon_options icon ON icon.id = c.icon
@@ -1343,7 +1343,7 @@ app.get("/api/categories", async (req, res) => {
 });
 app.get("/api/admin/categories", auth, async (req, res) => {
   const result = await pool.query(
-    `SELECT c.id, c.name, c.parent_id, c.icon, c.active, c.sort_order,
+    `SELECT c.id, c.name, c.parent_id, c.icon, c.active, c.show_in_showcase, c.sort_order,
        COUNT(DISTINCT p.id)::INTEGER AS product_count,
        COUNT(DISTINCT p.id) FILTER (WHERE p.category_id = c.id)::INTEGER AS direct_product_count
      FROM categories c
@@ -1424,6 +1424,7 @@ app.put("/api/categories/:id", auth, role("admin"), async (req, res) => {
   const name = String(req.body.name || "").trim();
   const icon = String(req.body.icon || "");
   const active = req.body.active;
+  const showInShowcase = req.body.show_in_showcase;
   const parentId = req.body.parent_id == null || req.body.parent_id === "" ? null : Number(req.body.parent_id);
   if (!Number.isInteger(id) || id < 1) return res.status(400).json({ error: "معرّف القسم غير صالح" });
   if (!name || name.length > 100) return res.status(400).json({ error: "اسم القسم مطلوب (حتى 100 حرف)" });
@@ -1431,6 +1432,9 @@ app.put("/api/categories/:id", auth, role("admin"), async (req, res) => {
     return res.status(400).json({ error: "أيقونة القسم غير صالحة" });
   }
   if (typeof active !== "boolean") return res.status(400).json({ error: "حالة القسم غير صالحة" });
+  if (showInShowcase !== undefined && typeof showInShowcase !== "boolean") {
+    return res.status(400).json({ error: "حالة ظهور بطاقة القسم غير صالحة" });
+  }
   if (parentId !== null && (!Number.isInteger(parentId) || parentId < 1 || parentId === id)) {
     return res.status(400).json({ error: "القسم الأب غير صالح" });
   }
@@ -1442,8 +1446,9 @@ app.put("/api/categories/:id", auth, role("admin"), async (req, res) => {
   }
   try {
     const result = await pool.query(
-      "UPDATE categories SET name = $1, icon = $2, active = $3, parent_id = $4 WHERE id = $5 RETURNING id",
-      [name, icon, active, parentId, id]
+      `UPDATE categories SET name = $1, icon = $2, active = $3, parent_id = $4,
+       show_in_showcase = COALESCE($5, show_in_showcase) WHERE id = $6 RETURNING id`,
+      [name, icon, active, parentId, showInShowcase ?? null, id]
     );
     if (!result.rowCount) return res.status(404).json({ error: "القسم غير موجود" });
     res.json({ ok: true });
@@ -2691,11 +2696,13 @@ async function initializeDatabase() {
       name TEXT UNIQUE NOT NULL,
       icon TEXT NOT NULL DEFAULT 'tag',
       active BOOLEAN NOT NULL DEFAULT TRUE,
+      show_in_showcase BOOLEAN NOT NULL DEFAULT TRUE,
       sort_order INTEGER,
       parent_id INTEGER REFERENCES categories(id) ON DELETE SET NULL
     );
     ALTER TABLE categories ADD COLUMN IF NOT EXISTS icon TEXT NOT NULL DEFAULT 'tag';
     ALTER TABLE categories ADD COLUMN IF NOT EXISTS active BOOLEAN NOT NULL DEFAULT TRUE;
+    ALTER TABLE categories ADD COLUMN IF NOT EXISTS show_in_showcase BOOLEAN NOT NULL DEFAULT TRUE;
     ALTER TABLE categories ADD COLUMN IF NOT EXISTS sort_order INTEGER;
     ALTER TABLE categories ADD COLUMN IF NOT EXISTS parent_id INTEGER REFERENCES categories(id) ON DELETE SET NULL;
     UPDATE categories AS c SET sort_order = ordered.position - 1
