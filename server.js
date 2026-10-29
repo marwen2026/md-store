@@ -262,6 +262,8 @@ function parseProductInput(body) {
     stock,
     colors,
     advertised: ["1", "true", "on"].includes(String(body.advertised).toLowerCase()),
+    showNewProducts: ["1", "true", "on"].includes(String(body.show_new_products).toLowerCase()),
+    showBestSellers: ["1", "true", "on"].includes(String(body.show_best_sellers).toLowerCase()),
     active: body.active === undefined || ["1", "true", "on"].includes(String(body.active).toLowerCase())
   };
 }
@@ -395,8 +397,7 @@ async function migrateLegacyHeroBackground() {
 async function productRows(includeInactive = false) {
   const salesJoin = includeInactive ? "" : `
      LEFT JOIN (
-       SELECT sold.product_id, sold.units_sold,
-         ROW_NUMBER() OVER (ORDER BY sold.units_sold DESC, sold.product_id DESC) AS sales_rank
+       SELECT sold.product_id, sold.units_sold
        FROM (
          SELECT oi.product_id, SUM(oi.quantity)::bigint AS units_sold
          FROM order_items oi
@@ -409,7 +410,7 @@ async function productRows(includeInactive = false) {
      ) sales ON sales.product_id = p.id`;
   const products = await pool.query(
     `SELECT p.*, c.name AS category_name
-       ${includeInactive ? "" : ", COALESCE(sales.units_sold, 0)::bigint AS units_sold, COALESCE(sales.sales_rank <= 3, FALSE) AS best_seller"}
+       ${includeInactive ? "" : ", COALESCE(sales.units_sold, 0)::bigint AS units_sold, COALESCE(p.show_best_sellers, FALSE) AS best_seller"}
      FROM products p LEFT JOIN categories c ON c.id = p.category_id
      LEFT JOIN categories parent ON parent.id = c.parent_id
      ${salesJoin}
@@ -1668,13 +1669,14 @@ app.post("/api/products", auth, role("admin", "manager"), productUpload.array("i
       await client.query("UPDATE products SET advertised = FALSE WHERE advertised = TRUE");
     }
     const result = await client.query(
-      `INSERT INTO products(name, description, category_id, price, cost_price, delivery_price, old_price, stock, colors, advertised, sort_order)
-       VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+      `INSERT INTO products(name, description, category_id, price, cost_price, delivery_price, old_price, stock, colors, advertised,
+         show_new_products, show_best_sellers, sort_order)
+       VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
          CASE WHEN EXISTS (SELECT 1 FROM products WHERE sort_order IS NOT NULL)
            THEN COALESCE((SELECT MAX(sort_order) + 1 FROM products), 0) ELSE NULL END)
        RETURNING id`,
       [product.name, product.description, product.categoryId, product.price, product.costPrice, product.deliveryPrice,
-        product.oldPrice, product.stock, product.colors, product.advertised]
+        product.oldPrice, product.stock, product.colors, product.advertised, product.showNewProducts, product.showBestSellers]
     );
     const productId = result.rows[0].id;
     await insertProductImages(client, productId, req.files);
@@ -1718,9 +1720,10 @@ app.put("/api/products/:id", auth, role("admin", "manager"), productUpload.array
     }
     await client.query(
       `UPDATE products SET name=$1, description=$2, category_id=$3, price=$4, cost_price=$5, delivery_price=$6, old_price=$7,
-       stock=$8, active=$9, advertised=$10, colors=$11 WHERE id=$12`,
+       stock=$8, active=$9, advertised=$10, colors=$11, show_new_products=$12, show_best_sellers=$13 WHERE id=$14`,
       [product.name, product.description, product.categoryId, product.price, product.costPrice, product.deliveryPrice,
-        product.oldPrice, product.stock, product.active, product.advertised, product.colors, req.params.id]
+        product.oldPrice, product.stock, product.active, product.advertised, product.colors,
+        product.showNewProducts, product.showBestSellers, req.params.id]
     );
     await insertProductImages(client, req.params.id, req.files);
     const previousProduct = existing.rows[0];
@@ -2693,9 +2696,13 @@ async function initializeDatabase() {
       colors TEXT[] NOT NULL DEFAULT '{}',
       active BOOLEAN NOT NULL DEFAULT TRUE,
       advertised BOOLEAN NOT NULL DEFAULT FALSE,
+      show_new_products BOOLEAN NOT NULL DEFAULT FALSE,
+      show_best_sellers BOOLEAN NOT NULL DEFAULT FALSE,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
     ALTER TABLE products ADD COLUMN IF NOT EXISTS advertised BOOLEAN NOT NULL DEFAULT FALSE;
+    ALTER TABLE products ADD COLUMN IF NOT EXISTS show_new_products BOOLEAN NOT NULL DEFAULT FALSE;
+    ALTER TABLE products ADD COLUMN IF NOT EXISTS show_best_sellers BOOLEAN NOT NULL DEFAULT FALSE;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS delivery_price NUMERIC(12, 2) NOT NULL DEFAULT 0;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS cost_price NUMERIC(12, 2);
     ALTER TABLE products ADD COLUMN IF NOT EXISTS sort_order INTEGER;
