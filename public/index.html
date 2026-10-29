@@ -1338,7 +1338,16 @@ function syncShopCategoryUrl(){
 	const current=`${location.pathname}${location.search}${location.hash}`;
 	if(current!==target)history.pushState({shop:true,categoryId:category?.id||null},"",target);
 }
-function toggleShopCategory(id,checked){if(checked)shopCategoryIds.add(String(id));else shopCategoryIds.delete(String(id));shopPage=1;syncShopCategoryUrl();renderShopCatalog()}
+function toggleShopCategory(id,checked){
+	id=String(id);
+	if(checked){
+		for(const selectedId of shopCategoryIds){
+			if(categoryDescendantIds(id).has(selectedId)||categoryDescendantIds(selectedId).has(id))shopCategoryIds.delete(selectedId);
+		}
+		shopCategoryIds.add(id);
+	}else shopCategoryIds.delete(id);
+	shopPage=1;syncShopCategoryUrl();renderShopCatalog();
+}
 function changeShopPage(delta){shopPage=Math.max(1,shopPage+delta);renderShopCatalog();document.getElementById("shopToolbar").scrollIntoView({behavior:"smooth",block:"start"})}
 function resetShopFilters(){
 	shopCategoryIds.clear();shopPage=1;
