@@ -24,6 +24,7 @@ fbq('track','PageView');
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 <style>
 body.shop-page #offers,body.shop-page #features,body.shop-page #categoryShowcase,body.shop-page #newArrivals{display:none!important}
+#categoryShowcase[hidden]{display:none!important}
 body.shop-page .nav-shop-item .mega-menu{display:none}
 .home-product-sections{display:flex;flex-direction:column}
 body.shop-page #products{max-width:1440px;min-height:calc(100vh - var(--store-header-height,136px));margin:0 auto;padding:28px clamp(16px,4vw,56px) 60px}
@@ -913,7 +914,7 @@ if(incomingStoreUrl.searchParams.has("product")&&incomingStoreUrl.hash==="#produ
 	normalizeIncomingStoreUrl=true;
 }
 if(normalizeIncomingStoreUrl)history.replaceState(history.state,"",incomingStoreUrl);
-let products=[],featuredProducts=[],featuredProduct=null,featuredProductIndex=0,advertisementTimer=null,campaignTimer=null,campaignSlideIndex=0,productSearchTimer=null,productLoadSequence=0,cart=JSON.parse(localStorage.getItem("md_cart")||"[]"),cfg={whatsapp:"",whatsappConfigured:false,store:"M&D Store",currency:"TND",homepageSections:[{id:"new_products",title:"Nouveautés",subtitle:"Fraîchement arrivés",enabled:true,order:1,productCount:12},{id:"best_sellers",title:"Meilleures ventes",subtitle:"Sélection M&D",enabled:true,order:2,productCount:12}]},selectedCategory="",detailProduct=null,detailQuantity=1,detailImageIndex=0,detailColor=null,compareProductIds=[],favoriteProductIds=JSON.parse(localStorage.getItem("md_favorites")||"[]"),shopMode=location.hash==="#shop",shopCatalog=[],shopCategoryIds=new Set(),shopPage=1;
+let products=[],featuredProducts=[],featuredProduct=null,featuredProductIndex=0,advertisementTimer=null,campaignTimer=null,campaignSlideIndex=0,productSearchTimer=null,productLoadSequence=0,cart=JSON.parse(localStorage.getItem("md_cart")||"[]"),cfg={whatsapp:"",whatsappConfigured:false,store:"M&D Store",currency:"TND",homepageSections:[{id:"category_showcase",title:"Explorez nos univers",subtitle:"Une sélection pour chaque envie",enabled:true,order:1},{id:"new_products",title:"Nouveautés",subtitle:"Fraîchement arrivés",enabled:true,order:2,productCount:12},{id:"best_sellers",title:"Meilleures ventes",subtitle:"Sélection M&D",enabled:true,order:3,productCount:12}]},selectedCategory="",detailProduct=null,detailQuantity=1,detailImageIndex=0,detailColor=null,compareProductIds=[],favoriteProductIds=JSON.parse(localStorage.getItem("md_favorites")||"[]"),shopMode=location.hash==="#shop",shopCatalog=[],shopCategoryIds=new Set(),shopPage=1;
 function storeProductSlug(name){
 	return String(name||"").normalize("NFKD").replace(/\p{M}/gu,"").toLowerCase().replace(/[^\p{L}\p{N}]+/gu,"-").replace(/^-+|-+$/g,"")||"product";
 }
@@ -1070,9 +1071,10 @@ function renderCategoryShowcase(){
 	const grid=document.getElementById("categoryShowcaseGrid");
 	if(!grid)return;
 	const isFrench=currentStoreLanguage==="fr";
+	const section=homepageSection("category_showcase");
 	document.getElementById("categoryShowcaseKicker").textContent=isFrench?"NOS UNIVERS":"اكتشفوا عوالمنا";
-	document.getElementById("categoryShowcaseTitle").textContent=isFrench?"Explorez nos univers":"اكتشفوا أقسامنا";
-	document.getElementById("categoryShowcaseDescription").textContent=isFrench?"Une sélection pour chaque envie":"اختيارات متنوعة تناسب كل الأذواق";
+	document.getElementById("categoryShowcaseTitle").textContent=section.title;
+	document.getElementById("categoryShowcaseDescription").textContent=section.subtitle;
 	grid.innerHTML=currentCategories.filter(category=>category.parent_id==null).map((category,index)=>{
 		const image=categoryShowcaseImage(category,index);
 		const categoryIds=categoryDescendantIds(category.id);
@@ -1331,7 +1333,7 @@ function goToHome(event){
 	url.searchParams.delete("product");url.hash="";
 	if(wasNotHome)history.pushState({},"",url.pathname+url.search);
 	detailProduct=null;productDetail.hidden=true;
-	heroSection.hidden=false;featuresSection.hidden=false;categoryShowcase.hidden=false;
+	heroSection.hidden=false;featuresSection.hidden=false;categoryShowcase.hidden=!homepageSection("category_showcase").enabled;
 	newArrivalsSection.hidden=featuredProducts.length===0||!homepageSection("new_products").enabled;productsSection.hidden=!homepageSection("best_sellers").enabled;
 	shopMode=false;selectedCategory="";shopCategoryIds.clear();
 	document.querySelectorAll("#sideMenuCategories [data-category-id]").forEach(button=>button.setAttribute("aria-pressed","false"));
@@ -1466,7 +1468,7 @@ function handleProductDetailTabKeydown(event){
   selectProductDetailTab(tabs[nextIndex].dataset.detailTab,true);
 }
 function closeProductDetails(updateHistory=true,target="products"){
-  detailProduct=null;productDetail.hidden=true;heroSection.hidden=false;featuresSection.hidden=false;categoryShowcase.hidden=false;newArrivalsSection.hidden=featuredProducts.length===0||!homepageSection("new_products").enabled;productsSection.hidden=!shopMode&&!homepageSection("best_sellers").enabled;
+  detailProduct=null;productDetail.hidden=true;heroSection.hidden=false;featuresSection.hidden=false;categoryShowcase.hidden=!homepageSection("category_showcase").enabled;newArrivalsSection.hidden=featuredProducts.length===0||!homepageSection("new_products").enabled;productsSection.hidden=!shopMode&&!homepageSection("best_sellers").enabled;
   if(updateHistory){history.replaceState({},"",location.pathname.startsWith("/product/")?"/":location.href)}
   const destination=target==="home"?0:productsSection.offsetTop;
   window.scrollTo({top:destination,behavior:"smooth"});
@@ -1736,7 +1738,12 @@ function applyProductGridSettings(){
 	document.documentElement.style.setProperty("--product-columns",String(Number.isInteger(columns)&&columns>=2&&columns<=6?columns:4));
 }
 function homepageSection(id){
-	return cfg.homepageSections.find(section=>section.id===id)||{id,title:id==="new_products"?"Nouveautés":"Meilleures ventes",subtitle:id==="new_products"?"Fraîchement arrivés":"Sélection M&D",enabled:true,order:id==="new_products"?1:2,productCount:12};
+	const defaults={
+		category_showcase:{id,title:"Explorez nos univers",subtitle:"Une sélection pour chaque envie",enabled:true,order:1},
+		new_products:{id,title:"Nouveautés",subtitle:"Fraîchement arrivés",enabled:true,order:2,productCount:12},
+		best_sellers:{id,title:"Meilleures ventes",subtitle:"Sélection M&D",enabled:true,order:3,productCount:12}
+	};
+	return cfg.homepageSections.find(section=>section.id===id)||defaults[id]||{id,title:id,subtitle:"",enabled:true,order:99};
 }
 function compareProductOrder(left,right){
 	const leftOrdered=left.sort_order!==null&&left.sort_order!==undefined;
@@ -1747,13 +1754,16 @@ function compareProductOrder(left,right){
 		:Number(left.id)-Number(right.id);
 }
 function applyHomepageSectionSettings(){
-	const newProducts=homepageSection("new_products"),bestSellers=homepageSection("best_sellers");
+	const bestSellers=homepageSection("best_sellers"),categorySection=homepageSection("category_showcase");
 	document.getElementById("bestSellersKicker").textContent=bestSellers.subtitle;
 	document.getElementById("bestSellersTitle").textContent=bestSellers.title;
 	document.getElementById("bestSellersHeading").hidden=shopMode||!bestSellers.enabled;
-	homeProductSections.append(...[newProducts,bestSellers].sort((a,b)=>a.order-b.order).map(section=>
-		section.id==="new_products"?newArrivalsSection:productsSection
-	));
+	categoryShowcase.hidden=Boolean(detailProduct)||!categorySection.enabled;
+	const sectionElements={category_showcase:categoryShowcase,new_products:newArrivalsSection,best_sellers:productsSection};
+	homeProductSections.append(...cfg.homepageSections
+		.filter(section=>sectionElements[section.id])
+		.sort((left,right)=>left.order-right.order)
+		.map(section=>sectionElements[section.id]));
 	if(!detailProduct)productsSection.hidden=!shopMode&&!bestSellers.enabled;
 	renderNewArrivals();
 	if(products.length&&!shopMode)renderProductGrid(products);

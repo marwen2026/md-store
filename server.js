@@ -517,35 +517,53 @@ async function readStoreSettings() {
 }
 
 const DEFAULT_HOMEPAGE_SECTIONS = [
-  { id: "new_products", title: "Nouveautés", subtitle: "Fraîchement arrivés", enabled: true, order: 1, productCount: 12 },
-  { id: "best_sellers", title: "Meilleures ventes", subtitle: "Sélection M&D", enabled: true, order: 2, productCount: 12 }
+  { id: "category_showcase", title: "Explorez nos univers", subtitle: "Une sélection pour chaque envie", enabled: true, order: 1 },
+  { id: "new_products", title: "Nouveautés", subtitle: "Fraîchement arrivés", enabled: true, order: 2, productCount: 12 },
+  { id: "best_sellers", title: "Meilleures ventes", subtitle: "Sélection M&D", enabled: true, order: 3, productCount: 12 }
 ];
 
 function parseHomepageSections(value) {
   if (value === undefined) return DEFAULT_HOMEPAGE_SECTIONS.map(section => ({ ...section }));
   const sections = JSON.parse(value);
-  if (!Array.isArray(sections) || sections.length !== DEFAULT_HOMEPAGE_SECTIONS.length) {
+  if (!Array.isArray(sections) || sections.length > DEFAULT_HOMEPAGE_SECTIONS.length) {
     throw new Error("Saved homepage section settings are invalid");
   }
-  const byId = new Map(sections.map(section => [section.id, section]));
-  const orders = new Set();
-  return DEFAULT_HOMEPAGE_SECTIONS.map(defaultSection => {
-    const section = byId.get(defaultSection.id);
-    if (!section || typeof section.title !== "string" || typeof section.subtitle !== "string" ||
-      typeof section.enabled !== "boolean" || !Number.isInteger(section.order) || section.order < 1 ||
-      section.order > DEFAULT_HOMEPAGE_SECTIONS.length || orders.has(section.order) ||
-      !Number.isInteger(section.productCount) || section.productCount < 1 || section.productCount > 48) {
+  const allowedIds = new Set(DEFAULT_HOMEPAGE_SECTIONS.map(section => section.id));
+  const byId = new Map();
+  const savedOrders = new Set();
+  for (const section of sections) {
+    if (!section || !allowedIds.has(section.id) || byId.has(section.id)) {
       throw new Error("Saved homepage section settings are invalid");
     }
-    orders.add(section.order);
-    return {
+    if (!Number.isInteger(section.order) || section.order < 1 ||
+      section.order > DEFAULT_HOMEPAGE_SECTIONS.length || savedOrders.has(section.order)) {
+      throw new Error("Saved homepage section settings are invalid");
+    }
+    byId.set(section.id, section);
+    savedOrders.add(section.order);
+  }
+  const orderedSections = sections.slice().sort((left, right) => left.order - right.order);
+  for (const defaultSection of DEFAULT_HOMEPAGE_SECTIONS) {
+    if (byId.has(defaultSection.id)) continue;
+    orderedSections.splice(Math.min(defaultSection.order - 1, orderedSections.length), 0, { ...defaultSection });
+  }
+  return orderedSections.map((section, index) => {
+    const defaultSection = DEFAULT_HOMEPAGE_SECTIONS.find(item => item.id === section.id);
+    if (typeof section.title !== "string" || typeof section.subtitle !== "string" ||
+      typeof section.enabled !== "boolean" ||
+      (Object.hasOwn(defaultSection, "productCount") &&
+        (!Number.isInteger(section.productCount) || section.productCount < 1 || section.productCount > 48))) {
+      throw new Error("Saved homepage section settings are invalid");
+    }
+    const parsedSection = {
       id: defaultSection.id,
       title: section.title,
       subtitle: section.subtitle,
       enabled: section.enabled,
-      order: section.order,
-      productCount: section.productCount
+      order: index + 1
     };
+    if (Object.hasOwn(defaultSection, "productCount")) parsedSection.productCount = section.productCount;
+    return parsedSection;
   });
 }
 
@@ -856,13 +874,14 @@ app.get("/api/admin/settings", auth, role("admin"), async (req, res) => {
 app.put("/api/admin/homepage-sections", auth, role("admin"), async (req, res) => {
   const sections = req.body?.sections;
   if (!Array.isArray(sections) || sections.length !== DEFAULT_HOMEPAGE_SECTIONS.length) {
-    return res.status(400).json({ error: "Exactly two homepage sections are required" });
+    return res.status(400).json({ error: "All homepage sections must be configured" });
   }
   const ids = new Set();
   const orders = new Set();
   const validatedSections = [];
   for (const section of sections) {
-    if (!section || !["new_products", "best_sellers"].includes(section.id) || ids.has(section.id)) {
+    const defaultSection = DEFAULT_HOMEPAGE_SECTIONS.find(item => item.id === section?.id);
+    if (!section || !defaultSection || ids.has(section.id)) {
       return res.status(400).json({ error: "Invalid homepage section id" });
     }
     if (typeof section.title !== "string" || !section.title.trim() || section.title.trim().length > 80 ||
@@ -872,25 +891,28 @@ app.put("/api/admin/homepage-sections", auth, role("admin"), async (req, res) =>
     if (typeof section.enabled !== "boolean") {
       return res.status(400).json({ error: "Invalid homepage section enabled state" });
     }
-    if (!Number.isInteger(section.order) || section.order < 1 || section.order > 2 || orders.has(section.order)) {
-      return res.status(400).json({ error: "Homepage section order must be unique and between 1 and 2" });
+    if (!Number.isInteger(section.order) || section.order < 1 ||
+      section.order > DEFAULT_HOMEPAGE_SECTIONS.length || orders.has(section.order)) {
+      return res.status(400).json({ error: "Homepage section order must be unique and within the section list" });
     }
-    if (!Number.isInteger(section.productCount) || section.productCount < 1 || section.productCount > 48) {
+    if (Object.hasOwn(defaultSection, "productCount") &&
+      (!Number.isInteger(section.productCount) || section.productCount < 1 || section.productCount > 48)) {
       return res.status(400).json({ error: "Homepage section product count must be between 1 and 48" });
     }
     ids.add(section.id);
     orders.add(section.order);
-    validatedSections.push({
+    const validatedSection = {
       id: section.id,
       title: section.title.trim(),
       subtitle: section.subtitle.trim(),
       enabled: section.enabled,
-      order: section.order,
-      productCount: section.productCount
-    });
+      order: section.order
+    };
+    if (Object.hasOwn(defaultSection, "productCount")) validatedSection.productCount = section.productCount;
+    validatedSections.push(validatedSection);
   }
   if (ids.size !== DEFAULT_HOMEPAGE_SECTIONS.length) {
-    return res.status(400).json({ error: "Both homepage sections must be configured" });
+    return res.status(400).json({ error: "All homepage sections must be configured" });
   }
   try {
     await pool.query(

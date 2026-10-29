@@ -267,25 +267,9 @@ body.dark .chart-controls button[aria-pressed="true"]{box-shadow:0 2px 7px #0004
 </div>
 <section class="homepage-sections-manager" aria-labelledby="homepageSectionsTitle">
 <h3 id="homepageSectionsTitle">إدارة أقسام الصفحة الرئيسية</h3>
-<p class="settings-hint" id="homepageSectionsHint">تحكم في ظهور الأقسام وعناوينها وترتيبها وعدد المنتجات المعروضة.</p>
-<div class="homepage-sections-list">
-<div class="homepage-section-row" data-homepage-section="new_products">
-<h4 id="newProductsSectionLabel">Nouveautés</h4>
-<label><span id="sectionTitleLabel">العنوان</span><input data-field="title" maxlength="80" required value="Nouveautés"></label>
-<label><span id="sectionSubtitleLabel">العنوان الفرعي</span><input data-field="subtitle" maxlength="120" required value="Fraîchement arrivés"></label>
-<label><span id="sectionOrderLabel">الترتيب</span><input data-field="order" type="number" min="1" max="2" step="1" value="1" required></label>
-<label><span id="sectionProductCountLabel">عدد المنتجات المعروضة</span><input data-field="productCount" type="number" min="1" max="48" step="1" value="12" required></label>
-<label class="homepage-section-enabled"><input data-field="enabled" type="checkbox" checked><span id="sectionEnabledLabel">إظهار القسم</span></label>
-</div>
-<div class="homepage-section-row" data-homepage-section="best_sellers">
-<h4 id="bestSellersSectionLabel">Meilleures ventes</h4>
-<label><span id="sectionTitleLabel2">العنوان</span><input data-field="title" maxlength="80" required value="Meilleures ventes"></label>
-<label><span id="sectionSubtitleLabel2">العنوان الفرعي</span><input data-field="subtitle" maxlength="120" required value="Sélection M&amp;D"></label>
-<label><span id="sectionOrderLabel2">الترتيب</span><input data-field="order" type="number" min="1" max="2" step="1" value="2" required></label>
-<label><span id="sectionProductCountLabel2">عدد المنتجات المعروضة</span><input data-field="productCount" type="number" min="1" max="48" step="1" value="12" required></label>
-<label class="homepage-section-enabled"><input data-field="enabled" type="checkbox" checked><span id="sectionEnabledLabel2">إظهار القسم</span></label>
-</div>
-</div>
+<p class="settings-hint" id="homepageSectionsHint">تحكم في ظهور الأقسام وعناوينها وترتيبها وعدد المنتجات المعروضة. يمكن إضافة أقسام جديدة إلى القائمة دون تغيير واجهة الإدارة.</p>
+<div hidden aria-hidden="true"><span id="newProductsSectionLabel"></span><span id="bestSellersSectionLabel"></span><span id="sectionTitleLabel"></span><span id="sectionTitleLabel2"></span><span id="sectionSubtitleLabel"></span><span id="sectionSubtitleLabel2"></span><span id="sectionOrderLabel"></span><span id="sectionOrderLabel2"></span><span id="sectionProductCountLabel"></span><span id="sectionProductCountLabel2"></span><span id="sectionEnabledLabel"></span><span id="sectionEnabledLabel2"></span></div>
+<div class="homepage-sections-list" id="homepageSectionsList"></div>
 <div class="hero-background-actions"><button class="gold" id="saveHomepageSectionsBtn" type="button" onclick="saveHomepageSections()">حفظ أقسام الصفحة الرئيسية</button></div>
 </section>
 <section class="navigation-manager" aria-labelledby="navigationTitle">
@@ -372,8 +356,8 @@ Object.assign(translations.ar,{productColumnsLabel:"عدد أعمدة المنت
 Object.assign(translations.fr,{productColumnsLabel:"Nombre de colonnes de produits sur grand écran"});
 Object.assign(translations.ar,{categoryColumnsLabel:"عدد أعمدة الأقسام على الشاشات الكبيرة"});
 Object.assign(translations.fr,{categoryColumnsLabel:"Nombre de colonnes de catégories sur grand écran"});
-Object.assign(translations.ar,{homepageSectionsTitle:"إدارة أقسام الصفحة الرئيسية",homepageSectionsHint:"تحكم في ظهور الأقسام وعناوينها وترتيبها وعدد المنتجات المعروضة.",newProductsSection:"المنتجات الجديدة",bestSellersSection:"الأكثر مبيعاً",sectionTitle:"العنوان",sectionSubtitle:"العنوان الفرعي",sectionOrder:"الترتيب",sectionProductCount:"عدد المنتجات المعروضة",sectionEnabled:"إظهار القسم",saveHomepageSections:"حفظ أقسام الصفحة الرئيسية",homepageSectionsSaved:"تم حفظ إعدادات أقسام الصفحة الرئيسية",homepageSectionsFailed:"تعذر حفظ إعدادات أقسام الصفحة الرئيسية",homepageSectionsOrderInvalid:"يجب أن يكون ترتيب القسمين مختلفاً من 1 إلى 2"});
-Object.assign(translations.fr,{homepageSectionsTitle:"Gérer les sections de la page d’accueil",homepageSectionsHint:"Choisissez les sections visibles, leurs titres, leur ordre et le nombre de produits affichés.",newProductsSection:"Nouveautés",bestSellersSection:"Meilleures ventes",sectionTitle:"Titre",sectionSubtitle:"Sous-titre",sectionOrder:"Ordre",sectionProductCount:"Nombre de produits affichés",sectionEnabled:"Afficher la section",saveHomepageSections:"Enregistrer les sections",homepageSectionsSaved:"Paramètres des sections enregistrés",homepageSectionsFailed:"Impossible d’enregistrer les paramètres des sections",homepageSectionsOrderInvalid:"Les deux sections doivent avoir un ordre distinct entre 1 et 2"});
+Object.assign(translations.ar,{homepageSectionsTitle:"إدارة أقسام الصفحة الرئيسية",homepageSectionsHint:"أظهر أو أخفِ الأقسام، وعدّل عناوينها وترتيبها. تضاف الأقسام الجديدة إلى هذه القائمة تلقائيًا.",categoryShowcaseSection:"اكتشفوا عوالمنا",newProductsSection:"المنتجات الجديدة",bestSellersSection:"الأكثر مبيعاً",sectionTitle:"العنوان",sectionSubtitle:"العنوان الفرعي",sectionOrder:"الترتيب",sectionProductCount:"عدد المنتجات المعروضة",sectionEnabled:"إظهار القسم",saveHomepageSections:"حفظ أقسام الصفحة الرئيسية",homepageSectionsSaved:"تم حفظ إعدادات أقسام الصفحة الرئيسية",homepageSectionsFailed:"تعذر حفظ إعدادات أقسام الصفحة الرئيسية",homepageSectionsOrderInvalid:"يجب إدخال ترتيب مختلف لكل قسم من 1 إلى {count}"});
+Object.assign(translations.fr,{homepageSectionsTitle:"Gérer les sections de la page d’accueil",homepageSectionsHint:"Affichez ou masquez les sections, modifiez leurs titres et leur ordre. Les nouvelles sections apparaîtront automatiquement dans cette liste.",categoryShowcaseSection:"Explorez nos univers",newProductsSection:"Nouveautés",bestSellersSection:"Meilleures ventes",sectionTitle:"Titre",sectionSubtitle:"Sous-titre",sectionOrder:"Ordre",sectionProductCount:"Nombre de produits affichés",sectionEnabled:"Afficher la section",saveHomepageSections:"Enregistrer les sections",homepageSectionsSaved:"Paramètres des sections enregistrés",homepageSectionsFailed:"Impossible d’enregistrer les paramètres des sections",homepageSectionsOrderInvalid:"Attribuez un ordre différent à chaque section, de 1 à {count}"});
 Object.assign(translations.ar,{navigationTitle:"إدارة روابط شريط التنقل",navigationHint:"أضف الروابط أو عدّلها أو احذفها، وحدّد اسمًا بالعربية والفرنسية. يقبل الرابط #products أو /page أو https://...",navigationArabicLabel:"الاسم بالعربية",navigationFrenchLabel:"الاسم بالفرنسية",navigationHrefLabel:"الرابط",navigationAdd:"إضافة رابط",navigationSave:"حفظ",navigationDelete:"حذف",navigationMoveUp:"تحريك لأعلى",navigationMoveDown:"تحريك لأسفل",navigationSaved:"تم حفظ روابط التنقل",navigationSaveFailed:"تعذر حفظ روابط التنقل",navigationDeleteConfirm:"هل تريد حذف هذا الرابط من شريط التنقل؟",navigationEmpty:"لا توجد روابط في شريط التنقل",navigationMaxLinks:"يمكن إضافة 12 رابطاً كحد أقصى"});
 Object.assign(translations.fr,{navigationTitle:"Gérer les liens du menu",navigationHint:"Ajoutez, modifiez ou supprimez les liens avec un libellé arabe et français. Lien accepté : #products, /page ou https://...",navigationArabicLabel:"Libellé en arabe",navigationFrenchLabel:"Libellé en français",navigationHrefLabel:"Lien",navigationAdd:"Ajouter un lien",navigationSave:"Enregistrer",navigationDelete:"Supprimer",navigationMoveUp:"Monter",navigationMoveDown:"Descendre",navigationSaved:"Liens du menu enregistrés",navigationSaveFailed:"Impossible d’enregistrer les liens du menu",navigationDeleteConfirm:"Supprimer ce lien du menu ?",navigationEmpty:"Aucun lien dans le menu",navigationMaxLinks:"Vous pouvez ajouter jusqu’à 12 liens"});
 Object.assign(translations.ar,{navigationLoadFailed:"تعذر تحميل روابط شريط التنقل",navigationLabelsRequired:"أدخل الاسم بالعربية والفرنسية والرابط"});
@@ -562,30 +546,73 @@ async function storeSettingsLoad(){
 }
 function renderHomepageSectionSettings(sections){
   if(!Array.isArray(sections))throw new Error("Invalid homepage section settings response");
-  for(const section of sections){
-    const row=document.querySelector(`[data-homepage-section="${section.id}"]`);
-    if(!row)continue;
-    row.querySelector('[data-field="title"]').value=section.title;
-    row.querySelector('[data-field="subtitle"]').value=section.subtitle;
-    row.querySelector('[data-field="order"]').value=String(section.order);
-    row.querySelector('[data-field="productCount"]').value=String(section.productCount);
-    row.querySelector('[data-field="enabled"]').checked=section.enabled;
-  }
+  const sectionList=document.getElementById("homepageSectionsList");
+  const makeField=(field,labelKey,type,value,attributes={})=>{
+    const label=document.createElement("label");
+    const caption=document.createElement("span");
+    caption.dataset.labelKey=labelKey;
+    const input=document.createElement("input");
+    input.dataset.field=field;
+    input.type=type;
+    input.required=type!=="checkbox";
+    if(type==="checkbox")input.checked=value;
+    else input.value=String(value);
+    for(const [name,attributeValue] of Object.entries(attributes))input.setAttribute(name,String(attributeValue));
+    label.append(caption,input);
+    return label;
+  };
+  sectionList.replaceChildren(...[...sections].sort((a,b)=>a.order-b.order).map(section=>{
+    const row=document.createElement("div");
+    row.className="homepage-section-row";
+    row.dataset.homepageSection=section.id;
+    const heading=document.createElement("h4");
+    heading.dataset.sectionHeading=section.id;
+    row.append(heading);
+    row.append(
+      makeField("title","sectionTitle","text",section.title,{maxlength:80}),
+      makeField("subtitle","sectionSubtitle","text",section.subtitle,{maxlength:120}),
+      makeField("order","sectionOrder","number",section.order,{min:1,max:sections.length,step:1})
+    );
+    if(Number.isInteger(section.productCount)){
+      row.append(makeField("productCount","sectionProductCount","number",section.productCount,{min:1,max:48,step:1}));
+    }
+    const enabled=makeField("enabled","sectionEnabled","checkbox",section.enabled);
+    enabled.className="homepage-section-enabled";
+    row.append(enabled);
+    return row;
+  }));
+  updateHomepageSectionLabels();
+}
+function updateHomepageSectionLabels(){
+  const sectionNameKeys={category_showcase:"categoryShowcaseSection",new_products:"newProductsSection",best_sellers:"bestSellersSection"};
+  document.querySelectorAll(".homepage-section-row").forEach(row=>{
+    const sectionTitle=row.querySelector('[data-field="title"]').value;
+    const headingKey=sectionNameKeys[row.dataset.homepageSection];
+    const headingText=headingKey&&translations[currentLang][headingKey];
+    row.querySelector("h4").textContent=headingText||sectionTitle;
+    row.querySelectorAll("[data-label-key]").forEach(label=>{label.textContent=t(label.dataset.labelKey)});
+  });
+}
+for(const languageButton of [langToggle,loginLangToggle]){
+  languageButton.addEventListener("click",()=>setTimeout(updateHomepageSectionLabels,0));
 }
 async function saveHomepageSections(){
   const rows=[...document.querySelectorAll("[data-homepage-section]")];
-  const sections=rows.map(row=>({
-    id:row.dataset.homepageSection,
-    title:row.querySelector('[data-field="title"]').value,
-    subtitle:row.querySelector('[data-field="subtitle"]').value,
-    order:Number(row.querySelector('[data-field="order"]').value),
-    productCount:Number(row.querySelector('[data-field="productCount"]').value),
-    enabled:row.querySelector('[data-field="enabled"]').checked
-  }));
+  const sections=rows.map(row=>{
+    const productCount=row.querySelector('[data-field="productCount"]');
+    return {
+      id:row.dataset.homepageSection,
+      title:row.querySelector('[data-field="title"]').value,
+      subtitle:row.querySelector('[data-field="subtitle"]').value,
+      order:Number(row.querySelector('[data-field="order"]').value),
+      ...(productCount?{productCount:Number(productCount.value)}:{}),
+      enabled:row.querySelector('[data-field="enabled"]').checked
+    };
+  });
   const orders=sections.map(section=>section.order);
   if(rows.some(row=>![...row.querySelectorAll("input[required]")].every(input=>input.reportValidity()))||
-    new Set(orders).size!==2||orders.some(order=>!Number.isInteger(order)||order<1||order>2)){
-    if(new Set(orders).size!==2)alert(t("homepageSectionsOrderInvalid"));
+    new Set(orders).size!==rows.length||orders.some(order=>!Number.isInteger(order)||order<1||order>rows.length)){
+    if(new Set(orders).size!==rows.length)alert(t("homepageSectionsOrderInvalid").replace("{count}",String(rows.length)));
     return;
   }
   const button=document.getElementById("saveHomepageSectionsBtn");
