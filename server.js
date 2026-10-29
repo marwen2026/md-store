@@ -572,6 +572,7 @@ function parseManualHomepageSections(value) {
       typeof section.buttonText !== "string" || section.buttonText.length > 60 ||
       typeof section.buttonLink !== "string" || (section.buttonLink && !isValidHomepageUrl(section.buttonLink)) ||
       (section.imagePosition !== undefined && !["center", "left", "right"].includes(section.imagePosition)) ||
+      (section.imageVerticalPosition !== undefined && !["center", "top", "bottom"].includes(section.imageVerticalPosition)) ||
       typeof section.enabled !== "boolean" ||
       !Number.isInteger(section.order) || section.order < 1 || section.order > sections.length ||
       orders.has(section.order)) {
@@ -598,6 +599,7 @@ function parseManualHomepageSections(value) {
       subtitle: section.subtitle,
       image: section.image,
       imagePosition: section.imagePosition || "center",
+      imageVerticalPosition: section.imageVerticalPosition || "center",
       buttonText: section.buttonText.trim(),
       buttonLink: section.buttonLink,
       enabled: section.enabled,
