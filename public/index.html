@@ -39,15 +39,6 @@ body.shop-page #products{max-width:1440px;min-height:calc(100vh - var(--store-he
 .shop-filter-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.shop-filter-heading h2{margin:0;font-size:17px}.shop-filter-heading button,.shop-filter-reset{border:0;background:none;color:#946b1e;font-size:12px;font-weight:800;cursor:pointer}.shop-filter-group{margin-top:18px;padding-top:17px;border-top:1px solid #edf0f4}.shop-filter-group h3{margin:0 0 11px;font-size:13px}.shop-category-list{display:grid;gap:9px}.shop-filter-option{display:flex;align-items:center;gap:9px;color:#374151;font-size:13px;cursor:pointer}.shop-filter-option.is-parent{font-weight:700}.shop-filter-option.is-subcategory{padding-inline-start:14px;font-weight:400}.shop-filter-option input{width:16px;height:16px;accent-color:#bd8a2a}.shop-filter-count{margin-inline-start:auto;color:#9299a5;font-size:11px}.shop-price-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px}.shop-price-inputs input{width:100%;min-width:0;height:38px;padding:0 9px;border:1px solid #e3e6ec;border-radius:8px;background:#fff}
 .shop-results{min-width:0}.shop-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 17px;padding:12px 15px;border:1px solid #e8eaf0;border-radius:12px;background:#fff}.shop-result-count{color:#657080;font-size:13px}.shop-toolbar-controls{display:flex;align-items:center;gap:9px}.shop-toolbar select{max-width:190px;height:38px;padding:0 10px;border:1px solid #e1e5eb;border-radius:8px;background:#fff;color:#263244;font-size:12px}
 .shop-page .products-layout{display:block}.shop-page .products{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.shop-pagination{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:24px}.shop-pagination button{min-width:38px;height:38px;padding:0 12px;border:1px solid #e2e5ea;border-radius:9px;background:#fff;color:#263244;font-weight:700;cursor:pointer}.shop-pagination button:disabled{opacity:.42;cursor:not-allowed}.shop-pagination span{color:#667085;font-size:13px}
-body.shop-page.back-cover-brand-page .shop-layout{grid-template-columns:minmax(0,1fr)}
-.shop-brands{margin-bottom:20px;padding:22px;border:1px solid #e8eaf0;border-radius:16px;background:linear-gradient(145deg,#fff,#fbfcfe);box-shadow:0 6px 24px #1e293b0a}
-.shop-brands[hidden]{display:none!important}.shop-brands h2{margin:0;color:#172554;font-size:clamp(18px,2.4vw,24px);font-weight:900}.shop-brands p{margin:5px 0 16px;color:#667085;font-size:13px}
-.shop-brand-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
-.shop-brand-option{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:54px;padding:12px 15px;border:1px solid #e3e7ed;border-radius:12px;background:#fff;color:#263244;font:inherit;font-weight:800;text-align:start;cursor:pointer;transition:border-color .18s ease,background .18s ease,color .18s ease,transform .18s ease}
-.shop-brand-option:hover,.shop-brand-option[aria-pressed="true"]{transform:translateY(-1px);border-color:#C99A3B;background:#fffaf0;color:#8a641c}
-.shop-brand-option[aria-pressed="true"]{box-shadow:0 0 0 2px #C99A3B24}.shop-brand-count{display:grid;min-width:27px;height:27px;place-items:center;padding:0 6px;border-radius:999px;background:#f1f3f6;color:#667085;font-size:11px}
-.shop-brand-option[aria-pressed="true"] .shop-brand-count{background:#f4e8cd;color:#755417}
-@media(max-width:500px){.shop-brands{padding:16px}.shop-brand-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.shop-brand-option{min-height:48px;padding:10px 11px;font-size:13px}}
 @media(max-width:950px){.shop-page .shop-layout{grid-template-columns:minmax(190px,220px) minmax(0,1fr);gap:17px}.shop-page .products{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){body.shop-page #products{padding:18px 14px 44px}.shop-banner{margin-bottom:17px;padding:22px 20px}.shop-page .shop-layout{grid-template-columns:minmax(0,1fr);gap:14px}.shop-filters{position:static;max-height:none;overflow:visible;padding:15px}.shop-category-list{grid-template-columns:repeat(2,minmax(0,1fr));max-height:180px;overflow:auto}.shop-filter-group{margin-top:13px;padding-top:13px}.shop-toolbar{align-items:flex-start;flex-direction:column;padding:11px}.shop-toolbar-controls{width:100%;display:grid;grid-template-columns:1fr 1fr}.shop-toolbar select{max-width:none;width:100%}.shop-page .products{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
 @media(max-width:380px){.shop-page .products{grid-template-columns:minmax(0,1fr)}.shop-category-list{grid-template-columns:minmax(0,1fr)}}
@@ -842,11 +833,6 @@ body{background:var(--background);color:var(--text)}
     <div class="shop-filter-group"><label class="shop-filter-option"><input id="shopInStock" type="checkbox"><span id="shopInStockLabel">En stock uniquement</span></label><label class="shop-filter-option" style="margin-top:10px"><input id="shopDiscountOnly" type="checkbox"><span id="shopDiscountLabel">En promotion</span></label></div>
   </aside>
   <div class="shop-results">
-    <section class="shop-brands" id="shopBrands" hidden aria-labelledby="shopBrandsTitle">
-      <h2 id="shopBrandsTitle"></h2>
-      <p id="shopBrandsDescription"></p>
-      <div class="shop-brand-options" id="shopBrandOptions" role="group"></div>
-    </section>
     <div class="shop-toolbar" id="shopToolbar" hidden>
       <span class="shop-result-count" id="shopResultCount" aria-live="polite">0 produit</span>
       <div class="shop-toolbar-controls"><select id="shopSort" aria-label="Trier les produits"><option value="recent">Plus récents</option><option value="price-asc">Prix croissant</option><option value="price-desc">Prix décroissant</option><option value="name">Nom</option></select><select id="shopPageSize" aria-label="Produits par page"><option value="12">12 par page</option><option value="24">24 par page</option><option value="48">48 par page</option></select></div>
@@ -939,7 +925,7 @@ if(incomingStoreUrl.searchParams.has("product")&&incomingStoreUrl.hash==="#produ
 	normalizeIncomingStoreUrl=true;
 }
 if(normalizeIncomingStoreUrl)history.replaceState(history.state,"",incomingStoreUrl);
-let products=[],featuredProducts=[],featuredProduct=null,featuredProductIndex=0,advertisementTimer=null,campaignTimer=null,campaignSlideIndex=0,productSearchTimer=null,productLoadSequence=0,cart=JSON.parse(localStorage.getItem("md_cart")||"[]"),cfg={whatsapp:"",whatsappConfigured:false,store:"M&D Store",currency:"TND",homepageSections:[{id:"category_showcase",title:"Explorez nos univers",subtitle:"Une sélection pour chaque envie",enabled:true,order:1},{id:"new_products",title:"Nouveautés",subtitle:"Fraîchement arrivés",enabled:true,order:2,productCount:12},{id:"best_sellers",title:"Meilleures ventes",subtitle:"Sélection M&D",enabled:true,order:3,productCount:12}],manualHomepageSections:[]},selectedCategory="",detailProduct=null,detailQuantity=1,detailImageIndex=0,detailColor=null,compareProductIds=[],favoriteProductIds=JSON.parse(localStorage.getItem("md_favorites")||"[]"),shopMode=location.hash==="#shop"||/^\/category\/[^/]+\/?$/.test(location.pathname),shopCatalog=[],shopCategoryIds=new Set(),shopPage=1,selectedShopBrand="";
+let products=[],featuredProducts=[],featuredProduct=null,featuredProductIndex=0,advertisementTimer=null,campaignTimer=null,campaignSlideIndex=0,productSearchTimer=null,productLoadSequence=0,cart=JSON.parse(localStorage.getItem("md_cart")||"[]"),cfg={whatsapp:"",whatsappConfigured:false,store:"M&D Store",currency:"TND",homepageSections:[{id:"category_showcase",title:"Explorez nos univers",subtitle:"Une sélection pour chaque envie",enabled:true,order:1},{id:"new_products",title:"Nouveautés",subtitle:"Fraîchement arrivés",enabled:true,order:2,productCount:12},{id:"best_sellers",title:"Meilleures ventes",subtitle:"Sélection M&D",enabled:true,order:3,productCount:12}],manualHomepageSections:[]},selectedCategory="",detailProduct=null,detailQuantity=1,detailImageIndex=0,detailColor=null,compareProductIds=[],favoriteProductIds=JSON.parse(localStorage.getItem("md_favorites")||"[]"),shopMode=location.hash==="#shop"||/^\/category\/[^/]+\/?$/.test(location.pathname),shopCatalog=[],shopCategoryIds=new Set(),shopPage=1;
 function storeProductSlug(name){
 	return String(name||"").normalize("NFKD").replace(/\p{M}/gu,"").toLowerCase().replace(/[^\p{L}\p{N}]+/gu,"-").replace(/^-+|-+$/g,"")||"product";
 }
@@ -1217,24 +1203,7 @@ function mobileNavigate(tab){
 }
 document.getElementById("newArrivalsTrack").addEventListener("scroll",updateNewArrivalArrows,{passive:true});
 window.addEventListener("resize",updateNewArrivalArrows);
-function backCoverBrandOptions(){return[{id:"samsung",label:"Samsung"},{id:"iphone",label:"iPhone"},{id:"redmi",label:"Redmi"},{id:"honor",label:"Honor"},{id:"infinix",label:"Infinix"}]}
-function backCoverBrandForProduct(product){
-	const name=String(product?.name||"").trim().toLowerCase();
-	if(/^samsung\b/.test(name))return"samsung";
-	if(/^iphone\b/.test(name))return"iphone";
-	if(/^redmi\b/.test(name))return"redmi";
-	if(/^honor\b/.test(name))return"honor";
-	if(/^(?:infinix\b|smart\s*\d|hot\s*\d|note\s*\d)/.test(name))return"infinix";
-	return"";
-}
-function backCoverCategory(){
-	return currentCategories.find(category=>String(category.slug||"").toLowerCase()==="back-cover"||String(category.name||"").trim().toLowerCase()==="back cover")||null;
-}
-function isBackCoverShopPage(){
-	const categoryId=shopCategoryIds.size===1?[...shopCategoryIds][0]:"";
-	return shopMode&&Boolean(categoryId)&&String(backCoverCategory()?.id)===categoryId;
-}
-async function loadCats(){const response=await fetch("/api/categories",{cache:"no-store"});if(!response.ok)throw new Error("Could not load storefront categories");const list=await response.json();currentCategories=list.map((category,index)=>({...category,slug:category.slug||storeProductSlug(category.name),displayName:translateCategoryName(category.name),icon:category.icon||categoryIconType(category.name,index)}));const route=location.pathname.match(/^\/category\/([^/]+)\/?$/);if(route){let slug;try{slug=decodeURIComponent(route[1])}catch(error){throw new Error("Invalid category URL", {cause:error})}const category=currentCategories.find(item=>storeCategorySlug(item)===slug);shopMode=true;shopCategoryIds.clear();if(category)shopCategoryIds.add(String(category.id));const requestedBrand=new URLSearchParams(location.search).get("brand")||"";selectedShopBrand=backCoverCategory()&&String(category?.id)===String(backCoverCategory().id)&&backCoverBrandOptions().some(brand=>brand.id===requestedBrand)?requestedBrand:"";applyShopPageVisibility();updateShopCopy()}else selectedShopBrand="";renderSideMenuCategories();categoriesSyncedAt=Date.now();renderStoreNavigation();renderCategoryShowcase();renderManualHomepageSections()}
+async function loadCats(){const response=await fetch("/api/categories",{cache:"no-store"});if(!response.ok)throw new Error("Could not load storefront categories");const list=await response.json();currentCategories=list.map((category,index)=>({...category,slug:category.slug||storeProductSlug(category.name),displayName:translateCategoryName(category.name),icon:category.icon||categoryIconType(category.name,index)}));const route=location.pathname.match(/^\/category\/([^/]+)\/?$/);if(route){let slug;try{slug=decodeURIComponent(route[1])}catch(error){throw new Error("Invalid category URL", {cause:error})}const category=currentCategories.find(item=>storeCategorySlug(item)===slug);shopMode=true;shopCategoryIds.clear();if(category)shopCategoryIds.add(String(category.id));applyShopPageVisibility();updateShopCopy()}renderSideMenuCategories();categoriesSyncedAt=Date.now();renderStoreNavigation();renderCategoryShowcase();renderManualHomepageSections()}
 function renderSideMenuCategories(){const container=document.getElementById("sideMenuCategories");container.innerHTML=`<button class="side-menu-category" type="button" data-category-id="" aria-pressed="${!shopCategoryIds.size}" onclick="selectCategoryFromMenu('')">${storeText("allProducts")}</button>`+currentCategories.map(category=>`<a class="side-menu-category ${category.parent_id==null?"":"is-subcategory"}" href="${esc(categoryLink(category))}" data-category-id="${esc(category.id)}" ${shopCategoryIds.has(String(category.id))?'aria-current="page"':""} onclick="openCategoryPage(this.dataset.categoryId,event)">${esc(category.displayName||category.name)}</a>`).join("")}
 function selectCategoryFromMenu(id){closeSideMenu();if(id)openShopPage(id);else openShopPage()}
 function refreshCategoriesOnReturn(){if(document.visibilityState==="visible"&&Date.now()-categoriesSyncedAt>1000)loadCats().catch(error=>console.error("Could not refresh storefront categories:",error))}
@@ -1320,9 +1289,6 @@ function updateShopCopy(){
 	[...document.getElementById("shopSort").options].forEach((option,index)=>option.textContent=sortOptions[index]);
 	[...document.getElementById("shopPageSize").options].forEach((option,index)=>option.textContent=pageOptions[index]);
 	document.getElementById("shopPagination").setAttribute("aria-label",french?"Pagination de la boutique":"صفحات المتجر");
-	document.getElementById("shopBrandsTitle").textContent=french?"Choisissez une marque":"اختر العلامة التجارية";
-	document.getElementById("shopBrandsDescription").textContent=french?"Sélectionnez une marque pour afficher ses produits.":"اختر علامة تجارية لعرض منتجاتها فقط.";
-	document.getElementById("shopBrandOptions").setAttribute("aria-label",french?"Marques de coques":"علامات أغطية الهاتف");
 }
 function renderShopFilters(list){
 	const container=document.getElementById("shopCategoryFilters");
@@ -1345,53 +1311,13 @@ function categoryDescendantIds(categoryId){
 	}
 	return ids;
 }
-function renderShopBrandFilters(list){
-	const container=document.getElementById("shopBrandOptions");
-	const french=currentStoreLanguage==="fr";
-	const category=backCoverCategory();
-	const categoryIds=category?categoryDescendantIds(category.id):new Set();
-	container.innerHTML=backCoverBrandOptions().map(brand=>{
-		const count=list.filter(product=>categoryIds.has(String(product.category_id))&&backCoverBrandForProduct(product)===brand.id).length;
-		return `<button type="button" class="shop-brand-option" data-brand="${brand.id}" aria-pressed="${selectedShopBrand===brand.id}" onclick="selectBackCoverBrand('${brand.id}')" ${count===0?"disabled":""}><span>${brand.label}</span><span class="shop-brand-count">${count}</span></button>`;
-	}).join("");
-	document.getElementById("shopBrandsTitle").textContent=french?"Choisissez une marque":"اختر العلامة التجارية";
-	document.getElementById("shopBrandsDescription").textContent=french?"Sélectionnez une marque pour afficher ses produits.":"اختر علامة تجارية لعرض منتجاتها فقط.";
-	container.setAttribute("aria-label",french?"Marques de coques":"علامات أغطية الهاتف");
-}
-function selectBackCoverBrand(brandId){
-	if(!backCoverBrandOptions().some(brand=>brand.id===brandId))return;
-	const category=backCoverCategory();
-	if(!category)return;
-	selectedShopBrand=brandId;
-	shopPage=1;
-	const target=`${categoryLink(category)}?brand=${encodeURIComponent(brandId)}`;
-	if(`${location.pathname}${location.search}`!==target)history.pushState({shop:true,categoryId:category.id,brand:brandId},"",target);
-	renderShopCatalog();
-}
 function renderShopCatalog(){
-	const isBackCover=isBackCoverShopPage();
-	const brandsPanel=document.getElementById("shopBrands");
-	brandsPanel.hidden=!isBackCover;
-	document.getElementById("shopFilters").hidden=!shopMode||isBackCover;
-	document.getElementById("shopToolbar").hidden=!shopMode||(isBackCover&&!selectedShopBrand);
-	if(isBackCover)renderShopBrandFilters(shopCatalog);
-	else renderShopFilters(shopCatalog);
-	if(isBackCover&&!selectedShopBrand){
-		products=[];
-		grid.innerHTML="";
-		document.getElementById("shopResultCount").textContent=currentStoreLanguage==="fr"?"Choisissez une marque":"اختر علامة تجارية";
-		const pagination=document.getElementById("shopPagination");
-		pagination.hidden=true;
-		pagination.innerHTML="";
-		return;
-	}
+	renderShopFilters(shopCatalog);
 	const minInput=document.getElementById("shopMinPrice"),maxInput=document.getElementById("shopMaxPrice");
 	const minPrice=minInput.value===""?null:Number(minInput.value),maxPrice=maxInput.value===""?null:Number(maxInput.value);
-	const backCoverCategoryIds=isBackCover?categoryDescendantIds(backCoverCategory().id):null;
 	let results=shopCatalog.filter(product=>{
 		const price=Number(product.price)||0,oldPrice=Number(product.old_price)||0;
 		return (!shopCategoryIds.size||[...shopCategoryIds].some(categoryId=>categoryDescendantIds(categoryId).has(String(product.category_id))))
-			&&(!isBackCover||backCoverCategoryIds.has(String(product.category_id))&&backCoverBrandForProduct(product)===selectedShopBrand)
 			&&(minPrice===null||price>=minPrice)&&(maxPrice===null||price<=maxPrice)
 			&&(!document.getElementById("shopInStock").checked||Number(product.stock)>0)
 			&&(!document.getElementById("shopDiscountOnly").checked||oldPrice>price);
@@ -1415,7 +1341,7 @@ function renderShopCatalog(){
 function syncShopCategoryUrl(){
 	const selectedCategories=[...shopCategoryIds];
 	const category=selectedCategories.length===1?currentCategories.find(item=>String(item.id)===selectedCategories[0]):null;
-	const target=category?`${categoryLink(category)}${isBackCoverShopPage()&&selectedShopBrand?`?brand=${encodeURIComponent(selectedShopBrand)}`:""}`:"/#shop";
+	const target=category?categoryLink(category):"/#shop";
 	const current=`${location.pathname}${location.search}${location.hash}`;
 	if(current!==target)history.pushState({shop:true,categoryId:category?.id||null},"",target);
 }
@@ -1433,7 +1359,6 @@ function changeShopPage(delta){shopPage=Math.max(1,shopPage+delta);renderShopCat
 function resetShopFilters(){
 	shopCategoryIds.clear();shopPage=1;
 	selectedCategory="";
-	selectedShopBrand="";
 	syncShopCategoryUrl();
 	document.querySelectorAll("#sideMenuCategories [data-category-id]").forEach(button=>button.setAttribute("aria-pressed","false"));
 	document.getElementById("shopMinPrice").value="";document.getElementById("shopMaxPrice").value="";
@@ -1442,13 +1367,10 @@ function resetShopFilters(){
 	if(search.value){search.value="";searchClear.hidden=true;load()}else renderShopCatalog();
 }
 function applyShopPageVisibility(){
-	const isBackCover=isBackCoverShopPage();
 	document.body.classList.toggle("shop-page",shopMode);
-	document.body.classList.toggle("back-cover-brand-page",isBackCover);
 	document.getElementById("shopBanner").hidden=!shopMode;
-	document.getElementById("shopFilters").hidden=!shopMode||isBackCover;
-	document.getElementById("shopBrands").hidden=!isBackCover;
-	document.getElementById("shopToolbar").hidden=!shopMode||(isBackCover&&!selectedShopBrand);
+	document.getElementById("shopFilters").hidden=!shopMode;
+	document.getElementById("shopToolbar").hidden=!shopMode;
 	document.getElementById("bestSellersHeading").hidden=shopMode||!homepageSection("best_sellers").enabled;
 	if(!detailProduct)productsSection.hidden=!shopMode&&!homepageSection("best_sellers").enabled;
 	productsSection.setAttribute("aria-labelledby",shopMode?"shopTitle":"bestSellersTitle");
@@ -1463,8 +1385,6 @@ function openShopPage(categoryId=null,pushHistory=true){
 	shopCategoryIds.clear();
 	const category=categoryId!==null?currentCategories.find(item=>String(item.id)===String(categoryId)):null;
 	if(category)shopCategoryIds.add(String(category.id));
-	const requestedBrand=new URLSearchParams(location.search).get("brand")||"";
-	selectedShopBrand=!pushHistory&&category&&String(category.id)===String(backCoverCategory()?.id)&&backCoverBrandOptions().some(brand=>brand.id===requestedBrand)?requestedBrand:"";
 	shopPage=1;
 	selectedCategory="";
 	renderSideMenuCategories();
@@ -1479,7 +1399,7 @@ function openShopPage(categoryId=null,pushHistory=true){
 function closeShopPage(pushHistory=true){
 	if(!shopMode)return;
 	setMobileTab("home");
-	shopMode=false;selectedCategory="";selectedShopBrand="";shopCategoryIds.clear();renderManualHomepageSections();
+	shopMode=false;selectedCategory="";shopCategoryIds.clear();renderManualHomepageSections();
 	renderSideMenuCategories();
 	applyShopPageVisibility();
 	if(pushHistory){const url=new URL(location.href);url.searchParams.delete("product");if(/^\/category\/[^/]+\/?$/.test(url.pathname))url.pathname="/";url.hash="";history.replaceState({},"",url)}
@@ -1501,7 +1421,7 @@ function goToHome(event){
 	detailProduct=null;productDetail.hidden=true;
 	heroSection.hidden=false;featuresSection.hidden=false;categoryShowcase.hidden=!homepageSection("category_showcase").enabled;
 	newArrivalsSection.hidden=featuredProducts.length===0||!homepageSection("new_products").enabled;productsSection.hidden=!homepageSection("best_sellers").enabled;
-	shopMode=false;selectedCategory="";selectedShopBrand="";shopCategoryIds.clear();renderManualHomepageSections();
+	shopMode=false;selectedCategory="";shopCategoryIds.clear();renderManualHomepageSections();
 	renderSideMenuCategories();
 	document.querySelectorAll("#sideMenuCategories [data-category-id]").forEach(button=>button.setAttribute("aria-pressed","false"));
 	applyShopPageVisibility();
