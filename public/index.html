@@ -680,6 +680,7 @@ body{background:var(--background);color:var(--text)}
   .detail-tab-panel h2 { margin: 0 0 12px; color: #172554; font-size: 22px; line-height: 1.4; }
   .detail-tab-panel h3 { margin: 0 0 10px; color: #172554; font-size: 17px; }
   .detail-tab-description { max-width: 1000px; margin: 0; color: #526078; font-size: 14px; line-height: 1.9; white-space: pre-line; }
+  .product-short-description { margin: 15px 0; color: #666; font-size: 15px; line-height: 1.6; }
   .detail-attributes { width: 100%; max-width: 760px; border-collapse: collapse; font-size: 14px; }
   .detail-attributes th,.detail-attributes td { padding: 12px 14px; border-bottom: 1px solid #e8ebf1; text-align: start; vertical-align: middle; }
   .detail-attributes th { width: 34%; color: #667085; font-weight: 700; }
@@ -1584,7 +1585,7 @@ function openProductDetails(id,updateHistory=true){
     </div>
     <section class="detail-tab-panel" id="detail-panel-description" role="tabpanel" aria-labelledby="detail-tab-description" tabindex="0">
       <h2>${esc(product.name)}</h2>
-      <p class="detail-tab-description">${esc(product.description||storeText("discoverProduct"))}</p>
+      <p class="detail-tab-description product-short-description">${esc(product.description||storeText("discoverProduct"))}</p>
     </section>
     <section class="detail-tab-panel" id="detail-panel-information" role="tabpanel" aria-labelledby="detail-tab-information" tabindex="0" hidden>
       <h3>${detailTabText.details}</h3>
