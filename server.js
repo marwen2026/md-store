@@ -89,8 +89,9 @@ async function serveStorePage(req, res, requestedProductId, requestedSlug = "") 
        FROM products p
        LEFT JOIN categories c ON c.id = p.category_id
        LEFT JOIN categories parent ON parent.id = c.parent_id
-       WHERE p.active = TRUE
-         AND (p.category_id IS NULL OR (c.active = TRUE AND (c.parent_id IS NULL OR parent.active = TRUE)))
+       WHERE p.active = TRUE AND p.storefront_visible = TRUE
+         AND (p.category_id IS NULL OR (c.active = TRUE AND c.storefront_visible = TRUE
+           AND (c.parent_id IS NULL OR (parent.active = TRUE AND parent.storefront_visible = TRUE))))
        ORDER BY p.id`
     );
     const product = products.rows.find(row => productSlug(row.name) === requestedSlug);
@@ -103,8 +104,9 @@ async function serveStorePage(req, res, requestedProductId, requestedSlug = "") 
        FROM products p
        LEFT JOIN categories c ON c.id = p.category_id
        LEFT JOIN categories parent ON parent.id = c.parent_id
-       WHERE p.id = $1 AND p.active = TRUE
-         AND (p.category_id IS NULL OR (c.active = TRUE AND (c.parent_id IS NULL OR parent.active = TRUE)))`,
+       WHERE p.id = $1 AND p.active = TRUE AND p.storefront_visible = TRUE
+         AND (p.category_id IS NULL OR (c.active = TRUE AND c.storefront_visible = TRUE
+           AND (c.parent_id IS NULL OR (parent.active = TRUE AND parent.storefront_visible = TRUE))))`,
       [Number(requestedId)]
     );
     if (result.rowCount) {
@@ -178,13 +180,31 @@ app.get("/uploads/:filename", (req, res) => {
 app.get("/api/product-images/:id", async (req, res) => {
   if (!/^[1-9]\d*$/.test(req.params.id)) return res.status(404).json({ error: "Image not found" });
   const { rows } = await pool.query(
-    "SELECT image_data, content_type FROM product_images WHERE id = $1",
+    `SELECT image.image_data, image.content_type, product.storefront_visible
+     FROM product_images image JOIN products product ON product.id = image.product_id
+     WHERE image.id = $1`,
     [Number(req.params.id)]
   );
   const image = rows[0];
   if (!image?.image_data || !image.content_type) return res.status(404).json({ error: "Image not found" });
+  if (!image.storefront_visible) {
+    const expiresAt = String(req.query.admin_exp || "");
+    const signature = String(req.query.admin_sig || "");
+    const expiresAtNumber = Number(expiresAt);
+    if (!/^\d{13}$/.test(expiresAt) || !/^[a-f0-9]{64}$/.test(signature) ||
+        expiresAtNumber <= Date.now() || expiresAtNumber > Date.now() + 60 * 60 * 1000 + 60 * 1000) {
+      return res.status(404).json({ error: "Image not found" });
+    }
+    const expected = crypto.createHmac("sha256", JWT_SECRET)
+      .update(`${req.params.id}:${expiresAt}`)
+      .digest();
+    const provided = Buffer.from(signature, "hex");
+    if (!crypto.timingSafeEqual(provided, expected)) {
+      return res.status(404).json({ error: "Image not found" });
+    }
+  }
   res.set({
-    "Cache-Control": "public, max-age=31536000, immutable",
+    "Cache-Control": image.storefront_visible ? "public, max-age=31536000, immutable" : "private, no-store",
     "X-Content-Type-Options": "nosniff"
   }).type(image.content_type).send(image.image_data);
 });
@@ -241,6 +261,11 @@ function parseProductInput(body) {
   const categoryId = categoryValue ? Number(categoryValue) : null;
   const colorInput = String(body.colors || "").trim();
   const colors = colorInput ? colorInput.split(",").map(color => color.trim().toUpperCase()) : [];
+  const storefrontVisibilityInput = body.storefront_visible;
+  const storefrontVisibleValues = ["0", "false", "off", "1", "true", "on"];
+  const storefrontVisibleValue = storefrontVisibilityInput == null
+    ? "true"
+    : String(storefrontVisibilityInput).toLowerCase();
     if (!name || !Number.isFinite(price) || price < 0 || price > MAX_MONEY ||
       (costPrice !== null && (!Number.isFinite(costPrice) || costPrice < 0 || costPrice > MAX_MONEY)) ||
       !Number.isFinite(deliveryPrice) || deliveryPrice < 0 || deliveryPrice > MAX_MONEY ||
@@ -249,7 +274,8 @@ function parseProductInput(body) {
       (categoryId !== null && (!Number.isInteger(categoryId) || categoryId < 1 || categoryId > 2147483647)) ||
       colors.length > 12 ||
       colors.some(color => !/^#[0-9A-F]{6}$/.test(color)) ||
-      new Set(colors).size !== colors.length) {
+      new Set(colors).size !== colors.length ||
+      !storefrontVisibleValues.includes(storefrontVisibleValue)) {
     return null;
   }
   return {
@@ -265,6 +291,7 @@ function parseProductInput(body) {
     advertised: ["1", "true", "on"].includes(String(body.advertised).toLowerCase()),
     showNewProducts: ["1", "true", "on"].includes(String(body.show_new_products).toLowerCase()),
     showBestSellers: ["1", "true", "on"].includes(String(body.show_best_sellers).toLowerCase()),
+    storefrontVisible: ["1", "true", "on"].includes(storefrontVisibleValue),
     active: body.active === undefined || ["1", "true", "on"].includes(String(body.active).toLowerCase())
   };
 }
@@ -395,7 +422,7 @@ async function migrateLegacyHeroBackground() {
   }
 }
 
-async function productRows(includeInactive = false) {
+async function productRows(includeInactive = false, includeStoreHidden = false) {
   const salesJoin = includeInactive ? "" : `
      LEFT JOIN (
        SELECT sold.product_id, sold.units_sold
@@ -415,7 +442,9 @@ async function productRows(includeInactive = false) {
      FROM products p LEFT JOIN categories c ON c.id = p.category_id
      LEFT JOIN categories parent ON parent.id = c.parent_id
      ${salesJoin}
-     ${includeInactive ? "" : "WHERE p.active = TRUE AND (p.category_id IS NULL OR (c.active = TRUE AND c.storefront_visible = TRUE AND (c.parent_id IS NULL OR (parent.active = TRUE AND parent.storefront_visible = TRUE))))"}
+     ${includeInactive
+       ? includeStoreHidden ? "" : "WHERE p.storefront_visible = TRUE"
+       : "WHERE p.active = TRUE AND p.storefront_visible = TRUE AND (p.category_id IS NULL OR (c.active = TRUE AND c.storefront_visible = TRUE AND (c.parent_id IS NULL OR (parent.active = TRUE AND parent.storefront_visible = TRUE))))"}
      ORDER BY CASE WHEN EXISTS (SELECT 1 FROM products ordered WHERE ordered.sort_order IS NOT NULL)
        THEN p.sort_order END ASC NULLS LAST,
        ${includeInactive ? "p.id DESC" : "COALESCE(sales.units_sold, 0) DESC, p.id DESC"}`
@@ -430,11 +459,21 @@ async function productRows(includeInactive = false) {
       zoom_percent: image.zoom_percent
     });
   }
+  const adminImageExpiry = includeStoreHidden ? Date.now() + 60 * 60 * 1000 : null;
   return products.rows.map(product => {
     const { cost_price, ...publicProduct } = product;
     return {
       ...(includeInactive ? product : publicProduct),
-      images: imagesByProduct.get(product.id) || []
+      images: (imagesByProduct.get(product.id) || []).map(image => {
+        if (!includeStoreHidden || product.storefront_visible !== false) return image;
+        const signature = crypto.createHmac("sha256", JWT_SECRET)
+          .update(`${image.id}:${adminImageExpiry}`)
+          .digest("hex");
+        return {
+          ...image,
+          path: `${image.path}?admin_exp=${adminImageExpiry}&admin_sig=${signature}`
+        };
+      })
     };
   });
 }
@@ -1686,7 +1725,9 @@ app.get("/api/products", async (req, res) => {
   }
   res.json(products);
 });
-app.get("/api/admin/products", auth, async (req, res) => res.json(await productRows(true)));
+app.get("/api/admin/products", auth, async (req, res) =>
+  res.json(await productRows(true, req.admin.role === "admin"))
+);
 app.put("/api/products/order", auth, role("admin", "manager"), async (req, res) => {
   const ids = req.body.ids;
   if (!Array.isArray(ids) || ids.some(id => !Number.isInteger(id) || id < 1) ||
@@ -1697,7 +1738,11 @@ app.put("/api/products/order", auth, role("admin", "manager"), async (req, res) 
   try {
     await client.query("BEGIN");
     await client.query("LOCK TABLE products IN SHARE ROW EXCLUSIVE MODE");
-    const current = await client.query("SELECT id FROM products ORDER BY id DESC");
+    const includeStoreHidden = req.admin.role === "admin";
+    const current = await client.query(
+      "SELECT id FROM products WHERE ($1::boolean OR storefront_visible = TRUE) ORDER BY id DESC",
+      [includeStoreHidden]
+    );
     const currentIds = current.rows.map(row => row.id);
     if (ids.length !== currentIds.length || ids.some(id => !currentIds.includes(id))) {
       await client.query("ROLLBACK");
@@ -1706,8 +1751,8 @@ app.put("/api/products/order", auth, role("admin", "manager"), async (req, res) 
     await client.query(
       `UPDATE products AS p SET sort_order = ordered.ordinality - 1
        FROM unnest($1::INTEGER[]) WITH ORDINALITY AS ordered(id, ordinality)
-       WHERE p.id = ordered.id`,
-      [ids]
+       WHERE p.id = ordered.id AND ($2::boolean OR p.storefront_visible = TRUE)`,
+      [ids, includeStoreHidden]
     );
     await client.query("COMMIT");
     res.json({ ok: true });
@@ -1719,25 +1764,31 @@ app.put("/api/products/order", auth, role("admin", "manager"), async (req, res) 
   }
 });
 
-async function loadInventoryReport() {
+async function loadInventoryReport(includeStoreHidden = true) {
   const [summary, stockLevels, topProducts, movements] = await Promise.all([
     pool.query(
       `SELECT COUNT(*) FILTER (WHERE active = TRUE)::int AS active_products,
-       COALESCE(SUM(stock) FILTER (WHERE active = TRUE), 0)::bigint AS units_in_stock,
+       COALESCE(SUM(stock) FILTER (WHERE active = TRUE AND ($1::boolean OR storefront_visible = TRUE)), 0)::bigint AS units_in_stock,
        COUNT(*) FILTER (WHERE active = TRUE AND stock = 0)::int AS out_of_stock
-       FROM products`
+       FROM products WHERE ($1::boolean OR storefront_visible = TRUE)`,
+      [includeStoreHidden]
     ),
     pool.query(
       `SELECT p.id, p.name, c.name AS category_name, p.stock
        FROM products p LEFT JOIN categories c ON c.id = p.category_id
-       WHERE p.active = TRUE ORDER BY p.stock ASC, p.name, p.id`
+       WHERE p.active = TRUE AND ($1::boolean OR p.storefront_visible = TRUE)
+       ORDER BY p.stock ASC, p.name, p.id`,
+      [includeStoreHidden]
     ),
     pool.query(
       `SELECT oi.product_id, oi.product_name, COALESCE(SUM(oi.quantity), 0)::bigint AS units_sold
        FROM order_items oi JOIN orders o ON o.id = oi.order_id
+       LEFT JOIN products p ON p.id = oi.product_id
        WHERE o.status NOT IN ('cancelled', 'returned') AND o.inventory_deducted = TRUE
+         AND ($1::boolean OR p.id IS NULL OR p.storefront_visible = TRUE)
        GROUP BY oi.product_id, oi.product_name
-       ORDER BY units_sold DESC, oi.product_name ASC LIMIT 10`
+       ORDER BY units_sold DESC, oi.product_name ASC LIMIT 10`,
+      [includeStoreHidden]
     ),
     pool.query(
       `SELECT m.id, m.product_name, m.movement_type, m.quantity_change, m.stock_before,
@@ -1745,7 +1796,9 @@ async function loadInventoryReport() {
        FROM inventory_movements m
        LEFT JOIN products p ON p.id = m.product_id
        LEFT JOIN categories c ON c.id = p.category_id
-       ORDER BY m.created_at DESC, m.id DESC LIMIT 200`
+       WHERE ($1::boolean OR p.id IS NULL OR p.storefront_visible = TRUE)
+       ORDER BY m.created_at DESC, m.id DESC LIMIT 200`,
+      [includeStoreHidden]
     )
   ]);
   return {
@@ -1767,7 +1820,7 @@ function inventoryMovementLabel(type) {
 }
 
 app.get("/api/admin/inventory", auth, role("admin", "manager"), async (req, res) => {
-  res.json(await loadInventoryReport());
+  res.json(await loadInventoryReport(req.admin.role === "admin"));
 });
 
 app.delete("/api/admin/inventory/movements/:id", auth, role("admin"), async (req, res) => {
@@ -1784,7 +1837,7 @@ app.delete("/api/admin/inventory/movements/:id", auth, role("admin"), async (req
 });
 
 app.get("/api/admin/inventory/export.csv", auth, role("admin", "manager"), async (req, res) => {
-  const report = await loadInventoryReport();
+  const report = await loadInventoryReport(req.admin.role === "admin");
   const rows = [
     ["Rapport", "Produit", "Catégorie", "Stock", "Variation", "Avant", "Après", "Type", "Référence", "Effectué par", "Date"],
     ...report.stockLevels.map(item => ["Stock actuel", item.name, item.category_name || "", item.stock, "", "", "", "", "", "", ""]),
@@ -1803,7 +1856,7 @@ app.get("/api/admin/inventory/export.csv", auth, role("admin", "manager"), async
 });
 
 app.get("/api/admin/inventory/export.pdf", auth, role("admin", "manager"), async (req, res) => {
-  const report = await loadInventoryReport();
+  const report = await loadInventoryReport(req.admin.role === "admin");
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", 'attachment; filename="inventory-report.pdf"');
   const document = new PDFDocument({ size: "A4", margin: 44, bufferPages: true });
@@ -1879,6 +1932,9 @@ app.get("/api/admin/inventory/export.pdf", auth, role("admin", "manager"), async
 app.post("/api/products", auth, role("admin", "manager"), productUpload.array("images", 8), async (req, res) => {
   const product = parseProductInput(req.body);
   if (!product) return res.status(400).json({ error: "الاسم والسعر مطلوبان" });
+  if (req.admin.role !== "admin" && !product.storefrontVisible) {
+    return res.status(403).json({ error: "إخفاء المنتجات من الموقع متاح للمدير فقط" });
+  }
   let client;
   try {
     client = await pool.connect();
@@ -1888,13 +1944,14 @@ app.post("/api/products", auth, role("admin", "manager"), productUpload.array("i
     }
     const result = await client.query(
       `INSERT INTO products(name, description, category_id, price, cost_price, delivery_price, old_price, stock, colors, advertised,
-         show_new_products, show_best_sellers, sort_order)
-       VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
+         show_new_products, show_best_sellers, storefront_visible, sort_order)
+       VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,
          CASE WHEN EXISTS (SELECT 1 FROM products WHERE sort_order IS NOT NULL)
            THEN COALESCE((SELECT MAX(sort_order) + 1 FROM products), 0) ELSE NULL END)
        RETURNING id`,
       [product.name, product.description, product.categoryId, product.price, product.costPrice, product.deliveryPrice,
-        product.oldPrice, product.stock, product.colors, product.advertised, product.showNewProducts, product.showBestSellers]
+        product.oldPrice, product.stock, product.colors, product.advertised, product.showNewProducts,
+        product.showBestSellers, product.storefrontVisible]
     );
     const productId = result.rows[0].id;
     await insertProductImages(client, productId, req.files);
@@ -1928,8 +1985,16 @@ app.put("/api/products/:id", auth, role("admin", "manager"), productUpload.array
   try {
     client = await pool.connect();
     await client.query("BEGIN");
-    const existing = await client.query("SELECT id, name, stock FROM products WHERE id = $1 FOR UPDATE", [req.params.id]);
+    const existing = await client.query(
+      "SELECT id, name, stock, storefront_visible FROM products WHERE id = $1 FOR UPDATE",
+      [req.params.id]
+    );
     if (!existing.rowCount) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "المنتج غير موجود" });
+    }
+    if (req.admin.role !== "admin" &&
+        (!existing.rows[0].storefront_visible || !product.storefrontVisible)) {
       await client.query("ROLLBACK");
       return res.status(404).json({ error: "المنتج غير موجود" });
     }
@@ -1938,10 +2003,11 @@ app.put("/api/products/:id", auth, role("admin", "manager"), productUpload.array
     }
     await client.query(
       `UPDATE products SET name=$1, description=$2, category_id=$3, price=$4, cost_price=$5, delivery_price=$6, old_price=$7,
-       stock=$8, active=$9, advertised=$10, colors=$11, show_new_products=$12, show_best_sellers=$13 WHERE id=$14`,
+       stock=$8, active=$9, advertised=$10, colors=$11, show_new_products=$12, show_best_sellers=$13,
+       storefront_visible=$14 WHERE id=$15`,
       [product.name, product.description, product.categoryId, product.price, product.costPrice, product.deliveryPrice,
         product.oldPrice, product.stock, product.active, product.advertised, product.colors,
-        product.showNewProducts, product.showBestSellers, req.params.id]
+        product.showNewProducts, product.showBestSellers, product.storefrontVisible, req.params.id]
     );
     await insertProductImages(client, req.params.id, req.files);
     const previousProduct = existing.rows[0];
@@ -1974,7 +2040,11 @@ app.delete("/api/products/:id", auth, role("admin", "manager"), async (req, res)
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    const product = await client.query("SELECT id FROM products WHERE id = $1 FOR UPDATE", [productId]);
+    const product = await client.query(
+      `SELECT id, storefront_visible FROM products WHERE id = $1
+       AND ($2::boolean OR storefront_visible = TRUE) FOR UPDATE`,
+      [productId, req.admin.role === "admin"]
+    );
     if (!product.rowCount) {
       await client.query("ROLLBACK");
       return res.status(404).json({ error: "المنتج غير موجود" });
@@ -1995,8 +2065,14 @@ app.delete("/api/products/:id", auth, role("admin", "manager"), async (req, res)
 });
 app.delete("/api/products/:id/images/:imageId", auth, role("admin", "manager"), async (req, res) => {
   const result = await pool.query(
-    "DELETE FROM product_images WHERE id = $1 AND product_id = $2 RETURNING id",
-    [req.params.imageId, req.params.id]
+    `DELETE FROM product_images image
+     WHERE image.id = $1 AND image.product_id = $2
+       AND ($3::boolean OR EXISTS (
+         SELECT 1 FROM products product
+         WHERE product.id = image.product_id AND product.storefront_visible = TRUE
+       ))
+     RETURNING image.id`,
+    [req.params.imageId, req.params.id, req.admin.role === "admin"]
   );
   if (!result.rowCount) return res.status(404).json({ error: "الصورة غير موجودة" });
   res.json({ ok: true });
@@ -2011,8 +2087,14 @@ app.put("/api/products/:id/images/:imageId/zoom", auth, role("admin", "manager")
     return res.status(400).json({ error: "مستوى تكبير الصورة غير صالح" });
   }
   const result = await pool.query(
-    "UPDATE product_images SET zoom_percent = $1 WHERE id = $2 AND product_id = $3 RETURNING id",
-    [zoomPercent, imageId, productId]
+    `UPDATE product_images image SET zoom_percent = $1
+     WHERE image.id = $2 AND image.product_id = $3
+       AND ($4::boolean OR EXISTS (
+         SELECT 1 FROM products product
+         WHERE product.id = image.product_id AND product.storefront_visible = TRUE
+       ))
+     RETURNING image.id`,
+    [zoomPercent, imageId, productId, req.admin.role === "admin"]
   );
   if (!result.rowCount) return res.status(404).json({ error: "الصورة غير موجودة" });
   res.json({ ok: true });
@@ -2055,7 +2137,10 @@ app.post("/api/orders", async (req, res) => {
     }
     const productsById = new Map();
     for (const [productId, quantity] of [...requestedStock].sort(([left], [right]) => left - right)) {
-        const result = await client.query("SELECT * FROM products WHERE id = $1 AND active = TRUE FOR UPDATE", [productId]);
+        const result = await client.query(
+          "SELECT * FROM products WHERE id = $1 AND active = TRUE AND storefront_visible = TRUE FOR UPDATE",
+          [productId]
+        );
         const product = result.rows[0];
         if (!product || quantity > product.stock) {
           throw new OrderValidationError(`الكمية غير متوفرة: ${product?.name || "منتج"}`);
@@ -2936,11 +3021,13 @@ async function initializeDatabase() {
       advertised BOOLEAN NOT NULL DEFAULT FALSE,
       show_new_products BOOLEAN NOT NULL DEFAULT FALSE,
       show_best_sellers BOOLEAN NOT NULL DEFAULT FALSE,
+      storefront_visible BOOLEAN NOT NULL DEFAULT TRUE,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
     ALTER TABLE products ADD COLUMN IF NOT EXISTS advertised BOOLEAN NOT NULL DEFAULT FALSE;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS show_new_products BOOLEAN NOT NULL DEFAULT FALSE;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS show_best_sellers BOOLEAN NOT NULL DEFAULT FALSE;
+    ALTER TABLE products ADD COLUMN IF NOT EXISTS storefront_visible BOOLEAN NOT NULL DEFAULT TRUE;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS delivery_price NUMERIC(12, 2) NOT NULL DEFAULT 0;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS cost_price NUMERIC(12, 2);
     ALTER TABLE products ADD COLUMN IF NOT EXISTS sort_order INTEGER;
