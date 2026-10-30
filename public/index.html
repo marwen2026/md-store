@@ -1556,7 +1556,7 @@ function openProductDetails(id,updateHistory=true){
   <div class="detail-layout"><div class="detail-gallery">
     <div class="detail-main-image" data-image-index="0">${hasDiscount?`<span class="sale-badge">-${discount}%</span>`:""}<img id="detailMainImage" src="${esc(images[0].path)}" alt="${esc(product.name)}" onclick="previewImage(this,${product.id})"></div>
     ${images.length>1?`<div class="detail-thumbnails" role="list">${images.map((image,index)=>`<button type="button" class="detail-thumb ${index===0?"active":""}" onclick="setDetailImage(${index})" aria-label="${storeText("productImagePreview")} ${index+1}"><img src="${esc(image.path)}" alt=""></button>`).join("")}</div>`:""}
-  </div><div class="detail-info"><h1 class="detail-title">${esc(product.name)}</h1>
+  </div><div class="detail-info"><h1 class="detail-title">${esc(product.name)}</h1>${product.description?`<p class="product-short-description">${esc(product.description)}</p>`:""}
     <div class="detail-meta"><span>${storeText("ref")} #${Number(product.id)}</span><span class="stock-state">${stock>0?`✓ ${storeText("inStock")}`:storeText("currentlyUnavailable")}</span></div>
     <div class="detail-price-line"><strong class="detail-price">${esc(formatStoreMoney(price))}</strong>${hasDiscount?`<span class="detail-old">${esc(formatStoreMoney(oldPrice))}</span><span class="detail-discount">-${discount}%</span>`:""}</div>
     ${hasDiscount?`<div class="detail-saving">${storeText("youSave")} ${esc(formatStoreMoney(oldPrice-price))}</div>`:""}
