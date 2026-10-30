@@ -261,6 +261,9 @@ function parseProductInput(body) {
   const categoryId = categoryValue ? Number(categoryValue) : null;
   const colorInput = String(body.colors || "").trim();
   const colors = colorInput ? colorInput.split(",").map(color => color.trim().toUpperCase()) : [];
+  const zoomPercent = body.zoom_percent == null || body.zoom_percent === ""
+    ? 100
+    : Number(body.zoom_percent);
   const storefrontVisibilityInput = body.storefront_visible;
   const storefrontVisibleValues = ["0", "false", "off", "1", "true", "on"];
   const storefrontVisibleValue = storefrontVisibilityInput == null
@@ -275,6 +278,7 @@ function parseProductInput(body) {
       colors.length > 12 ||
       colors.some(color => !/^#[0-9A-F]{6}$/.test(color)) ||
       new Set(colors).size !== colors.length ||
+      !Number.isInteger(zoomPercent) || ![70, 80, 90, 100].includes(zoomPercent) ||
       !storefrontVisibleValues.includes(storefrontVisibleValue)) {
     return null;
   }
@@ -291,6 +295,7 @@ function parseProductInput(body) {
     advertised: ["1", "true", "on"].includes(String(body.advertised).toLowerCase()),
     showNewProducts: ["1", "true", "on"].includes(String(body.show_new_products).toLowerCase()),
     showBestSellers: ["1", "true", "on"].includes(String(body.show_best_sellers).toLowerCase()),
+    zoomPercent,
     storefrontVisible: ["1", "true", "on"].includes(storefrontVisibleValue),
     active: body.active === undefined || ["1", "true", "on"].includes(String(body.active).toLowerCase())
   };
@@ -299,12 +304,12 @@ function parseProductInput(body) {
 class OrderValidationError extends Error {}
 class InventoryAvailabilityError extends Error {}
 
-async function insertProductImages(client, productId, files = []) {
+async function insertProductImages(client, productId, files = [], zoomPercent = 100) {
   for (const file of files) {
     const result = await client.query(
-      `INSERT INTO product_images(product_id, path, image_data, content_type)
-       VALUES($1, '', $2, $3) RETURNING id`,
-      [productId, file.buffer, file.mimetype]
+      `INSERT INTO product_images(product_id, path, image_data, content_type, zoom_percent)
+       VALUES($1, '', $2, $3, $4) RETURNING id`,
+      [productId, file.buffer, file.mimetype, zoomPercent]
     );
     const imagePath = `/api/product-images/${result.rows[0].id}`;
     await client.query("UPDATE product_images SET path = $1 WHERE id = $2", [imagePath, result.rows[0].id]);
@@ -1944,17 +1949,17 @@ app.post("/api/products", auth, role("admin", "manager"), productUpload.array("i
     }
     const result = await client.query(
       `INSERT INTO products(name, description, category_id, price, cost_price, delivery_price, old_price, stock, colors, advertised,
-         show_new_products, show_best_sellers, storefront_visible, sort_order)
-       VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,
+         show_new_products, show_best_sellers, storefront_visible, zoom_percent, sort_order)
+       VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
          CASE WHEN EXISTS (SELECT 1 FROM products WHERE sort_order IS NOT NULL)
            THEN COALESCE((SELECT MAX(sort_order) + 1 FROM products), 0) ELSE NULL END)
        RETURNING id`,
       [product.name, product.description, product.categoryId, product.price, product.costPrice, product.deliveryPrice,
         product.oldPrice, product.stock, product.colors, product.advertised, product.showNewProducts,
-        product.showBestSellers, product.storefrontVisible]
+        product.showBestSellers, product.storefrontVisible, product.zoomPercent]
     );
     const productId = result.rows[0].id;
-    await insertProductImages(client, productId, req.files);
+    await insertProductImages(client, productId, req.files, product.zoomPercent);
     if (product.stock > 0) {
       await client.query(
         `INSERT INTO inventory_movements(product_id, product_name, movement_type, quantity_change, stock_before, stock_after, actor)
@@ -2004,12 +2009,12 @@ app.put("/api/products/:id", auth, role("admin", "manager"), productUpload.array
     await client.query(
       `UPDATE products SET name=$1, description=$2, category_id=$3, price=$4, cost_price=$5, delivery_price=$6, old_price=$7,
        stock=$8, active=$9, advertised=$10, colors=$11, show_new_products=$12, show_best_sellers=$13,
-       storefront_visible=$14 WHERE id=$15`,
+       storefront_visible=$14, zoom_percent=$15 WHERE id=$16`,
       [product.name, product.description, product.categoryId, product.price, product.costPrice, product.deliveryPrice,
         product.oldPrice, product.stock, product.active, product.advertised, product.colors,
-        product.showNewProducts, product.showBestSellers, product.storefrontVisible, req.params.id]
+        product.showNewProducts, product.showBestSellers, product.storefrontVisible, product.zoomPercent, req.params.id]
     );
-    await insertProductImages(client, req.params.id, req.files);
+    await insertProductImages(client, req.params.id, req.files, product.zoomPercent);
     const previousProduct = existing.rows[0];
     if (previousProduct.stock !== product.stock) {
       await client.query(
@@ -2098,6 +2103,42 @@ app.put("/api/products/:id/images/:imageId/zoom", auth, role("admin", "manager")
   );
   if (!result.rowCount) return res.status(404).json({ error: "الصورة غير موجودة" });
   res.json({ ok: true });
+});
+app.put("/api/products/:id/zoom", auth, role("admin", "manager"), async (req, res) => {
+  const productId = Number(req.params.id);
+  const zoomPercent = req.body?.zoom_percent;
+  if (!Number.isInteger(productId) || productId < 1 ||
+      !Number.isInteger(zoomPercent) || ![70, 80, 90, 100].includes(zoomPercent)) {
+    return res.status(400).json({ error: "مستوى تكبير المنتج غير صالح" });
+  }
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const product = await client.query(
+      `UPDATE products SET zoom_percent = $1 WHERE id = $2
+       AND ($3::boolean OR storefront_visible = TRUE) RETURNING id`,
+      [zoomPercent, productId, req.admin.role === "admin"]
+    );
+    if (!product.rowCount) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "المنتج غير موجود" });
+    }
+    await client.query(
+      "UPDATE product_images SET zoom_percent = $1 WHERE product_id = $2",
+      [zoomPercent, productId]
+    );
+    await client.query("COMMIT");
+    res.json({ ok: true });
+  } catch (error) {
+    try {
+      await client.query("ROLLBACK");
+    } catch (rollbackError) {
+      console.error("Could not roll back product zoom update:", rollbackError);
+    }
+    throw error;
+  } finally {
+    client.release();
+  }
 });
 
 app.post("/api/orders", async (req, res) => {
@@ -3022,12 +3063,14 @@ async function initializeDatabase() {
       show_new_products BOOLEAN NOT NULL DEFAULT FALSE,
       show_best_sellers BOOLEAN NOT NULL DEFAULT FALSE,
       storefront_visible BOOLEAN NOT NULL DEFAULT TRUE,
+      zoom_percent INTEGER NOT NULL DEFAULT 100 CHECK (zoom_percent IN (70, 80, 90, 100)),
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
     ALTER TABLE products ADD COLUMN IF NOT EXISTS advertised BOOLEAN NOT NULL DEFAULT FALSE;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS show_new_products BOOLEAN NOT NULL DEFAULT FALSE;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS show_best_sellers BOOLEAN NOT NULL DEFAULT FALSE;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS storefront_visible BOOLEAN NOT NULL DEFAULT TRUE;
+    ALTER TABLE products ADD COLUMN IF NOT EXISTS zoom_percent INTEGER NOT NULL DEFAULT 100 CHECK (zoom_percent IN (70, 80, 90, 100));
     ALTER TABLE products ADD COLUMN IF NOT EXISTS delivery_price NUMERIC(12, 2) NOT NULL DEFAULT 0;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS cost_price NUMERIC(12, 2);
     ALTER TABLE products ADD COLUMN IF NOT EXISTS sort_order INTEGER;
