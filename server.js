@@ -420,11 +420,15 @@ async function productRows(includeInactive = false) {
        THEN p.sort_order END ASC NULLS LAST,
        ${includeInactive ? "p.id DESC" : "COALESCE(sales.units_sold, 0) DESC, p.id DESC"}`
   );
-  const images = await pool.query("SELECT id, product_id, path FROM product_images ORDER BY id");
+  const images = await pool.query("SELECT id, product_id, path, zoom_percent FROM product_images ORDER BY id");
   const imagesByProduct = new Map();
   for (const image of images.rows) {
     if (!imagesByProduct.has(image.product_id)) imagesByProduct.set(image.product_id, []);
-    imagesByProduct.get(image.product_id).push({ id: image.id, path: image.path });
+    imagesByProduct.get(image.product_id).push({
+      id: image.id,
+      path: image.path,
+      zoom_percent: image.zoom_percent
+    });
   }
   return products.rows.map(product => {
     const { cost_price, ...publicProduct } = product;
@@ -1997,6 +2001,22 @@ app.delete("/api/products/:id/images/:imageId", auth, role("admin", "manager"), 
   if (!result.rowCount) return res.status(404).json({ error: "الصورة غير موجودة" });
   res.json({ ok: true });
 });
+app.put("/api/products/:id/images/:imageId/zoom", auth, role("admin", "manager"), async (req, res) => {
+  const productId = Number(req.params.id);
+  const imageId = Number(req.params.imageId);
+  const zoomPercent = req.body?.zoom_percent;
+  if (!Number.isInteger(productId) || productId < 1 ||
+      !Number.isInteger(imageId) || imageId < 1 ||
+      ![70, 80, 90, 100].includes(zoomPercent)) {
+    return res.status(400).json({ error: "مستوى تكبير الصورة غير صالح" });
+  }
+  const result = await pool.query(
+    "UPDATE product_images SET zoom_percent = $1 WHERE id = $2 AND product_id = $3 RETURNING id",
+    [zoomPercent, imageId, productId]
+  );
+  if (!result.rowCount) return res.status(404).json({ error: "الصورة غير موجودة" });
+  res.json({ ok: true });
+});
 
 app.post("/api/orders", async (req, res) => {
   const { customer, items } = req.body || {};
@@ -2935,8 +2955,10 @@ async function initializeDatabase() {
     CREATE TABLE IF NOT EXISTS product_images (
       id SERIAL PRIMARY KEY,
       product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-      path TEXT NOT NULL
+      path TEXT NOT NULL,
+      zoom_percent INTEGER NOT NULL DEFAULT 100 CHECK (zoom_percent IN (70, 80, 90, 100))
     );
+    ALTER TABLE product_images ADD COLUMN IF NOT EXISTS zoom_percent INTEGER NOT NULL DEFAULT 100 CHECK (zoom_percent IN (70, 80, 90, 100));
     ALTER TABLE product_images ADD COLUMN IF NOT EXISTS image_data BYTEA;
     ALTER TABLE product_images ADD COLUMN IF NOT EXISTS content_type TEXT;
     CREATE TABLE IF NOT EXISTS customers (

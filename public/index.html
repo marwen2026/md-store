@@ -1422,6 +1422,7 @@ function goToHome(event){
 	window.scrollTo({top:0,behavior:"smooth"});
 }
 function productImages(product){return Array.isArray(product.images)&&product.images.length?product.images:[{path:"https://via.placeholder.com/800x800?text=M%26D"}]}
+function productImageScale(image){const zoom=Number(image?.zoom_percent);return [70,80,90,100].includes(zoom)?zoom/100:1}
 function openProductDetails(id,updateHistory=true){
   const product=[...products,...shopCatalog,...featuredProducts].find(item=>Number(item.id)===Number(id));
   if(!product)return;
@@ -1511,6 +1512,7 @@ function openProductDetails(id,updateHistory=true){
     <div class="products related-products-grid"></div>
   </section>`:""}`;
   if(relatedProducts.length)renderProductGrid(relatedProducts,productDetail.querySelector(".related-products-grid"));
+  setDetailImage(0);
   productDetail.hidden=false;
   updateFavoriteButton(document.querySelector(".detail-favorite"));
   updateCompareControls();
@@ -1560,6 +1562,7 @@ function setDetailImage(index){
   detailImageIndex=(index+images.length)%images.length;
   const mainImage=document.getElementById("detailMainImage");
   mainImage.src=images[detailImageIndex].path;
+  mainImage.style.transform=`scale(${productImageScale(images[detailImageIndex])})`;
   document.querySelector(".detail-main-image").dataset.imageIndex=String(detailImageIndex);
   document.querySelectorAll(".detail-thumb").forEach((thumbnail,i)=>thumbnail.classList.toggle("active",i===detailImageIndex));
 }
@@ -1654,11 +1657,11 @@ window.addEventListener("popstate",event=>{
 });
 let previewProductId=null,previewImageIndex=0,imagePreviewHistoryEntry=false;
 function changeProductImage(productId,delta,event){event?.stopPropagation();const product=findStoreProduct(productId);const pic=document.querySelector(`.pic[data-product-id="${Number(productId)}"]`);if(!product||!pic||!product.images?.length)return;const index=(Number(pic.dataset.imageIndex||0)+delta+product.images.length)%product.images.length;pic.dataset.imageIndex=String(index);const image=pic.querySelector("img");image.src=product.images[index].path;pic.querySelector(".gallery-count").textContent=`${index+1} / ${product.images.length}`}
-function showImagePreview(productId,imageIndex){const product=findStoreProduct(productId);if(!product)return;previewProductId=Number(productId);previewImageIndex=Math.max(0,Math.min(Number(imageIndex)||0,productImages(product).length-1));const image=productImages(product)[previewImageIndex];previewImageEl.src=image.path;previewImageEl.alt=product.name;previewImageEl.classList.remove("zoomed");const hasGallery=productImages(product).length>1;previewPrev.hidden=!hasGallery;previewNext.hidden=!hasGallery;imageViewer.classList.add("open")}
+function showImagePreview(productId,imageIndex){const product=findStoreProduct(productId);if(!product)return;previewProductId=Number(productId);previewImageIndex=Math.max(0,Math.min(Number(imageIndex)||0,productImages(product).length-1));const image=productImages(product)[previewImageIndex];previewImageEl.src=image.path;previewImageEl.alt=product.name;previewImageEl.classList.remove("zoomed");previewImageEl.style.transform=`scale(${productImageScale(image)})`;const hasGallery=productImages(product).length>1;previewPrev.hidden=!hasGallery;previewNext.hidden=!hasGallery;imageViewer.classList.add("open")}
 function previewImage(image,productId){const pic=image.closest(".pic"),detailGallery=image.closest(".detail-main-image"),imageIndex=Number(detailGallery?.dataset.imageIndex||pic?.dataset.imageIndex||0);showImagePreview(productId,imageIndex);if(imagePreviewHistoryEntry)history.replaceState({...history.state,previewProductId:Number(productId),previewImageIndex:imageIndex},"",location.href);else{history.pushState({...history.state,imagePreview:true,previewProductId:Number(productId),previewImageIndex:imageIndex},"",location.href);imagePreviewHistoryEntry=true}}
-function changePreviewImage(delta){const product=findStoreProduct(previewProductId);if(!product?.images?.length)return;previewImageIndex=(previewImageIndex+delta+product.images.length)%product.images.length;previewImageEl.src=product.images[previewImageIndex].path;previewImageEl.alt=product.name;previewImageEl.classList.remove("zoomed")}
-function zoomPreview(){previewImageEl.classList.toggle("zoomed")}
-function closeImagePreview(restoreHistory=true){if(restoreHistory&&imagePreviewHistoryEntry)history.back();imageViewer.classList.remove("open");previewImageEl.src="";previewProductId=null}
+function changePreviewImage(delta){const product=findStoreProduct(previewProductId);if(!product?.images?.length)return;previewImageIndex=(previewImageIndex+delta+product.images.length)%product.images.length;const image=product.images[previewImageIndex];previewImageEl.src=image.path;previewImageEl.alt=product.name;previewImageEl.classList.remove("zoomed");previewImageEl.style.transform=`scale(${productImageScale(image)})`}
+function zoomPreview(){const zoomed=previewImageEl.classList.toggle("zoomed"),product=findStoreProduct(previewProductId),image=product?productImages(product)[previewImageIndex]:null;previewImageEl.style.transform=`scale(${productImageScale(image)*(zoomed?1.35:1)})`}
+function closeImagePreview(restoreHistory=true){if(restoreHistory&&imagePreviewHistoryEntry)history.back();imageViewer.classList.remove("open");previewImageEl.src="";previewImageEl.style.transform="";previewProductId=null}
 function updateFavoriteButton(button){if(!button)return;const active=favoriteProductIds.includes(Number(button.dataset.productId));button.textContent=active?"♥":"♡";button.setAttribute("aria-pressed",String(active))}
 function syncFavoriteUI(){document.querySelectorAll(".heart[data-product-id],.detail-favorite[data-product-id]").forEach(updateFavoriteButton);const favCount=document.getElementById("fav");if(favCount){favCount.textContent=String(favoriteProductIds.length);favCount.hidden=favoriteProductIds.length===0}}
 function fav(button){const productId=Number(button.dataset.productId||button.closest("[data-product-id]")?.dataset.productId||detailProduct?.id);if(!Number.isInteger(productId)||productId<1)return;if(favoriteProductIds.includes(productId))favoriteProductIds=favoriteProductIds.filter(id=>id!==productId);else favoriteProductIds.push(productId);localStorage.setItem("md_favorites",JSON.stringify(favoriteProductIds));syncFavoriteUI()}
