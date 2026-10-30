@@ -252,6 +252,7 @@ function safeNum(value, fallback = 0) {
 
 function parseProductInput(body) {
   const name = String(body.name || "").trim();
+  const shortDescription = String(body.short_description || "").trim();
   const price = safeNum(body.price, NaN);
   const costPrice = body.cost_price === "" || body.cost_price == null ? null : safeNum(body.cost_price, NaN);
   const deliveryPrice = body.delivery_price === "" || body.delivery_price == null ? 0 : safeNum(body.delivery_price, NaN);
@@ -284,6 +285,7 @@ function parseProductInput(body) {
   }
   return {
     name,
+    shortDescription,
     description: String(body.description || ""),
     categoryId,
     price,
@@ -1706,7 +1708,7 @@ app.get("/api/products", async (req, res) => {
   const query = String(req.query.q || "").trim().toLowerCase();
   const category = req.query.category;
   if (query) products = products.filter(product =>
-    `${product.name} ${product.description} ${product.category_name || ""}`.toLowerCase().includes(query)
+    `${product.name} ${product.short_description || ""} ${product.description} ${product.category_name || ""}`.toLowerCase().includes(query)
   );
   if (category) {
     const categoryId = Number(category);
@@ -1948,13 +1950,13 @@ app.post("/api/products", auth, role("admin", "manager"), productUpload.array("i
       await client.query("UPDATE products SET advertised = FALSE WHERE advertised = TRUE");
     }
     const result = await client.query(
-      `INSERT INTO products(name, description, category_id, price, cost_price, delivery_price, old_price, stock, colors, advertised,
+      `INSERT INTO products(name, short_description, description, category_id, price, cost_price, delivery_price, old_price, stock, colors, advertised,
          show_new_products, show_best_sellers, storefront_visible, zoom_percent, sort_order)
-       VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
+       VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
          CASE WHEN EXISTS (SELECT 1 FROM products WHERE sort_order IS NOT NULL)
            THEN COALESCE((SELECT MAX(sort_order) + 1 FROM products), 0) ELSE NULL END)
        RETURNING id`,
-      [product.name, product.description, product.categoryId, product.price, product.costPrice, product.deliveryPrice,
+      [product.name, product.shortDescription, product.description, product.categoryId, product.price, product.costPrice, product.deliveryPrice,
         product.oldPrice, product.stock, product.colors, product.advertised, product.showNewProducts,
         product.showBestSellers, product.storefrontVisible, product.zoomPercent]
     );
@@ -2007,10 +2009,10 @@ app.put("/api/products/:id", auth, role("admin", "manager"), productUpload.array
       await client.query("UPDATE products SET advertised = FALSE WHERE advertised = TRUE AND id <> $1", [req.params.id]);
     }
     await client.query(
-      `UPDATE products SET name=$1, description=$2, category_id=$3, price=$4, cost_price=$5, delivery_price=$6, old_price=$7,
-       stock=$8, active=$9, advertised=$10, colors=$11, show_new_products=$12, show_best_sellers=$13,
-       storefront_visible=$14, zoom_percent=$15 WHERE id=$16`,
-      [product.name, product.description, product.categoryId, product.price, product.costPrice, product.deliveryPrice,
+      `UPDATE products SET name=$1, short_description=$2, description=$3, category_id=$4, price=$5, cost_price=$6, delivery_price=$7, old_price=$8,
+       stock=$9, active=$10, advertised=$11, colors=$12, show_new_products=$13, show_best_sellers=$14,
+       storefront_visible=$15, zoom_percent=$16 WHERE id=$17`,
+      [product.name, product.shortDescription, product.description, product.categoryId, product.price, product.costPrice, product.deliveryPrice,
         product.oldPrice, product.stock, product.active, product.advertised, product.colors,
         product.showNewProducts, product.showBestSellers, product.storefrontVisible, product.zoomPercent, req.params.id]
     );
@@ -3050,6 +3052,7 @@ async function initializeDatabase() {
     CREATE TABLE IF NOT EXISTS products (
       id SERIAL PRIMARY KEY,
       name TEXT NOT NULL,
+      short_description TEXT NOT NULL DEFAULT '',
       description TEXT NOT NULL DEFAULT '',
       category_id INTEGER REFERENCES categories(id) ON DELETE SET NULL,
       price NUMERIC(12, 2) NOT NULL,
@@ -3066,6 +3069,7 @@ async function initializeDatabase() {
       zoom_percent INTEGER NOT NULL DEFAULT 100 CHECK (zoom_percent IN (70, 80, 90, 100)),
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+    ALTER TABLE products ADD COLUMN IF NOT EXISTS short_description TEXT NOT NULL DEFAULT '';
     ALTER TABLE products ADD COLUMN IF NOT EXISTS advertised BOOLEAN NOT NULL DEFAULT FALSE;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS show_new_products BOOLEAN NOT NULL DEFAULT FALSE;
     ALTER TABLE products ADD COLUMN IF NOT EXISTS show_best_sellers BOOLEAN NOT NULL DEFAULT FALSE;
