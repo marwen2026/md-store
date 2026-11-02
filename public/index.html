@@ -543,7 +543,10 @@ body{background:var(--background);color:var(--text)}
     .modern-brand, .modern-menu, .modern-header-tools { min-width: 0; }
     .modern-brand .modern-brand-text { font-size: 34px; }
     .modern-menu { width: 100%; height: auto; min-height: 48px; flex-wrap: wrap; }
-    .mega-menu { top: calc(100% + 2px); }
+    .mega-menu { top: calc(100% + 2px); width: min(760px, calc(100vw - 32px)); padding: 18px; }
+    .mega-menu-layout { grid-template-columns: 1fr; gap: 14px; }
+    .mega-menu-columns { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+    .mega-menu-promo { min-height: 130px; }
     .modern-header-tools { width: 100%; max-width: 100%; flex-wrap: wrap; justify-content: center; }
     .modern-hero-inner { grid-template-columns: 1fr; padding-bottom: 35px; }
     .modern-copy { text-align: center; }
@@ -589,13 +592,14 @@ body{background:var(--background);color:var(--text)}
     .side-menu-shop-toggle { cursor: pointer; }
     .side-menu-chevron { width: 10px; height: 10px; flex: 0 0 auto; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform .18s ease; }
     .side-menu-shop-toggle[aria-expanded="true"] .side-menu-chevron { transform: rotate(225deg) translate(-2px,-2px); }
-    .side-menu-categories { display: none; flex: 0 0 auto; margin: 0; padding: 8px 0 12px; border: 0; overflow: visible; }
+    .side-menu-categories { display: none; flex: 0 0 auto; margin: 0; padding: 10px 0 14px; border: 0; overflow: visible; }
     .side-menu.shop-categories-open .side-menu-categories { display: flex; }
     .side-menu-categories h3 { display: none; }
-    .side-menu-category-list { display: grid; max-height: 32vh; grid-template-columns: 1fr; gap: 0; overflow: auto; padding: 0; scrollbar-width: thin; }
-    .side-menu-category { display: block; min-height: 48px; padding: 10px 12px; border: 0; border-bottom: 1px solid #eef0f3; border-radius: 0; background: #f8f9fb; color: #34415c; font-size: 14px; font-weight: 650; text-align: start; text-decoration: none; }
+    .side-menu-category-list { display: grid; max-height: 38vh; grid-template-columns: 1fr; gap: 5px; overflow: auto; padding: 0 2px; scrollbar-width: thin; }
+    .side-menu-category { display: block; min-height: 46px; padding: 10px 14px; border: 1px solid #edf0f4; border-radius: 10px; background: #f8f9fb; color: #34415c; font-size: 14px; font-weight: 650; text-align: start; text-decoration: none; transition: background .16s ease,border-color .16s ease,color .16s ease,transform .16s ease; }
     .side-menu-category:after { inset-inline-end: 12px; opacity: .7; color: #8290a3; font-size: 18px; }
-    .side-menu-category:hover, .side-menu-category:focus-visible, .side-menu-category[aria-pressed="true"] { border-color: #eef0f3; border-inline-start: 3px solid #c99a3b; background: #f8f9fb; color: #10243b; }
+    .side-menu-category:hover, .side-menu-category:focus-visible, .side-menu-category[aria-pressed="true"], .side-menu-category[aria-current="page"] { border-color: #e8d8b5; background: #fffaf0; color: #10243b; }
+    .side-menu-category:focus-visible { outline: 2px solid #c99a3b; outline-offset: 2px; }
     .side-menu-actions { display: grid; flex: 0 0 auto; gap: 10px; padding: 18px 24px calc(18px + env(safe-area-inset-bottom)); border-top: 1px solid #e7eaf0; background: #f7f8fb; }
     .side-menu-actions a { display: flex; min-height: 56px; align-items: center; justify-content: center; gap: 10px; border: 0; border-radius: 999px; color: #fff; font-size: 16px; font-weight: 800; }
     .side-menu-actions a svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -2092,7 +2096,7 @@ async function checkout(){
 		alert(storeText("sendOrderFailed"));
 	}
 }
-const previewImageEl=document.getElementById("previewImage");document.addEventListener("keydown",event=>{if(event.key==="Escape"){closeDrawers();closeImagePreview()}});
+const previewImageEl=document.getElementById("previewImage");document.addEventListener("keydown",event=>{if(event.key==="Escape"){const item=document.querySelector(".nav-shop-item.is-open");if(item){item.classList.remove("is-open");item.querySelector(".nav-shop-trigger")?.setAttribute("aria-expanded","false");item.querySelector(".nav-shop-trigger")?.focus()}closeDrawers();closeImagePreview()}});
 const storeHeader=document.querySelector(".header"),storeNav=document.querySelector(".nav");
 let storeNavigationLinks=[],storeNavigationLoaded=false,storeNavigationActiveIndex=0;
 function categoryMegaMenuGroups(){
@@ -2145,7 +2149,7 @@ function renderStoreNavigation(){
 		const isExternal=/^https:\/\//i.test(link.href);
 		const isNewArrivalsLink=/(nouveautés|nouveautes|new arrivals|new products|جديدنا|وصل حديثاً)/i.test(`${link.label_ar} ${link.label_fr}`)&&link.href==="#products";
 		const href=isNewArrivalsLink?"#newArrivals":link.href;
-		const trigger=hasMegaMenu?' data-shop-trigger="true" aria-haspopup="true" aria-expanded="false"':"";
+		const trigger=hasMegaMenu?' data-shop-trigger="true" aria-haspopup="true" aria-expanded="false" aria-controls="categoryMegaMenu"':"";
 		const isPromotionsLink=/(promotion|promo|offre|sale|deal|عروض|تخفيض)/i.test(`${link.label_ar} ${link.label_fr}`);
 		const label=isPromotionsLink?`${esc(getLabel(link))}<span class="modern-promo-badge" aria-label="Hot">HOT</span>`:esc(getLabel(link));
 		return `<a class="${isActive?"active":""}${hasMegaMenu?" nav-shop-trigger":""}" href="${esc(href)}"${isActive?' aria-current="page"':""}${isExternal?' target="_blank" rel="noopener noreferrer"':""}${trigger}><span>${label}</span>${hasMegaMenu?'<span class="nav-shop-chevron" aria-hidden="true"></span>':""}</a>`;
