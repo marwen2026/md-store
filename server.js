@@ -581,9 +581,9 @@ async function readStoreSettings() {
 }
 
 const DEFAULT_HOMEPAGE_SECTIONS = [
-  { id: "category_showcase", title: "Explorez nos univers", subtitle: "Une sélection pour chaque envie", enabled: true, order: 1 },
-  { id: "new_products", title: "Nouveautés", subtitle: "Fraîchement arrivés", enabled: true, order: 2, productCount: 12 },
-  { id: "best_sellers", title: "Meilleures ventes", subtitle: "Sélection M&D", enabled: true, order: 3, productCount: 12 }
+  { id: "best_sellers", title: "Meilleures ventes", subtitle: "Sélection M&D", enabled: true, order: 1, productCount: 12 },
+  { id: "category_showcase", title: "Explorez nos univers", subtitle: "Une sélection pour chaque envie", enabled: true, order: 2 },
+  { id: "new_products", title: "Nouveautés", subtitle: "Fraîchement arrivés", enabled: true, order: 3, productCount: 12 }
 ];
 const MANUAL_HOMEPAGE_SECTION_TYPES = new Set([
   "hero_banner",
@@ -663,9 +663,19 @@ function parseManualHomepageSections(value) {
 
 function parseHomepageSections(value) {
   if (value === undefined) return DEFAULT_HOMEPAGE_SECTIONS.map(section => ({ ...section }));
-  const sections = JSON.parse(value);
+  let sections = JSON.parse(value);
   if (!Array.isArray(sections) || sections.length > DEFAULT_HOMEPAGE_SECTIONS.length) {
     throw new Error("Saved homepage section settings are invalid");
+  }
+  const savedOrderById = new Map(sections.map(section => [section?.id, section?.order]));
+  if (sections.length === DEFAULT_HOMEPAGE_SECTIONS.length &&
+    savedOrderById.get("best_sellers") === 1 &&
+    savedOrderById.get("new_products") === 2 &&
+    savedOrderById.get("category_showcase") === 3) {
+    sections = sections.map(section => ({
+      ...section,
+      order: section.id === "best_sellers" ? 1 : section.id === "category_showcase" ? 2 : 3
+    }));
   }
   const allowedIds = new Set(DEFAULT_HOMEPAGE_SECTIONS.map(section => section.id));
   const byId = new Map();
