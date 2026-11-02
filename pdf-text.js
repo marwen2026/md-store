@@ -16,26 +16,17 @@ function registerArabicFonts(document) {
 }
 
 function getPdfTextRuns(value, latinFont) {
-  const shapedText = ArabicShaper.convertArabic(String(value ?? ""));
+  let shapedText = ArabicShaper.convertArabic(String(value ?? ""));
   const levels = bidi.getEmbeddingLevels(shapedText, "rtl");
-  const codepoints = Array.from(shapedText);
-  const codepointIndices = [];
-  let utf16Index = 0;
-  for (const [index, codepoint] of codepoints.entries()) {
-    for (let offset = 0; offset < codepoint.length; offset += 1) {
-      codepointIndices[utf16Index + offset] = index;
-    }
-    utf16Index += codepoint.length;
-  }
   for (const [start, end] of bidi.getReorderSegments(shapedText, levels)) {
-    const first = codepointIndices[start];
-    const last = codepointIndices[end];
-    codepoints.splice(first, last - first + 1, ...codepoints.slice(first, last + 1).reverse());
+    shapedText = shapedText.slice(0, start)
+      + Array.from(shapedText.slice(start, end + 1)).reverse().join("")
+      + shapedText.slice(end + 1);
   }
 
   const runs = [];
   let previousWasArabic = false;
-  for (const codepoint of codepoints) {
+  for (const codepoint of Array.from(shapedText)) {
     const isArabic = ARABIC_SCRIPT.test(codepoint)
       || (/\p{M}/u.test(codepoint) && previousWasArabic);
     const font = isArabic ? (latinFont === "Helvetica-Bold" ? "Arabic-Bold" : "Arabic") : latinFont;
@@ -64,6 +55,7 @@ function pdfTextHeight(document, value, options) {
     totalWidth += document.widthOfString(run.text);
     lineHeight = Math.max(lineHeight, document.currentLineHeight(true));
   }
+  document.font(latinFont).fontSize(fontSize);
   return Math.max(1, Math.ceil(totalWidth / width)) * lineHeight;
 }
 
@@ -98,6 +90,7 @@ function drawPdfText(document, value, x, y, options) {
       document.text(run.text, runOptions);
     }
   });
+  document.font(latinFont).fontSize(textOptions.fontSize);
 }
 
 module.exports = { drawPdfText, pdfTextHeight, registerArabicFonts };
