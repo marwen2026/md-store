@@ -8,6 +8,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const PDFDocument = require("pdfkit");
+const { drawPdfText, pdfTextHeight, registerArabicFonts } = require("./pdf-text");
 const { colorName, normalizeColorHex } = require("./public/color-names");
 
 const app = express();
@@ -1867,6 +1868,7 @@ app.get("/api/admin/inventory/export.pdf", auth, role("admin", "manager"), async
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", 'attachment; filename="inventory-report.pdf"');
   const document = new PDFDocument({ size: "A4", margin: 44, bufferPages: true });
+  registerArabicFonts(document);
   document.pipe(res);
   const left = 44;
   const pageWidth = document.page.width - 88;
@@ -1886,12 +1888,12 @@ app.get("/api/admin/inventory/export.pdf", auth, role("admin", "manager"), async
     const height = options.height || 22;
     ensureSpace(height);
     if (options.header) document.fillColor("#f1f5f9").rect(left, y - 3, pageWidth, height).fill();
-    document.fillColor(options.header ? "#172554" : "#334155")
-      .font(options.header ? "Helvetica-Bold" : "Helvetica").fontSize(options.header ? 8 : 8);
+    const font = options.header ? "Helvetica-Bold" : "Helvetica";
+    document.fillColor(options.header ? "#172554" : "#334155").font(font).fontSize(8);
     let x = left + 5;
     values.forEach((value, index) => {
-      document.text(String(value ?? "-"), x, y, {
-        width: widths[index] - 8, height: height - 3, ellipsis: true, lineBreak: false
+      drawPdfText(document, String(value ?? "-"), x, y, {
+        font, fontSize: 8, width: widths[index] - 8, height: height - 3, ellipsis: true, lineBreak: false
       });
       x += widths[index];
     });
@@ -2764,6 +2766,7 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
   res.setHeader("Content-Disposition", `inline; filename=invoice-${order.id}.pdf`);
 
   const document = new PDFDocument({ size: "A4", margin: 44, bufferPages: true });
+  registerArabicFonts(document);
   document.pipe(res);
 
   const accent = "#c99a3b";
@@ -2823,12 +2826,14 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
 
       document.fillColor(accent).font("Helvetica-Bold").fontSize(8)
         .text("FACTURÉ À", left + 15, infoY + 14, { width: cardWidth - 30, characterSpacing: 0.8 });
-      document.fillColor(text).font("Helvetica-Bold").fontSize(12)
-        .text(String(order.customer_name || "-"), left + 15, infoY + 34, { width: cardWidth - 30, height: 18, ellipsis: true });
+      document.fillColor(text).font("Helvetica-Bold").fontSize(12);
+      drawPdfText(document, String(order.customer_name || "-"), left + 15, infoY + 34, {
+        font: "Helvetica-Bold", fontSize: 12, width: cardWidth - 30, height: 18, ellipsis: true
+      });
       document.fillColor("#596579").font("Helvetica").fontSize(9)
         .text(`Téléphone : ${order.phone || "-"}`, left + 15, infoY + 59, { width: cardWidth - 30, height: 14, ellipsis: true });
-      document.text(`Adresse : ${[order.address, order.city].filter(Boolean).join(", ") || "-"}`,
-        left + 15, infoY + 78, { width: cardWidth - 30, height: 24, ellipsis: true });
+      drawPdfText(document, `Adresse : ${[order.address, order.city].filter(Boolean).join(", ") || "-"}`,
+        left + 15, infoY + 78, { font: "Helvetica", fontSize: 9, width: cardWidth - 30, height: 24, ellipsis: true });
 
       const detailX = left + cardWidth + 29;
       document.fillColor(accent).font("Helvetica-Bold").fontSize(8)
@@ -2855,7 +2860,7 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
     const variantColor = normalizeColorHex(item.variant_color);
     const variantLabel = variantColor ? `Couleur : ${colorName(variantColor, "fr")}` : "";
     const productOptions = { width: columns.product.width, font: "Helvetica-Bold", fontSize: 9 };
-    const productHeight = document.heightOfString(productName, productOptions);
+    const productHeight = pdfTextHeight(document, productName, productOptions);
     const rowHeight = Math.max(40, productHeight + (variantLabel ? 20 : 18));
     const reservedSpace = itemIndex === items.rows.length - 1 ? 230 : 132;
     if (y + rowHeight + reservedSpace > footerY) {
@@ -2866,8 +2871,10 @@ app.get("/api/orders/:id/invoice", auth, async (req, res) => {
       document.fillColor("#fafbfd").roundedRect(left, y, contentWidth, rowHeight, 6).fill();
     }
     const productNameY = y + (variantLabel ? 6 : Math.max(12, (rowHeight - productHeight) / 2));
-    document.fillColor(text).font("Helvetica-Bold").fontSize(9)
-      .text(productName, columns.product.x, productNameY, { ...productOptions, height: productHeight, ellipsis: true });
+    document.fillColor(text).font("Helvetica-Bold").fontSize(9);
+    drawPdfText(document, productName, columns.product.x, productNameY, {
+      ...productOptions, height: productHeight, ellipsis: true
+    });
     if (variantLabel) {
       const variantY = productNameY + productHeight + 1;
       document.fillColor(variantColor).circle(columns.product.x + 3, variantY + 4, 2.5).fill();
