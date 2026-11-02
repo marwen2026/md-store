@@ -1948,9 +1948,9 @@ function applyProductGridSettings(){
 }
 function homepageSection(id){
 	const defaults={
-		best_sellers:{id,title:"Meilleures ventes",subtitle:"Sélection M&D",enabled:true,order:1,productCount:12},
-		category_showcase:{id,title:"Explorez nos univers",subtitle:"Une sélection pour chaque envie",enabled:true,order:2},
-		new_products:{id,title:"Nouveautés",subtitle:"Fraîchement arrivés",enabled:true,order:3,productCount:12}
+		category_showcase:{id,title:"Explorez nos univers",subtitle:"Une sélection pour chaque envie",enabled:true,order:1},
+		new_products:{id,title:"Nouveautés",subtitle:"Fraîchement arrivés",enabled:true,order:2,productCount:12},
+		best_sellers:{id,title:"Meilleures ventes",subtitle:"Sélection M&D",enabled:true,order:3,productCount:12}
 	};
 	return cfg.homepageSections.find(section=>section.id===id)||defaults[id]||{id,title:id,subtitle:"",enabled:true,order:99};
 }
