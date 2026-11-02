@@ -147,6 +147,7 @@ html[dir="rtl"] .close{float:right}html[dir="ltr"] .close{float:left}
 @media(max-width:800px){.product-detail{margin:18px auto 30px;padding:0 16px}.detail-layout{grid-template-columns:1fr;gap:24px}.detail-main-image{height:min(88vw,520px);min-height:300px}.detail-thumbnails{grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}.detail-thumb{height:70px}.detail-title{font-size:25px}.detail-price-line{align-items:flex-start;flex-direction:column;gap:8px;margin-top:16px}.detail-price{font-size:clamp(24px,7vw,30px);line-height:1.25}.detail-old{align-self:flex-start;margin:0;padding:3px 9px;border-radius:999px;background:#f3f4f6;color:#8b95a5;font-size:15px;font-weight:600}.detail-description{margin:16px 0}.direct-order{margin-top:17px}}
 @media(max-width:600px){.detail-tabs{margin-top:36px}.detail-tab-list{justify-content:flex-start;gap:22px;padding-inline:16px}.detail-tab{min-height:54px;font-size:11px}.detail-tab-panel{min-height:130px;padding:21px 16px}.detail-tab-panel h2{font-size:19px}.detail-attributes th,.detail-attributes td{padding:10px 8px;font-size:12px}.detail-shipping-card{gap:10px;padding:14px}.detail-tab-icon{width:36px;height:36px;flex-basis:36px}}
 @media(max-width:420px){.product-detail{padding:0 12px}.detail-main-image{min-height:260px;border-radius:16px}.detail-thumb{height:58px}.detail-actions{grid-template-columns:auto minmax(0,1fr) auto;gap:7px}.detail-quantity{height:46px}.detail-quantity button{width:32px;height:34px}.detail-add{min-height:46px;font-size:13px}.detail-favorite{width:44px;height:44px}.direct-order{padding:15px}}
+.detail-navigation{margin-bottom:0}.product-detail .detail-navigation .breadcrumb{flex:1;margin:0 0 20px;color:#888}.product-detail .breadcrumb button{color:#666;font-weight:400}.product-detail .breadcrumb button:hover{color:#0f2a66}.product-detail .breadcrumb .current-product{color:#333;font-weight:600}
 </style>
 <style>
 .brand .md{font-size:54px;color:#C99A3B;text-shadow:0 3px 12px #C99A3B24;transition:color .2s ease,text-shadow .2s ease}
@@ -1545,10 +1546,10 @@ function openProductDetails(id,updateHistory=true){
   const detailAvailability=stock>0?storeText("inStock"):storeText("currentlyUnavailable");
   const detailColors=colors.length?`<div class="detail-attribute-colors">${colors.map(color=>`<span class="detail-attribute-color"><span class="color-name-swatch" style="background-color:${StoreColor.normalizeColorHex(color)}" aria-hidden="true"></span>${esc(StoreColor.colorName(color,currentStoreLanguage))}</span>`).join("")}</div>`:"—";
   productDetail.innerHTML=`<div class="detail-navigation">
-  <nav class="detail-crumbs" aria-label="${storeText("navigationPath")}">
+  <nav class="detail-crumbs breadcrumb" aria-label="${storeText("navigationPath")}">
     <button type="button" onclick="closeProductDetails(true,'home')">${storeText("home")}</button><span aria-hidden="true">/</span>
     <button type="button" onclick="closeProductDetails(true,'products')">${storeText("allProducts")}</button><span aria-hidden="true">/</span>
-    <strong aria-current="page">${esc(product.name)}</strong>
+    <strong class="current-product" aria-current="page">${esc(product.name)}</strong>
   </nav>
     <button class="detail-close" type="button" onclick="closeProductDetails()" aria-label="${storeText("closeProductDetails")}" title="${storeText("close")}">×</button>
   </div>
