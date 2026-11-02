@@ -744,7 +744,7 @@ body{background:var(--background);color:var(--text)}
     <input id="search" type="search" autocomplete="off" placeholder="Recherche" aria-label="Rechercher un produit ou une marque">
     <button class="search-clear" id="searchClear" type="button" aria-label="Effacer la recherche" hidden>×</button>
   </div>
-  <a class="modern-brand" href="/#shop" aria-label="MA-DOR Store — Retour aux produits" title="Retour aux produits" onclick="goToProducts(event)">
+  <a class="modern-brand" href="/" aria-label="MA-DOR Store — Accueil" title="Accueil" onclick="goToHome(event)">
     <span class="modern-brand-text">MA<span class="gold">-</span>DOR</span>
     <small class="modern-brand-tagline" id="storeBrandTagline">Achetez malin</small>
   </a>
@@ -1480,7 +1480,7 @@ function openShopPage(categoryId=null,pushHistory=true){
 	selectedCategory="";
 	renderSideMenuCategories();
 	applyShopPageVisibility();updateShopCopy();
-	if(pushHistory&&(entering||categoryId!==null||/^\/category\/[^/]+\/?$/.test(location.pathname))){
+	if(pushHistory&&(entering||categoryId!==null||/^\/(?:category|product)\/[^/]+\/?$/.test(location.pathname))){
 		const target=category?categoryLink(category):"/#shop";
 		history.pushState({shop:true,categoryId:category?.id||null},"",target);
 	}
@@ -1499,15 +1499,16 @@ function closeShopPage(pushHistory=true){
 function goToProducts(event){
 	event?.preventDefault();
 	closeCart();closeSideMenu();
+	if(detailProduct){detailProduct=null;productDetail.hidden=true;}
 	openShopPage(null,true);
 }
 function goToHome(event){
 	event?.preventDefault();
 	closeCart();closeSideMenu();
 	setMobileTab("home");
-	const url=new URL(location.href),wasNotHome=Boolean(url.search||url.hash||detailProduct||shopMode||/^\/category\/[^/]+\/?$/.test(url.pathname));
+	const url=new URL(location.href),wasNotHome=Boolean(url.search||url.hash||detailProduct||shopMode||/^\/(?:category|product)\/[^/]+\/?$/.test(url.pathname));
 	url.searchParams.delete("product");url.hash="";
-	if(/^\/category\/[^/]+\/?$/.test(url.pathname))url.pathname="/";
+	if(/^\/(?:category|product)\/[^/]+\/?$/.test(url.pathname))url.pathname="/";
 	if(wasNotHome)history.pushState({},"",url.pathname+url.search);
 	detailProduct=null;productDetail.hidden=true;
 	heroSection.hidden=false;featuresSection.hidden=false;categoryShowcase.hidden=!homepageSection("category_showcase").enabled;
@@ -1551,8 +1552,8 @@ function openProductDetails(id,updateHistory=true){
   const detailColors=colors.length?`<div class="detail-attribute-colors">${colors.map(color=>`<span class="detail-attribute-color"><span class="color-name-swatch" style="background-color:${StoreColor.normalizeColorHex(color)}" aria-hidden="true"></span>${esc(StoreColor.colorName(color,currentStoreLanguage))}</span>`).join("")}</div>`:"—";
   productDetail.innerHTML=`<div class="detail-navigation">
   <nav class="detail-crumbs breadcrumb" aria-label="${storeText("navigationPath")}">
-    <button type="button" onclick="closeProductDetails(true,'home')">${storeText("home")}</button><span aria-hidden="true">/</span>
-    <button type="button" onclick="closeProductDetails(true,'products')">${storeText("allProducts")}</button><span aria-hidden="true">/</span>
+    <button type="button" onclick="goToHome(event)">${storeText("home")}</button><span aria-hidden="true">/</span>
+    <button type="button" onclick="goToProducts(event)">${storeText("store")}</button><span aria-hidden="true">/</span>
     <strong class="current-product" aria-current="page">${esc(product.name)}</strong>
   </nav>
     <button class="detail-close" type="button" onclick="closeProductDetails()" aria-label="${storeText("closeProductDetails")}" title="${storeText("close")}">×</button>
