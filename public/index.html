@@ -1045,10 +1045,13 @@ const storefrontCategoryNames=[
 	{ar:"الحقائب والمنتجات الجلدية",fr:"Sacs & Maroquinerie",aliases:["Sacs et maroquinerie"]},
 	{ar:"أحذية",fr:"Chaussures",aliases:["Chaussure"]},
 	{ar:"النظارات",fr:"Lunettes",aliases:["Lunette"]},
-	{ar:"منزل",fr:"Maison",aliases:["المنزل","البيت"]},
+	{ar:"المنزل والمطبخ",fr:"Maison & Cuisine",aliases:["Maison","المنزل","البيت"]},
 	{ar:"الديكور",fr:"Décoration",aliases:["Decoration"]},
 	{ar:"الإضاءة",fr:"Luminaires",aliases:["Luminaire","Eclairage"]},
 	{ar:"المطبخ",fr:"Cuisine",aliases:[]},
+	{ar:"إكسسوارات المطبخ",fr:"Accessoires Cuisine",aliases:["Accessoires cuisine"]},
+	{ar:"أغطية وإكسسوارات الهواتف",fr:"Caches & Coques",aliases:["Back Cover","Coques et accessoires"]},
+	{ar:"صندوق الأدوات",fr:"Boîte à Outils",aliases:["Boite a Outils"]},
 	{ar:"الجمال",fr:"Beauté",aliases:["Cosmétiques","التجميل"]},
 	{ar:"العطور",fr:"Parfums",aliases:["Parfum"]},
 	{ar:"العناية",fr:"Soins",aliases:["Soin"]},
@@ -1086,6 +1089,19 @@ function categoryShowcaseImage(category,index){
 		:"photo-1519389950473-47ba0277781c";
 	return `https://images.unsplash.com/${image}?auto=format&fit=crop&w=900&q=85`;
 }
+function categoryShowcaseItems(){
+	const priorityNames=[
+		["back cover","caches & coques","coques et accessoires"],
+		["maison","maison & cuisine"],
+		["accessoires cuisine"],
+		["boîte à outils","boite a outils"]
+	].map(names=>currentCategories.find(category=>names.includes(normalizeCategoryName(category.name))));
+	const priority=priorityNames.filter(Boolean);
+	const priorityIds=new Set(priority.map(category=>String(category.id)));
+	return [...priority,...currentCategories.filter(category=>
+		category.parent_id==null&&category.show_in_showcase!==false&&!priorityIds.has(String(category.id))
+	)];
+}
 function renderCategoryShowcase(){
 	const grid=document.getElementById("categoryShowcaseGrid");
 	if(!grid)return;
@@ -1094,7 +1110,7 @@ function renderCategoryShowcase(){
 	document.getElementById("categoryShowcaseKicker").textContent=isFrench?"NOS UNIVERS":"اكتشفوا عوالمنا";
 	document.getElementById("categoryShowcaseTitle").textContent=section.title;
 	document.getElementById("categoryShowcaseDescription").textContent=section.subtitle;
-	grid.innerHTML=currentCategories.filter(category=>category.parent_id==null&&category.show_in_showcase!==false).map((category,index)=>{
+	grid.innerHTML=categoryShowcaseItems().map((category,index)=>{
 		const image=categoryShowcaseImage(category,index);
 		const categoryIds=categoryDescendantIds(category.id);
 		const productCount=featuredProducts.filter(product=>categoryIds.has(String(product.category_id))).length;
@@ -1129,7 +1145,7 @@ function renderManualHomepageSections(){
 		}
 		const heading=`<header class="manual-home-section-heading"><h2>${title}</h2>${subtitle?`<p>${subtitle}</p>`:""}</header>`;
 		if(section.type==="category_showcase"){
-			const categories=currentCategories.filter(category=>category.parent_id==null&&category.show_in_showcase!==false);
+			const categories=categoryShowcaseItems();
 			const cards=categories.map((category,index)=>{
 				const image=categoryShowcaseImage(category,index),categoryIds=categoryDescendantIds(category.id);
 				const count=featuredProducts.filter(product=>categoryIds.has(String(product.category_id))).length;
