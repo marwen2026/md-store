@@ -1103,6 +1103,12 @@ function renderCategoryShowcase(){
 		return `<a class="category-showcase-card" href="${categoryHref}" data-category-id="${esc(category.id)}" aria-label="${esc(category.displayName||category.name)} — ${esc(countLabel)}" onclick="openCategoryPage(this.dataset.categoryId,event)"><img class="category-showcase-image" src="${esc(image)}" alt="" loading="lazy"><span class="category-showcase-corner" aria-hidden="true"></span><strong>${esc(category.displayName||category.name)}</strong><small>${countLabel}</small><span class="category-showcase-cta">${isFrench?"Découvrir la catégorie":"اكتشفوا القسم"} <span aria-hidden="true">${isFrench?"→":"←"}</span></span></a>`;
 	}).join("");
 }
+function sortByOrder(items){
+	return [...items].sort((a,b)=>{
+		const orderA=Number(a.order)||9999,orderB=Number(b.order)||9999;
+		return orderA-orderB||(a.title||"").localeCompare(b.title||"","fr",{sensitivity:"base"});
+	});
+}
 function renderManualHomepageSections(){
 	const container=document.getElementById("manualHomepageSections");
 	if(!container)return;
@@ -1115,7 +1121,7 @@ function renderManualHomepageSections(){
 	};
 	container.className="manual-home-sections";
 	container.hidden=Boolean(detailProduct)||shopMode||!sections.some(section=>section.enabled);
-	container.innerHTML=sections.filter(section=>section.enabled).sort((left,right)=>left.order-right.order).map(section=>{
+	container.innerHTML=sortByOrder(sections.filter(section=>section.enabled)).map(section=>{
 		const id=esc(section.id),title=esc(section.title),subtitle=esc(section.subtitle||"");
 		if(section.type==="manual"||section.type==="hero_banner"){
 			const image=esc(section.image),imagePosition=["left","right"].includes(section.imagePosition)?section.imagePosition:"center",imageVerticalPosition=["top","bottom"].includes(section.imageVerticalPosition)?section.imageVerticalPosition:"center",buttonText=esc(section.buttonText),buttonLink=esc(section.buttonLink);
@@ -1947,10 +1953,9 @@ function applyHomepageSectionSettings(){
 	document.getElementById("bestSellersHeading").hidden=shopMode||!bestSellers.enabled;
 	categoryShowcase.hidden=Boolean(detailProduct)||!categorySection.enabled;
 	const sectionElements={category_showcase:categoryShowcase,new_products:newArrivalsSection,best_sellers:productsSection};
-	homeProductSections.append(...cfg.homepageSections
+	homeProductSections.append(...sortByOrder(cfg.homepageSections
 		.filter(section=>sectionElements[section.id])
-		.sort((left,right)=>left.order-right.order)
-		.map(section=>sectionElements[section.id]));
+	).map(section=>sectionElements[section.id]));
 	if(!detailProduct)productsSection.hidden=!shopMode&&!bestSellers.enabled;
 	renderNewArrivals();
 	renderManualHomepageSections();

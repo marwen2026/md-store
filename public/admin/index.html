@@ -591,6 +591,16 @@ async function storeSettingsLoad(){
   renderHeroSettingsStatus();
   renderCampaignImageManager();
 }
+function sortByOrder(items){
+  return [...items].sort((a,b)=>{
+    const orderA=Number(a.order)||9999,orderB=Number(b.order)||9999;
+    return orderA-orderB||(a.title||"").localeCompare(b.title||"","fr",{sensitivity:"base"});
+  });
+}
+function validateOrders(sections){
+  const orders=sections.map(section=>Number(section.order));
+  return new Set(orders).size===sections.length&&orders.every(order=>Number.isInteger(order)&&order>=1&&order<=sections.length);
+}
 function renderHomepageSectionSettings(sections){
   if(!Array.isArray(sections))throw new Error("Invalid homepage section settings response");
   const sectionList=document.getElementById("homepageSectionsList");
@@ -608,7 +618,7 @@ function renderHomepageSectionSettings(sections){
     label.append(caption,input);
     return label;
   };
-  sectionList.replaceChildren(...[...sections].sort((a,b)=>a.order-b.order).map(section=>{
+  sectionList.replaceChildren(...sortByOrder(sections).map(section=>{
     const row=document.createElement("div");
     row.className="homepage-section-row";
     row.dataset.homepageSection=section.id;
@@ -656,10 +666,9 @@ async function saveHomepageSections(){
       enabled:row.querySelector('[data-field="enabled"]').checked
     };
   });
-  const orders=sections.map(section=>section.order);
   if(rows.some(row=>![...row.querySelectorAll("input[required]")].every(input=>input.reportValidity()))||
-    new Set(orders).size!==rows.length||orders.some(order=>!Number.isInteger(order)||order<1||order>rows.length)){
-    if(new Set(orders).size!==rows.length)alert(t("homepageSectionsOrderInvalid").replace("{count}",String(rows.length)));
+    !validateOrders(sections)){
+    if(new Set(sections.map(section=>section.order)).size!==rows.length)alert(t("homepageSectionsOrderInvalid").replace("{count}",String(rows.length)));
     return;
   }
   const button=document.getElementById("saveHomepageSectionsBtn");
@@ -686,7 +695,7 @@ function manualSectionTypeOptions(selected){
 function renderManualHomepageSections(sections){
  if(!Array.isArray(sections))throw new Error("Invalid manual homepage sections response");
  const list=document.getElementById("manualHomepageSectionsList");
- list.innerHTML=sections.slice().sort((a,b)=>a.order-b.order).map(section=>`
+ list.innerHTML=sortByOrder(sections).map(section=>`
    <div class="manual-homepage-section-row" data-manual-homepage-section="${esc(section.id)}" data-manual-image="${esc(section.image||"")}">
      <h4>${esc(section.title||t("manualSectionTypeManual"))}</h4>
      <label><span data-manual-label="manualSectionType"></span><select data-manual-field="type">${manualSectionTypeOptions(section.type)}</select></label>
@@ -801,8 +810,7 @@ async function saveManualHomepageSections(){
    const type=row.querySelector('[data-manual-field="type"]').value;
    return (type==="manual"||type==="hero_banner")&&!row.dataset.manualImage&&!row.querySelector('[data-manual-field="imageFile"]').files.length;
  })){alert(t("manualSectionImageRequired"));return}
- const orders=sections.map(section=>section.order);
- if(new Set(orders).size!==rows.length||orders.some(order=>!Number.isInteger(order)||order<1||order>rows.length)){
+ if(!validateOrders(sections)){
    alert(t("manualSectionInvalidOrder"));return;
  }
  const form=new FormData();
