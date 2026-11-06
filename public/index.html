@@ -287,12 +287,14 @@ body{background:var(--background);color:var(--text)}
   .nav-shop-trigger:hover, .nav-shop-trigger[aria-expanded="true"] { background: transparent; color: #bd8a2a !important; }
   .nav-shop-chevron { width: 8px; height: 8px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform .18s ease; }
   .nav-shop-trigger[aria-expanded="true"] .nav-shop-chevron { transform: rotate(225deg) translate(-1px,-1px); }
-  .mega-menu { position: absolute; z-index: 30; top: calc(100% - 2px); left: 50%; width: min(1080px, calc(100vw - 40px)); padding: 22px; border: 1px solid #e9e7e2; border-radius: 22px; background: #fff; box-shadow: 0 24px 60px rgba(12,28,46,.18); opacity: 0; visibility: hidden; pointer-events: none; transform: translate(-50%, 10px); transition: opacity .18s ease, transform .18s ease, visibility .18s ease; }
+  .mega-menu { position: absolute; z-index: 30; top: calc(100% - 2px); left: 50%; width: min(1080px, calc(100vw - 40px)); max-height: calc(100vh - 110px); overflow-y: auto; padding: 22px; border: 1px solid #e9e7e2; border-radius: 22px; background: #fff; box-shadow: 0 24px 60px rgba(12,28,46,.18); opacity: 0; visibility: hidden; pointer-events: none; transform: translate(-50%, 10px); transition: opacity .18s ease, transform .18s ease, visibility .18s ease; }
   .nav-shop-item:hover .mega-menu, .nav-shop-item:focus-within .mega-menu, .nav-shop-item.is-open .mega-menu { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 0); }
   .mega-menu-layout { display: grid; grid-template-columns: minmax(0,1fr) 220px; gap: 22px; }
   .mega-menu-columns { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 20px; }
   .mega-menu-column { min-width: 0; padding: 4px 8px; }
   .mega-menu-title { margin: 0 0 12px; padding-bottom: 11px; border-bottom: 1px solid #e7eaf0; color: #c88e08; font-size: 12px; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }
+  .mega-menu-title a { display: block; color: inherit; text-decoration: none; }
+  .mega-menu-title a:hover { color: #10243b; }
   .mega-menu-links { display: grid; gap: 2px; }
   .mega-menu-links a, .mega-menu-all { width: 100%; border: 0; background: transparent; color: #4b5870; text-align: start; font-size: 13px; font-weight: 600; cursor: pointer; }
   .mega-menu-links a { display: block; padding: 8px 0; text-decoration: none; }
@@ -2122,34 +2124,30 @@ const previewImageEl=document.getElementById("previewImage");document.addEventLi
 const storeHeader=document.querySelector(".header"),storeNav=document.querySelector(".nav");
 let storeNavigationLinks=[],storeNavigationLoaded=false,storeNavigationActiveIndex=0;
 function categoryMegaMenuGroups(){
-	const groups=[
-		{key:"highTech",titleFr:"HIGH-TECH",titleAr:"إلكترونيات",items:[]},
-		{key:"fashion",titleFr:"MODE",titleAr:"أزياء",items:[]},
-		{key:"home",titleFr:"MAISON",titleAr:"المنزل",items:[]},
-		{key:"beauty",titleFr:"BEAUTÉ",titleAr:"الجمال",items:[]}
-	];
-	const rules=[
-		/(électron|electron|inform|ordinateur|smartphone|téléphone|telephone|audio|\bson\b|gaming|jeu|هاتف|حاسوب|إلكترون|الكترون|صوت|ألعاب|العاب)/i,
-		/(mode|vêtement|vetement|chauss|sac|montre|lunette|access|sport|ملابس|أزياء|ازياء|حذاء|حقائب|ساعات|إكسسوار|اكسسوار|رياضة)/i,
-		/(maison|décor|decor|luminaire|cuisine|منزل|ديكور|مطبخ|إضاءة|اضاءة)/i,
-		/(beauté|beaute|parfum|soin|cosmét|cosmet|جمال|عطور|عناية|تجميل)/i
-	];
-	currentCategories.forEach((category,index)=>{
-		const name=`${category.name||""} ${category.displayName||""}`;
-		const groupIndex=rules.findIndex(rule=>rule.test(name));
-		if(groupIndex>=0)groups[groupIndex].items.push(category);
-		else groups[index%groups.length].items.push(category);
+	const childrenByParent=new Map();
+	currentCategories.forEach(category=>{
+		if(category.parent_id==null)return;
+		const parentId=String(category.parent_id);
+		if(!childrenByParent.has(parentId))childrenByParent.set(parentId,[]);
+		childrenByParent.get(parentId).push(category);
 	});
-	return groups;
+	const roots=currentCategories.filter(category=>category.parent_id==null);
+	const rootIds=new Set(roots.map(category=>String(category.id)));
+	const orphaned=currentCategories.filter(category=>category.parent_id!=null&&!rootIds.has(String(category.parent_id)));
+	return [...roots,...orphaned].map(root=>({
+		root,
+		items:childrenByParent.get(String(root.id))||[]
+	}));
 }
 function renderCategoryMegaMenu(){
 	const isFrench=currentStoreLanguage==="fr";
 	const groups=categoryMegaMenuGroups();
-	const visibleGroups=groups.filter(group=>group.items.length);
-	const columns=visibleGroups.map(group=>{
-		const title=isFrench?group.titleFr:group.titleAr;
+	const columns=groups.map(group=>{
+		const title=esc(group.root.displayName||group.root.name);
+		const rootLink=`<a href="${esc(categoryLink(group.root))}" data-category-id="${esc(group.root.id)}" onclick="openCategoryPage(this.dataset.categoryId,event)">${title}</a>`;
 		const items=group.items.map(category=>`<a href="${esc(categoryLink(category))}" data-category-id="${esc(category.id)}" onclick="openCategoryPage(this.dataset.categoryId,event)">${esc(category.displayName||category.name)}</a>`).join("");
-		return `<section class="mega-menu-column"><h3 class="mega-menu-title">${title}</h3><div class="mega-menu-links">${items}</div><button class="mega-menu-all" type="button" onclick="selectCategoryFromMegaMenu('')">${isFrench?"Tout voir →":"عرض الكل ←"}</button></section>`;
+		const viewAll=group.items.length?`<button class="mega-menu-all" type="button" onclick="selectCategoryFromMegaMenu('${esc(group.root.id)}')">${isFrench?"Tout voir →":"عرض الكل ←"}</button>`:"";
+		return `<section class="mega-menu-column"><h3 class="mega-menu-title">${rootLink}</h3><div class="mega-menu-links">${items}</div>${viewAll}</section>`;
 	}).join("");
 	return `<div class="mega-menu" id="categoryMegaMenu"><div class="mega-menu-layout"><div class="mega-menu-columns">${columns||`<span class="mega-menu-empty">${isFrench?"Aucune catégorie disponible":"لا توجد فئات متاحة"}</span>`}</div><aside class="mega-menu-promo"><small>${isFrench?"À DÉCOUVRIR":"اكتشفوا"}</small><strong>${isFrench?"Les offres du moment":"عروض المتجر"}</strong><p>${isFrench?"Découvrez les promotions en cours dans la boutique.":"اكتشفوا أحدث العروض والتخفيضات في المتجر."}</p><button type="button" onclick="goToOffersFromMegaMenu()">${isFrench?"En profiter":"اكتشفوا العروض"}</button></aside></div></div>`;
 }
