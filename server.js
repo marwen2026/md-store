@@ -90,9 +90,11 @@ async function serveStorePage(req, res, requestedProductId, requestedSlug = "") 
        FROM products p
        LEFT JOIN categories c ON c.id = p.category_id
        LEFT JOIN categories parent ON parent.id = c.parent_id
+       LEFT JOIN categories root ON root.id = parent.parent_id
        WHERE p.active = TRUE AND p.storefront_visible = TRUE
          AND (p.category_id IS NULL OR (c.active = TRUE AND c.storefront_visible = TRUE
-           AND (c.parent_id IS NULL OR (parent.active = TRUE AND parent.storefront_visible = TRUE))))
+           AND (c.parent_id IS NULL OR (parent.active = TRUE AND parent.storefront_visible = TRUE
+             AND (parent.parent_id IS NULL OR (root.active = TRUE AND root.storefront_visible = TRUE AND root.parent_id IS NULL)))))
        ORDER BY p.id`
     );
     const product = products.rows.find(row => productSlug(row.name) === requestedSlug);
@@ -105,9 +107,11 @@ async function serveStorePage(req, res, requestedProductId, requestedSlug = "") 
        FROM products p
        LEFT JOIN categories c ON c.id = p.category_id
        LEFT JOIN categories parent ON parent.id = c.parent_id
+       LEFT JOIN categories root ON root.id = parent.parent_id
        WHERE p.id = $1 AND p.active = TRUE AND p.storefront_visible = TRUE
          AND (p.category_id IS NULL OR (c.active = TRUE AND c.storefront_visible = TRUE
-           AND (c.parent_id IS NULL OR (parent.active = TRUE AND parent.storefront_visible = TRUE))))`,
+           AND (c.parent_id IS NULL OR (parent.active = TRUE AND parent.storefront_visible = TRUE
+             AND (parent.parent_id IS NULL OR (root.active = TRUE AND root.storefront_visible = TRUE AND root.parent_id IS NULL)))))`,
       [Number(requestedId)]
     );
     if (result.rowCount) {
@@ -449,10 +453,11 @@ async function productRows(includeInactive = false, includeStoreHidden = false) 
        ${includeInactive ? "" : ", COALESCE(sales.units_sold, 0)::bigint AS units_sold, COALESCE(p.show_best_sellers, FALSE) AS best_seller"}
      FROM products p LEFT JOIN categories c ON c.id = p.category_id
      LEFT JOIN categories parent ON parent.id = c.parent_id
+     LEFT JOIN categories root ON root.id = parent.parent_id
      ${salesJoin}
      ${includeInactive
        ? includeStoreHidden ? "" : "WHERE p.storefront_visible = TRUE"
-       : "WHERE p.active = TRUE AND p.storefront_visible = TRUE AND (p.category_id IS NULL OR (c.active = TRUE AND c.storefront_visible = TRUE AND (c.parent_id IS NULL OR (parent.active = TRUE AND parent.storefront_visible = TRUE))))"}
+       : "WHERE p.active = TRUE AND p.storefront_visible = TRUE AND (p.category_id IS NULL OR (c.active = TRUE AND c.storefront_visible = TRUE AND (c.parent_id IS NULL OR (parent.active = TRUE AND parent.storefront_visible = TRUE AND (parent.parent_id IS NULL OR (root.active = TRUE AND root.storefront_visible = TRUE AND root.parent_id IS NULL))))))"}
      ORDER BY CASE WHEN EXISTS (SELECT 1 FROM products ordered WHERE ordered.sort_order IS NOT NULL)
        THEN p.sort_order END ASC NULLS LAST,
        ${includeInactive ? "p.id DESC" : "COALESCE(sales.units_sold, 0) DESC, p.id DESC"}`
@@ -1580,12 +1585,18 @@ app.get("/api/admin/events", auth, (req, res) => {
 });
 app.get("/api/categories", async (req, res) => {
   const result = await pool.query(
-    `SELECT c.id, c.name, c.parent_id, c.show_in_showcase, COALESCE(icon.icon_type, 'tag') AS icon
+    `WITH RECURSIVE visible_categories AS (
+       SELECT id FROM categories
+       WHERE parent_id IS NULL AND active = TRUE AND storefront_visible = TRUE
+       UNION ALL
+       SELECT child.id FROM categories child
+       JOIN visible_categories parent ON parent.id = child.parent_id
+       WHERE child.active = TRUE AND child.storefront_visible = TRUE
+     )
+     SELECT c.id, c.name, c.parent_id, c.show_in_showcase, COALESCE(icon.icon_type, 'tag') AS icon
      FROM categories c
-     LEFT JOIN categories parent ON parent.id = c.parent_id
+     JOIN visible_categories visible ON visible.id = c.id
      LEFT JOIN category_icon_options icon ON icon.id = c.icon
-     WHERE c.active = TRUE AND c.storefront_visible = TRUE
-       AND (c.parent_id IS NULL OR (parent.active = TRUE AND parent.storefront_visible = TRUE))
      ORDER BY c.sort_order, c.id`
   );
   res.json(result.rows);
@@ -1596,9 +1607,16 @@ app.get("/api/admin/categories", auth, async (req, res) => {
        COUNT(DISTINCT p.id)::INTEGER AS product_count,
        COUNT(DISTINCT p.id) FILTER (WHERE p.category_id = c.id)::INTEGER AS direct_product_count
      FROM categories c
-     LEFT JOIN products p ON p.category_id = c.id OR p.category_id IN (
-       SELECT child.id FROM categories child WHERE child.parent_id = c.id
-     )
+     LEFT JOIN LATERAL (
+       WITH RECURSIVE category_tree(id) AS (
+         SELECT c.id
+         UNION ALL
+         SELECT child.id FROM categories child
+         JOIN category_tree parent ON child.parent_id = parent.id
+       )
+       SELECT product.id FROM products product
+       WHERE product.category_id IN (SELECT id FROM category_tree)
+     ) p ON TRUE
      GROUP BY c.id ORDER BY c.sort_order, c.id`
   );
   res.json(result.rows);
@@ -1621,8 +1639,20 @@ app.post("/api/categories", auth, role("admin"), async (req, res) => {
     return res.status(400).json({ error: "القسم الأب غير صالح" });
   }
   if (parentId !== null) {
-    const parent = await pool.query("SELECT id FROM categories WHERE id = $1 AND parent_id IS NULL", [parentId]);
-    if (!parent.rowCount) return res.status(400).json({ error: "يجب اختيار قسم أب رئيسي صالح" });
+    const parent = await pool.query(
+      `WITH RECURSIVE ancestors(id, parent_id, depth) AS (
+         SELECT id, parent_id, 0 FROM categories WHERE id = $1
+         UNION ALL
+         SELECT category.id, category.parent_id, ancestors.depth + 1
+         FROM categories category JOIN ancestors ON category.id = ancestors.parent_id
+         WHERE ancestors.depth < 3
+       )
+       SELECT MAX(depth)::INTEGER AS depth FROM ancestors`,
+      [parentId]
+    );
+    if (parent.rows[0]?.depth == null || parent.rows[0].depth > 1) {
+      return res.status(400).json({ error: "يمكن أن يكون القسم الأب رئيسيًا أو من المستوى الثاني فقط" });
+    }
   }
   try {
     const result = await pool.query(
@@ -1687,11 +1717,32 @@ app.put("/api/categories/:id", auth, role("admin"), async (req, res) => {
   if (parentId !== null && (!Number.isInteger(parentId) || parentId < 1 || parentId === id)) {
     return res.status(400).json({ error: "القسم الأب غير صالح" });
   }
-  if (parentId !== null) {
-    const parent = await pool.query("SELECT id FROM categories WHERE id = $1 AND parent_id IS NULL", [parentId]);
-    if (!parent.rowCount) return res.status(400).json({ error: "يجب اختيار قسم أب رئيسي صالح" });
-    const children = await pool.query("SELECT 1 FROM categories WHERE parent_id = $1 LIMIT 1", [id]);
-    if (children.rowCount) return res.status(400).json({ error: "لا يمكن إدراج قسم رئيسي تابعاً لقسم آخر" });
+  const hierarchy = await pool.query(
+    `WITH RECURSIVE ancestors(id, parent_id, depth) AS (
+       SELECT id, parent_id, 0 FROM categories WHERE id = $1
+       UNION ALL
+       SELECT category.id, category.parent_id, ancestors.depth + 1
+       FROM categories category JOIN ancestors ON category.id = ancestors.parent_id
+       WHERE ancestors.depth < 3
+     ), descendants(id, depth) AS (
+       SELECT id, 0 FROM categories WHERE id = $2
+       UNION ALL
+       SELECT child.id, descendants.depth + 1
+       FROM categories child JOIN descendants ON child.parent_id = descendants.id
+       WHERE descendants.depth < 3
+     )
+     SELECT COALESCE((SELECT MAX(depth) FROM ancestors), -1)::INTEGER AS parent_depth,
+       COALESCE((SELECT MAX(depth) FROM descendants), 0)::INTEGER AS subtree_depth,
+       EXISTS(SELECT 1 FROM descendants WHERE id = $1) AS parent_is_descendant`,
+    [parentId, id]
+  );
+  const parentDepth = parentId === null ? -1 : hierarchy.rows[0].parent_depth;
+  const subtreeDepth = hierarchy.rows[0].subtree_depth;
+  if (parentId !== null && (parentDepth > 1 || hierarchy.rows[0].parent_is_descendant)) {
+    return res.status(400).json({ error: "القسم الأب غير صالح أو يتجاوز ثلاثة مستويات" });
+  }
+  if (parentDepth + 1 + subtreeDepth > 2) {
+    return res.status(400).json({ error: "لا يمكن أن يتجاوز تصنيف المتجر ثلاثة مستويات" });
   }
   try {
     const result = await pool.query(
