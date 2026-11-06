@@ -1614,7 +1614,7 @@ app.get("/api/admin/categories", auth, async (req, res) => {
          SELECT child.id FROM categories child
          JOIN category_tree parent ON child.parent_id = parent.id
        )
-       SELECT product.id FROM products product
+       SELECT product.id, product.category_id FROM products product
        WHERE product.category_id IN (SELECT id FROM category_tree)
      ) p ON TRUE
      GROUP BY c.id ORDER BY c.sort_order, c.id`
